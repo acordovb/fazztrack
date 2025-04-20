@@ -1,14 +1,11 @@
+import 'package:fazztrack_app/config/general.config.dart';
+import 'package:fazztrack_app/pages/procedures/base_procedures.dart';
 import 'package:flutter/material.dart';
 import 'package:fazztrack_app/common/colors.dart';
 import 'package:fazztrack_app/pages/splash/splash_screen.dart';
-import 'package:fazztrack_app/pages/local_selection/local_selection_screen.dart';
-import 'package:fazztrack_app/services/local_storage_service.dart';
+import 'package:fazztrack_app/pages/init/bar_selection_screen.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  await LocalStorageService.init();
-
+void main() {
   runApp(const MyApp());
 }
 
@@ -18,78 +15,18 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Fazztrack App',
+      title: AppConfig.appName,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: AppColors.primaryTurquoise,
         ),
       ),
       home: SplashScreen(
-        nextScreen: LocalSelectionScreen(
-          nextScreen: const MyHomePage(title: 'Fazztrack App'),
+        nextScreen: BarSelectionScreen(
+          nextScreen: const BaseProcedures(title: 'Fazztrack App'),
         ),
       ),
       debugShowCheckedModeBanner: false,
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  String? selectedLocal;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadSelectedLocal();
-  }
-
-  Future<void> _loadSelectedLocal() async {
-    final local = await LocalStorageService.getSelectedLocal();
-    if (mounted) {
-      setState(() {
-        selectedLocal = local;
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: AppColors.backgroundSecondary,
-        title: Text(
-          widget.title,
-          style: const TextStyle(color: AppColors.textPrimary),
-        ),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'Tu local seleccionado:',
-              style: TextStyle(fontSize: 18, color: AppColors.textSecondary),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              selectedLocal ?? 'Cargando...',
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: AppColors.primary,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
