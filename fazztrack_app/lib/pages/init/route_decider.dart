@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fazztrack_app/services/bar_storage_service.dart';
 import 'package:fazztrack_app/pages/init/bar_selection_screen.dart';
-import 'package:fazztrack_app/pages/procedures/base_procedures.dart';
+import 'package:fazztrack_app/pages/procedures/base_procedures_screen.dart';
 
 class RouteDecider extends StatelessWidget {
   const RouteDecider({super.key});
@@ -20,10 +20,10 @@ class RouteDecider extends StatelessWidget {
         final hasSelectedBar = snapshot.data ?? false;
 
         if (hasSelectedBar) {
-          return const BaseProcedures(title: 'Fazztrack App');
+          return const BaseProceduresScreen(title: 'Fazztrack App');
         } else {
           return BarSelectionScreen(
-            nextScreen: const BaseProcedures(title: 'Fazztrack App'),
+            nextScreen: const BaseProceduresScreen(title: 'Fazztrack App'),
           );
         }
       },
