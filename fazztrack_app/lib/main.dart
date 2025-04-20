@@ -3,13 +3,10 @@ import 'package:fazztrack_app/common/colors.dart';
 import 'package:fazztrack_app/pages/splash/splash_screen.dart';
 import 'package:fazztrack_app/pages/local_selection/local_selection_screen.dart';
 import 'package:fazztrack_app/services/local_storage_service.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
-  // Asegura que Flutter esté inicializado antes de llamar a cualquier plugin
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Inicializa los servicios antes de ejecutar la aplicación
   await LocalStorageService.init();
 
   runApp(const MyApp());

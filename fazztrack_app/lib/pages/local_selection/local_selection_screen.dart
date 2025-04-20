@@ -12,20 +12,16 @@ class LocalSelectionScreen extends StatefulWidget {
 }
 
 class _LocalSelectionScreenState extends State<LocalSelectionScreen> {
-  // Lista de nombres de locales (ejemplo)
   final List<String> _localesList = ['Local Barcelona', 'Local Madrid'];
 
-  // Valor seleccionado por defecto
   String? _selectedLocal;
 
   @override
   void initState() {
     super.initState();
-    // Intentar recuperar un local guardado previamente
     _loadSavedLocal();
   }
 
-  // Cargar local guardado si existe
   Future<void> _loadSavedLocal() async {
     final savedLocal = await LocalStorageService.getSelectedLocal();
     if (savedLocal != null) {
@@ -34,12 +30,11 @@ class _LocalSelectionScreenState extends State<LocalSelectionScreen> {
       });
     } else {
       setState(() {
-        _selectedLocal = _localesList.first; // Valor por defecto
+        _selectedLocal = _localesList.first;
       });
     }
   }
 
-  // Guardar la selección y navegar a la siguiente pantalla
   void _saveSelectionAndContinue() async {
     if (_selectedLocal != null) {
       await LocalStorageService.saveSelectedLocal(_selectedLocal!);
@@ -104,7 +99,9 @@ class _LocalSelectionScreenState extends State<LocalSelectionScreen> {
                         });
                       },
                       items:
-                          _localesList.map<DropdownMenuItem<String>>((String value) {
+                          _localesList.map<DropdownMenuItem<String>>((
+                            String value,
+                          ) {
                             return DropdownMenuItem<String>(
                               value: value,
                               child: Text(value),
