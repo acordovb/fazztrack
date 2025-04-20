@@ -63,74 +63,91 @@ class _SaldoClienteWidgetState extends State<SaldoClienteWidget> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         const SizedBox(height: 10),
-        GestureDetector(
-          onTap: () {
-            setState(() {
-              _isSearching = !_isSearching;
-              if (!_isSearching) {
-                _searchController.clear();
-                filteredClients = widget.clients;
-              }
-            });
-          },
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: AppColors.secondaryBlue,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Column(
-              children: [
-                // Botón para mostrar/ocultar buscador
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        selectedClient,
-                        style: const TextStyle(
-                          color: AppColors.textPrimary,
-                          fontSize: 16,
+        Container(
+          constraints: const BoxConstraints(maxWidth: 500),
+          child: GestureDetector(
+            onTap: () {
+              setState(() {
+                _isSearching = !_isSearching;
+                if (!_isSearching) {
+                  _searchController.clear();
+                  filteredClients = widget.clients;
+                }
+              });
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: AppColors.secondaryBlue,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                children: [
+                  // Botón para mostrar/ocultar buscador
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          selectedClient,
+                          style: const TextStyle(
+                            color: AppColors.textPrimary,
+                            fontSize: 16,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                    // Eliminamos el icono de lupa aquí
-                    Icon(
-                      _isSearching ? Icons.close : Icons.arrow_drop_down,
-                      color: AppColors.textPrimary,
-                    ),
-                  ],
-                ),
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  height: _isSearching ? 50 : 0,
-                  child:
-                      _isSearching
-                          ? TextField(
+                      // Eliminamos el icono de lupa aquí
+                      Icon(
+                        _isSearching ? Icons.close : Icons.arrow_drop_down,
+                        color: AppColors.textPrimary,
+                      ),
+                    ],
+                  ),
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    height: _isSearching ? 50 : 0,
+                    child:
+                        _isSearching
+                            ? TextField(
                               controller: _searchController,
                               decoration: const InputDecoration(
-                                prefixIcon: Icon(Icons.search, color: AppColors.lightGray),
-                                prefixIconConstraints: BoxConstraints(minWidth: 40),
+                                prefixIcon: Icon(
+                                  Icons.search,
+                                  color: AppColors.lightGray,
+                                ),
+                                prefixIconConstraints: BoxConstraints(
+                                  minWidth: 40,
+                                ),
                                 hintText: "Buscar cliente...",
-                                hintStyle: TextStyle(color: AppColors.lightGray),
+                                hintStyle: TextStyle(
+                                  color: AppColors.lightGray,
+                                ),
                                 border: InputBorder.none,
-                                contentPadding: EdgeInsets.symmetric(vertical: 15), // Ajustamos el padding vertical
-                                isDense: true, // Ayuda a controlar el tamaño del campo
-                                alignLabelWithHint: true, // Alinea el hint con el icono
+                                contentPadding: EdgeInsets.symmetric(
+                                  vertical: 15,
+                                ), // Ajustamos el padding vertical
+                                isDense:
+                                    true, // Ayuda a controlar el tamaño del campo
+                                alignLabelWithHint:
+                                    true, // Alinea el hint con el icono
                               ),
-                              textAlignVertical: TextAlignVertical.center, // Centra el texto verticalmente
-                              style: const TextStyle(color: AppColors.textPrimary),
+                              textAlignVertical:
+                                  TextAlignVertical
+                                      .center, // Centra el texto verticalmente
+                              style: const TextStyle(
+                                color: AppColors.textPrimary,
+                              ),
                               onChanged: _filterClients,
                             )
-                          : null,
-                ),
+                            : null,
+                  ),
 
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  height: _isSearching ? 150 : 0,
-                  child:
-                      _isSearching
-                          ? Container(
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    height: _isSearching ? 150 : 0,
+                    child:
+                        _isSearching
+                            ? Container(
                               margin: const EdgeInsets.only(top: 8),
                               decoration: BoxDecoration(
                                 color: AppColors.backgroundSecondary,
@@ -155,16 +172,19 @@ class _SaldoClienteWidgetState extends State<SaldoClienteWidget> {
                                         _searchController.clear();
                                       });
                                       if (widget.onClientSelected != null) {
-                                        widget.onClientSelected!(selectedClient);
+                                        widget.onClientSelected!(
+                                          selectedClient,
+                                        );
                                       }
                                     },
                                   );
                                 },
                               ),
                             )
-                          : null,
-                ),
-              ],
+                            : null,
+                  ),
+                ],
+              ),
             ),
           ),
         ),

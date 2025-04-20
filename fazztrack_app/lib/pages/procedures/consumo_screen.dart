@@ -11,8 +11,7 @@ class ConsumoScreen extends StatefulWidget {
 
 class _ConsumoScreenState extends State<ConsumoScreen> {
   String selectedClient = 'Cliente 1';
-  // Valor de ejemplo - positivo para abono, negativo para deuda
-  double balance = 500.00; // Cambiar a -500.00 para mostrar deuda
+  double balance = 500.00;
 
   final List<String> clients = [
     'Cliente 1',
