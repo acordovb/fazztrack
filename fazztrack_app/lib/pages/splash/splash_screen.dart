@@ -20,19 +20,14 @@ class _SplashScreenState extends State<SplashScreen>
   void initState() {
     super.initState();
 
-    // Create animation controller
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1500),
     );
 
-    // Create a curved animation for fade-in and scale effect
     _animation = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
-
-    // Start the animation
     _controller.forward();
 
-    // Navigate to next screen after delay
     Timer(const Duration(seconds: 3), () {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (context) => widget.nextScreen),
