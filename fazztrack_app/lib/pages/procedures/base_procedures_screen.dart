@@ -89,33 +89,14 @@ class CustomDrawer extends StatelessWidget {
         child: Column(
           children: [
             DrawerHeader(
-              decoration: const BoxDecoration(
-                color: AppColors.backgroundSecondary,
-              ),
-              child: SizedBox(
-                width: double.infinity,
-                child: const Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'FazzTrack App',
-                      style: TextStyle(
-                        color: AppColors.textPrimary,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(height: 10),
-                    Text(
-                      'Panel de navegación',
-                      style: TextStyle(
-                        color: AppColors.textPrimary,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('assets/app-logo-simple.png'),
+                  fit: BoxFit.cover,
                 ),
               ),
+              child:
+                  Container(), // Container vacío ya que la imagen está en la decoración
             ),
             Expanded(
               child: ListView(
