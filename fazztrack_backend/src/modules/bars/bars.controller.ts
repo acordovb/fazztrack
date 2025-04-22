@@ -13,7 +13,7 @@ import {
 import { BarsService } from './bars.service';
 import { CreateBarDto, UpdateBarDto, BarDto } from './dto';
 
-@Controller('bars')
+@Controller('bares')
 export class BarsController {
   constructor(private readonly barsService: BarsService) {}
 
