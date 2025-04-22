@@ -12,10 +12,8 @@ export class AppService {
     return 'Hello World!';
   }
 
-  // Example method to test database connectivity
   async testDatabaseConnection(): Promise<boolean> {
     try {
-      // Execute a simple query to check connection
       await this.prisma.$queryRaw`SELECT 1`;
       this.logger.log('Database connection test successful');
       return true;

@@ -12,8 +12,10 @@ import {
 } from '@nestjs/common';
 import { BarsService } from './bars.service';
 import { CreateBarDto, UpdateBarDto, BarDto } from './dto';
+import { Private } from '../auth/decorators/private.decorator';
 
 @Controller('bares')
+@Private() // Applying Private decorator at the controller level
 export class BarsController {
   constructor(private readonly barsService: BarsService) {}
 

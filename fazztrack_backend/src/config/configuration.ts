@@ -4,5 +4,8 @@ export default () => ({
     url: process.env.DATABASE_URL,
   },
   debug: process.env.DEBUG === 'true',
-  // Aquí puedes agregar más configuraciones según sea necesario
+  jwt: {
+    secret: process.env.JWT_SECRET,
+    expiresIn: parseInt(process.env.JWT_EXPIRES_IN ?? '3600', 10),
+  },
 });

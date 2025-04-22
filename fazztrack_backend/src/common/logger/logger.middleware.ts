@@ -10,7 +10,6 @@ export class LoggerMiddleware implements NestMiddleware {
     const { method, originalUrl } = req;
     const userAgent = req.get('user-agent') || '';
 
-    // Log at request start
     this.loggerService.log(
       `${method} ${originalUrl} - ${userAgent}`,
       'HttpRequest',
@@ -18,7 +17,6 @@ export class LoggerMiddleware implements NestMiddleware {
 
     const startTime = Date.now();
 
-    // Log once the response is finished
     res.on('finish', () => {
       const { statusCode } = res;
       const contentLength = res.get('content-length') || 0;
