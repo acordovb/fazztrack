@@ -3,5 +3,6 @@ export default () => ({
   database: {
     url: process.env.DATABASE_URL,
   },
+  debug: process.env.DEBUG === 'true',
   // Aquí puedes agregar más configuraciones según sea necesario
 });
