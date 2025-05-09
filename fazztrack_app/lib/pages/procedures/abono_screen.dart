@@ -10,16 +10,6 @@ class AbonoScreen extends StatefulWidget {
 }
 
 class _AbonoScreenState extends State<AbonoScreen> {
-  double balance = 500.00;
-
-  void _onClientSelected(String client) {
-    setState(() {
-      // Set balance based on the selected student
-      // For demonstration purposes, we'll set different balances based on student name
-      balance = client.contains('2') ? -350.00 : 500.00;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -29,12 +19,7 @@ class _AbonoScreenState extends State<AbonoScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          SaldoClienteWidget(
-            balance: balance,
-            onClientSelected: _onClientSelected,
-          ),
-        ],
+        children: [SaldoClienteWidget()],
       ),
     );
   }

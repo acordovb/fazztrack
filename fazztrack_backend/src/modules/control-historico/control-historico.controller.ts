@@ -30,22 +30,16 @@ export class ControlHistoricoController {
     return this.controlHistoricoService.create(createControlHistoricoDto);
   }
 
-  @Get('estudiante/:id')
+  @Get('estudiante/:idEstudiante')
   async findByEstudianteId(
-    @Param('id') id: string,
+    @Param('idEstudiante') idEstudiante: string,
   ): Promise<ControlHistoricoDto> {
-    const idEstudiante = parseInt(id, 10);
-
-    if (isNaN(idEstudiante)) {
-      throw new NotFoundException('ID de estudiante inválido');
-    }
-
     const controlHistorico =
       await this.controlHistoricoService.findByEstudianteId(idEstudiante);
 
     if (!controlHistorico) {
       throw new NotFoundException(
-        `No se encontró historial para el estudiante con ID ${id}`,
+        `No se encontró historial para el estudiante con ID ${idEstudiante}`,
       );
     }
 

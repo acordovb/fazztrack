@@ -6,7 +6,7 @@ import {
   UpdateControlHistoricoDto,
 } from './dto';
 import { BaseCrudService } from '../../common/crud/base-crud.service';
-import { encodeId } from 'src/shared/hashid/hashid.utils';
+import { decodeId, encodeId } from 'src/shared/hashid/hashid.utils';
 
 @Injectable()
 export class ControlHistoricoService extends BaseCrudService<
@@ -33,10 +33,11 @@ export class ControlHistoricoService extends BaseCrudService<
   }
 
   async findByEstudianteId(
-    id_estudiante: number,
+    idEstudiante: string,
   ): Promise<ControlHistoricoDto | null> {
+    const idNumberEstudiante = decodeId(idEstudiante);
     const controlHistorico = await this.database.control_historico.findFirst({
-      where: { id_estudiante },
+      where: { id_estudiante: idNumberEstudiante },
     });
 
     if (!controlHistorico) {

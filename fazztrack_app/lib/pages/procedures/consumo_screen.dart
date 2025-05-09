@@ -10,14 +10,6 @@ class ConsumoScreen extends StatefulWidget {
 }
 
 class _ConsumoScreenState extends State<ConsumoScreen> {
-  double balance = 0.0;
-  void _onClientSelected(String client) {
-    setState(() {
-      // Update balance based on selected client
-      balance = 0.0; // This would be replaced with actual balance fetching
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -27,12 +19,7 @@ class _ConsumoScreenState extends State<ConsumoScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          SaldoClienteWidget(
-            balance: balance,
-            onClientSelected: _onClientSelected,
-          ),
-        ],
+        children: [SaldoClienteWidget()],
       ),
     );
   }

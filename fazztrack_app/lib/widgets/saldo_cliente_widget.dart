@@ -1,19 +1,13 @@
 import 'package:fazztrack_app/constants/colors_constants.dart';
 import 'package:fazztrack_app/model/estudiante_model.dart';
 import 'package:fazztrack_app/services/estudiantes/estudiantes_api_service.dart';
+import 'package:fazztrack_app/services/estudiantes/control_historico_api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'dart:async';
 
 class SaldoClienteWidget extends StatefulWidget {
-  final Function(String)? onClientSelected;
-  final double balance;
-
-  const SaldoClienteWidget({
-    super.key,
-    this.onClientSelected,
-    this.balance = 0.0,
-  });
+  const SaldoClienteWidget({super.key});
 
   @override
   State<SaldoClienteWidget> createState() => _SaldoClienteWidgetState();
@@ -21,15 +15,50 @@ class SaldoClienteWidget extends StatefulWidget {
 
 class _SaldoClienteWidgetState extends State<SaldoClienteWidget> {
   String? selectedClient;
+  String? selectedClientId;
+  double balance = 0.0;
   final TextEditingController _searchController = TextEditingController();
   bool _isSearching = false;
   List<EstudianteModel> filteredEstudiantes = [];
   Timer? _debounceTimer;
   final EstudiantesApiService _estudiantesService = EstudiantesApiService();
+  final ControlHistoricoApiService _controlHistoricoService =
+      ControlHistoricoApiService();
   bool _isLoading = false;
+  bool _isLoadingBalance = false;
+
   @override
   void initState() {
     super.initState();
+  }
+
+  Future<void> _fetchStudentBalance(String estudianteId) async {
+    setState(() {
+      _isLoadingBalance = true;
+    });
+
+    try {
+      final controlHistorico = await _controlHistoricoService
+          .getControlHistoricoByEstudianteId(estudianteId);
+
+      if (controlHistorico != null) {
+        setState(() {
+          // Calculate balance as totalAbono - totalVenta
+          balance = controlHistorico.totalAbono - controlHistorico.totalVenta;
+          _isLoadingBalance = false;
+        });
+      } else {
+        setState(() {
+          balance = 0.0;
+          _isLoadingBalance = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        balance = 0.0;
+        _isLoadingBalance = false;
+      });
+    }
   }
 
   void _searchEstudiantes(String query) {
@@ -69,12 +98,11 @@ class _SaldoClienteWidgetState extends State<SaldoClienteWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final balanceColor =
-        widget.balance >= 0 ? AppColors.success : AppColors.error;
+    final balanceColor = balance >= 0 ? AppColors.success : AppColors.error;
     final balanceText = NumberFormat.currency(
       locale: 'es_MX',
       symbol: '\$',
-    ).format(widget.balance);
+    ).format(balance);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -191,19 +219,20 @@ class _SaldoClienteWidgetState extends State<SaldoClienteWidget> {
                                                 color: AppColors.textPrimary,
                                               ),
                                             ),
-                                            onTap: () {
+                                            onTap: () async {
                                               setState(() {
                                                 selectedClient =
                                                     estudiante.nombre;
+                                                selectedClientId =
+                                                    estudiante.id;
                                                 _isSearching = false;
                                                 _searchController.clear();
                                               });
-                                              if (widget.onClientSelected !=
-                                                  null) {
-                                                widget.onClientSelected!(
-                                                  estudiante.nombre,
-                                                );
-                                              }
+
+                                              // Fetch student balance
+                                              await _fetchStudentBalance(
+                                                estudiante.id,
+                                              );
                                             },
                                           );
                                         },
@@ -219,28 +248,35 @@ class _SaldoClienteWidgetState extends State<SaldoClienteWidget> {
 
         const SizedBox(height: 10),
 
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-          decoration: BoxDecoration(
-            color: balanceColor,
-            borderRadius: BorderRadius.circular(10),
-            boxShadow: const [
-              BoxShadow(
-                color: AppColors.shadow,
-                blurRadius: 4,
-                offset: Offset(0, 2),
+        // Balance indicator with loading state
+        _isLoadingBalance
+            ? const Center(
+              child: CircularProgressIndicator(
+                color: AppColors.primaryTurquoise,
               ),
-            ],
-          ),
-          child: Text(
-            balanceText,
-            style: const TextStyle(
-              fontSize: 28,
-              color: Colors.black,
-              fontWeight: FontWeight.bold,
+            )
+            : Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+              decoration: BoxDecoration(
+                color: balanceColor,
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: const [
+                  BoxShadow(
+                    color: AppColors.shadow,
+                    blurRadius: 4,
+                    offset: Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Text(
+                balanceText,
+                style: const TextStyle(
+                  fontSize: 28,
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
-          ),
-        ),
 
         const SizedBox(height: 10),
 

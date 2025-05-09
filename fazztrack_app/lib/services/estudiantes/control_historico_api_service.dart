@@ -15,7 +15,7 @@ class ControlHistoricoApiService {
   }
 
   Future<ControlHistorico?> getControlHistoricoByEstudianteId(
-    int estudianteId,
+    String estudianteId,
   ) async {
     try {
       final response = await _apiService.get(
