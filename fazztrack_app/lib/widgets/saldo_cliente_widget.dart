@@ -1,10 +1,11 @@
+import 'dart:async';
+
 import 'package:fazztrack_app/constants/colors_constants.dart';
 import 'package:fazztrack_app/model/estudiante_model.dart';
-import 'package:fazztrack_app/services/estudiantes/estudiantes_api_service.dart';
 import 'package:fazztrack_app/services/estudiantes/control_historico_api_service.dart';
+import 'package:fazztrack_app/services/estudiantes/estudiantes_api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'dart:async';
 
 class SaldoClienteWidget extends StatefulWidget {
   const SaldoClienteWidget({super.key});
@@ -114,136 +115,125 @@ class _SaldoClienteWidgetState extends State<SaldoClienteWidget> {
         const SizedBox(height: 10),
         Container(
           constraints: const BoxConstraints(maxWidth: 500),
-          child: GestureDetector(
-            onTap: () {
-              setState(() {
-                _isSearching = !_isSearching;
-                if (!_isSearching) {
-                  _searchController.clear();
-                  filteredEstudiantes = [];
-                }
-              });
-            },
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: AppColors.secondaryBlue,
-                borderRadius: BorderRadius.circular(8),
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.secondaryBlue,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: selectedClient ?? "Buscar estudiante...",
+                    hintStyle: TextStyle(
+                      color:
+                          selectedClient != null
+                              ? AppColors.textPrimary
+                              : AppColors.lightGray,
+                      fontSize: 16,
+                    ),
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.zero,
+                    isDense: true,
+                    prefixIcon: const Icon(
+                      Icons.search,
+                      color: AppColors.lightGray,
+                      size: 20,
+                    ),
+                    prefixIconConstraints: const BoxConstraints(
+                      minWidth: 30,
+                      minHeight: 30,
+                    ),
+                    suffixIcon:
+                        _searchController.text.isNotEmpty
+                            ? IconButton(
+                              icon: const Icon(Icons.close, size: 20),
+                              color: AppColors.lightGray,
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                              onPressed: () {
+                                setState(() {
+                                  _searchController.clear();
+                                  filteredEstudiantes = [];
+                                });
+                              },
+                            )
+                            : null,
+                  ),
+                  textAlignVertical: TextAlignVertical.center,
+                  style: const TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 16,
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      _isSearching = value.isNotEmpty;
+                    });
+                    _searchEstudiantes(value);
+                  },
+                ),
               ),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          selectedClient ?? 'Buscar estudiante...',
-                          style: const TextStyle(
-                            color: AppColors.textPrimary,
-                            fontSize: 16,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      Icon(
-                        _isSearching ? Icons.close : Icons.search,
-                        color: AppColors.textPrimary,
+
+              if ((_isSearching && filteredEstudiantes.isNotEmpty) ||
+                  _isLoading)
+                Container(
+                  height: 150,
+                  margin: const EdgeInsets.only(top: 8),
+                  decoration: BoxDecoration(
+                    color: AppColors.backgroundSecondary,
+                    borderRadius: BorderRadius.circular(4),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: AppColors.shadow,
+                        blurRadius: 4,
+                        offset: Offset(0, 2),
                       ),
                     ],
                   ),
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    height: _isSearching ? 50 : 0,
-                    child:
-                        _isSearching
-                            ? TextField(
-                              controller: _searchController,
-                              decoration: const InputDecoration(
-                                prefixIcon: Icon(
-                                  Icons.search,
-                                  color: AppColors.lightGray,
-                                ),
-                                prefixIconConstraints: BoxConstraints(
-                                  minWidth: 40,
-                                ),
-                                hintText: "Buscar estudiante...",
-                                hintStyle: TextStyle(
-                                  color: AppColors.lightGray,
-                                ),
-                                border: InputBorder.none,
-                                contentPadding: EdgeInsets.symmetric(
-                                  vertical: 15,
-                                ),
-                                isDense: true,
-                                alignLabelWithHint: true,
+                  child:
+                      _isLoading
+                          ? const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: CircularProgressIndicator(
+                                color: AppColors.primaryTurquoise,
+                                strokeWidth: 2,
                               ),
-                              textAlignVertical: TextAlignVertical.center,
-                              style: const TextStyle(
-                                color: AppColors.textPrimary,
-                              ),
-                              onChanged: _searchEstudiantes,
-                              autofocus: true,
-                            )
-                            : null,
-                  ),
-
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    height: _isSearching ? 150 : 0,
-                    child:
-                        _isSearching
-                            ? Container(
-                              margin: const EdgeInsets.only(top: 8),
-                              decoration: BoxDecoration(
-                                color: AppColors.backgroundSecondary,
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child:
-                                  _isLoading
-                                      ? const Center(
-                                        child: Padding(
-                                          padding: EdgeInsets.all(8.0),
-                                          child: CircularProgressIndicator(
-                                            color: AppColors.primaryTurquoise,
-                                            strokeWidth: 2,
-                                          ),
-                                        ),
-                                      )
-                                      : ListView.builder(
-                                        shrinkWrap: true,
-                                        itemCount: filteredEstudiantes.length,
-                                        itemBuilder: (context, index) {
-                                          final estudiante =
-                                              filteredEstudiantes[index];
-                                          return ListTile(
-                                            dense: true,
-                                            title: Text(
-                                              estudiante.nombre,
-                                              style: const TextStyle(
-                                                color: AppColors.textPrimary,
-                                              ),
-                                            ),
-                                            onTap: () async {
-                                              setState(() {
-                                                selectedClient =
-                                                    estudiante.nombre;
-                                                selectedClientId =
-                                                    estudiante.id;
-                                                _isSearching = false;
-                                                _searchController.clear();
-                                              });
-                                              await _fetchStudentBalance(
-                                                estudiante.id,
-                                              );
-                                            },
-                                          );
-                                        },
-                                      ),
-                            )
-                            : null,
-                  ),
-                ],
-              ),
-            ),
+                            ),
+                          )
+                          : ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: filteredEstudiantes.length,
+                            itemBuilder: (context, index) {
+                              final estudiante = filteredEstudiantes[index];
+                              return ListTile(
+                                dense: true,
+                                title: Text(
+                                  estudiante.nombre,
+                                  style: const TextStyle(
+                                    color: AppColors.textPrimary,
+                                  ),
+                                ),
+                                onTap: () async {
+                                  setState(() {
+                                    selectedClient = estudiante.nombre;
+                                    selectedClientId = estudiante.id;
+                                    _searchController.clear();
+                                    filteredEstudiantes = [];
+                                    _isSearching = false;
+                                  });
+                                  await _fetchStudentBalance(estudiante.id);
+                                },
+                              );
+                            },
+                          ),
+                ),
+            ],
           ),
         ),
 
