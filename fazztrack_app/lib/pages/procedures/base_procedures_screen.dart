@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:fazztrack_app/pages/procedures/consumo_screen.dart';
 import 'package:fazztrack_app/pages/reports/reports_screen.dart';
 import 'package:fazztrack_app/pages/admin/admin_screen.dart';
+import 'package:fazztrack_app/config/build.config.dart';
+import 'package:fazztrack_app/config/general.config.dart';
 
 enum PageType { consumo, abono, reports, admin }
 
@@ -122,26 +124,28 @@ class CustomDrawer extends StatelessWidget {
                       changePage(PageType.abono);
                     },
                   ),
-                  _buildDrawerItem(
-                    context: context,
-                    title: 'Reportes',
-                    icon: Icons.bar_chart,
-                    isSelected: currentPage == PageType.reports,
-                    onTap: () {
-                      Navigator.pop(context);
-                      changePage(PageType.reports);
-                    },
-                  ),
-                  _buildDrawerItem(
-                    context: context,
-                    title: 'Administración',
-                    icon: Icons.admin_panel_settings,
-                    isSelected: currentPage == PageType.admin,
-                    onTap: () {
-                      Navigator.pop(context);
-                      changePage(PageType.admin);
-                    },
-                  ),
+                  if (BuildConfig.appLevel == AppConfig.appLevel.admin) ...[
+                    _buildDrawerItem(
+                      context: context,
+                      title: 'Reportes',
+                      icon: Icons.bar_chart,
+                      isSelected: currentPage == PageType.reports,
+                      onTap: () {
+                        Navigator.pop(context);
+                        changePage(PageType.reports);
+                      },
+                    ),
+                    _buildDrawerItem(
+                      context: context,
+                      title: 'Administración',
+                      icon: Icons.admin_panel_settings,
+                      isSelected: currentPage == PageType.admin,
+                      onTap: () {
+                        Navigator.pop(context);
+                        changePage(PageType.admin);
+                      },
+                    ),
+                  ],
                 ],
               ),
             ),
