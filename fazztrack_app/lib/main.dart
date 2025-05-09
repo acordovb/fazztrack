@@ -1,7 +1,7 @@
 import 'package:fazztrack_app/config/general.config.dart';
 import 'package:fazztrack_app/pages/init/route_decider.dart';
 import 'package:flutter/material.dart';
-import 'package:fazztrack_app/common/colors.dart';
+import 'package:fazztrack_app/common/constants/colors_constants.dart';
 import 'package:fazztrack_app/pages/splash/splash_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 

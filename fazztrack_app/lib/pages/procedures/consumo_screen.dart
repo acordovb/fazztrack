@@ -1,4 +1,4 @@
-import 'package:fazztrack_app/common/colors.dart';
+import 'package:fazztrack_app/common/constants/colors_constants.dart';
 import 'package:fazztrack_app/widgets/saldo_cliente_widget.dart';
 import 'package:flutter/material.dart';
 

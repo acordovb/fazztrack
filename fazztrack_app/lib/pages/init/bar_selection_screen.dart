@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:fazztrack_app/common/colors.dart';
-import 'package:fazztrack_app/services/local_storages/bar_storage_service.dart';
+import 'package:fazztrack_app/common/constants/colors_constants.dart';
+import 'package:fazztrack_app/services/bar/bar_storage_service.dart';
+import 'package:fazztrack_app/services/bar/bar_api_service.dart';
+import 'package:fazztrack_app/common/model/bar_model.dart';
 
 class BarSelectionScreen extends StatefulWidget {
   final Widget nextScreen;
@@ -12,32 +14,53 @@ class BarSelectionScreen extends StatefulWidget {
 }
 
 class _BarSelectionScreenState extends State<BarSelectionScreen> {
-  final List<String> _barList = ['Bar Ecomundo', 'Bar Moderna'];
-
-  String? _selectedBar;
+  final List<BarModel> _barList = [];
+  final BarApiService _barApiService = BarApiService();
+  bool _isLoading = true;
+  String? _selectedBarId;
 
   @override
   void initState() {
     super.initState();
-    _loadSavedBar();
+    _loadBars();
+  }
+
+  Future<void> _loadBars() async {
+    try {
+      final bars = await _barApiService.getAllBars();
+      setState(() {
+        _barList.clear();
+        _barList.addAll(bars);
+        _isLoading = false;
+      });
+      _loadSavedBar();
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   Future<void> _loadSavedBar() async {
-    final savedBar = await BarStorageService.getSelectedBar();
-    if (savedBar != null) {
+    final savedBarId = await BarStorageService.getSelectedBar();
+    if (savedBarId != null && _barList.isNotEmpty) {
+      final selectedBar = _barList.firstWhere(
+        (bar) => bar.id == savedBarId,
+        orElse: () => _barList.first,
+      );
       setState(() {
-        _selectedBar = savedBar;
+        _selectedBarId = selectedBar.id;
       });
-    } else {
+    } else if (_barList.isNotEmpty) {
       setState(() {
-        _selectedBar = _barList.first;
+        _selectedBarId = _barList.first.id;
       });
     }
   }
 
   void _saveSelectionAndContinue() async {
-    if (_selectedBar != null) {
-      await BarStorageService.saveSelectedBar(_selectedBar!);
+    if (_selectedBarId != null) {
+      await BarStorageService.saveSelectedBar(_selectedBarId!);
       if (mounted) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => widget.nextScreen),
@@ -73,52 +96,56 @@ class _BarSelectionScreenState extends State<BarSelectionScreen> {
                   ),
                 ),
                 const SizedBox(height: 40),
-                SizedBox(
-                  width:
-                      MediaQuery.of(context).size.width > 500
-                          ? 500
-                          : double.infinity,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    decoration: BoxDecoration(
-                      color: AppColors.card,
-                      borderRadius: BorderRadius.circular(8.0),
-                      border: Border.all(color: AppColors.primary, width: 2),
-                    ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        value: _selectedBar,
-                        isExpanded: true,
-                        dropdownColor: AppColors.backgroundSecondary,
-                        icon: const Icon(
-                          Icons.arrow_drop_down,
-                          color: AppColors.primary,
+                if (_isLoading)
+                  const CircularProgressIndicator(color: AppColors.primary)
+                else
+                  SizedBox(
+                    width:
+                        MediaQuery.of(context).size.width > 500
+                            ? 500
+                            : double.infinity,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      decoration: BoxDecoration(
+                        color: AppColors.card,
+                        borderRadius: BorderRadius.circular(8.0),
+                        border: Border.all(color: AppColors.primary, width: 2),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          value: _selectedBarId,
+                          isExpanded: true,
+                          dropdownColor: AppColors.backgroundSecondary,
+                          icon: const Icon(
+                            Icons.arrow_drop_down,
+                            color: AppColors.primary,
+                          ),
+                          style: const TextStyle(
+                            fontSize: 18,
+                            color: AppColors.textPrimary,
+                          ),
+                          onChanged: (String? value) {
+                            setState(() {
+                              _selectedBarId = value;
+                            });
+                          },
+                          items:
+                              _barList.map<DropdownMenuItem<String>>((
+                                BarModel bar,
+                              ) {
+                                return DropdownMenuItem<String>(
+                                  value: bar.id,
+                                  child: Text(bar.nombre),
+                                );
+                              }).toList(),
                         ),
-                        style: const TextStyle(
-                          fontSize: 18,
-                          color: AppColors.textPrimary,
-                        ),
-                        onChanged: (String? value) {
-                          setState(() {
-                            _selectedBar = value;
-                          });
-                        },
-                        items:
-                            _barList.map<DropdownMenuItem<String>>((
-                              String value,
-                            ) {
-                              return DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(value),
-                              );
-                            }).toList(),
                       ),
                     ),
                   ),
-                ),
                 const SizedBox(height: 40),
                 ElevatedButton(
-                  onPressed: _saveSelectionAndContinue,
+                  onPressed:
+                      _barList.isEmpty ? null : _saveSelectionAndContinue,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     padding: const EdgeInsets.symmetric(
