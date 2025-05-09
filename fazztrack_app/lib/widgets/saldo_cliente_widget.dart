@@ -178,20 +178,23 @@ class _SaldoClienteWidgetState extends State<SaldoClienteWidget> {
                   },
                 ),
               ),
-
               if ((_isSearching && filteredEstudiantes.isNotEmpty) ||
                   _isLoading)
                 Container(
-                  height: 150,
+                  height: 220,
                   margin: const EdgeInsets.only(top: 8),
                   decoration: BoxDecoration(
                     color: AppColors.backgroundSecondary,
-                    borderRadius: BorderRadius.circular(4),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: AppColors.primaryTurquoise.withOpacity(0.3),
+                      width: 1,
+                    ),
                     boxShadow: const [
                       BoxShadow(
                         color: AppColors.shadow,
-                        blurRadius: 4,
-                        offset: Offset(0, 2),
+                        blurRadius: 6,
+                        offset: Offset(0, 3),
                       ),
                     ],
                   ),
@@ -206,29 +209,91 @@ class _SaldoClienteWidgetState extends State<SaldoClienteWidget> {
                               ),
                             ),
                           )
-                          : ListView.builder(
+                          : ListView.separated(
                             shrinkWrap: true,
+                            padding: const EdgeInsets.symmetric(vertical: 4),
                             itemCount: filteredEstudiantes.length,
+                            separatorBuilder:
+                                (context, index) => const Divider(
+                                  height: 1,
+                                  color: AppColors.shadow,
+                                  indent: 16,
+                                  endIndent: 16,
+                                ),
                             itemBuilder: (context, index) {
                               final estudiante = filteredEstudiantes[index];
-                              return ListTile(
-                                dense: true,
-                                title: Text(
-                                  estudiante.nombre,
-                                  style: const TextStyle(
-                                    color: AppColors.textPrimary,
+                              return Container(
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.card,
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Material(
+                                  color: Colors.transparent,
+                                  child: InkWell(
+                                    borderRadius: BorderRadius.circular(6),
+                                    onTap: () async {
+                                      setState(() {
+                                        selectedClient = estudiante.nombre;
+                                        selectedClientId = estudiante.id;
+                                        _searchController.clear();
+                                        filteredEstudiantes = [];
+                                        _isSearching = false;
+                                      });
+                                      await _fetchStudentBalance(estudiante.id);
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 10,
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          const Icon(
+                                            Icons.person,
+                                            color: AppColors.primaryTurquoise,
+                                            size: 20,
+                                          ),
+                                          const SizedBox(width: 12),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  estudiante.nombre,
+                                                  style: const TextStyle(
+                                                    color:
+                                                        AppColors.textPrimary,
+                                                    fontWeight: FontWeight.w500,
+                                                    fontSize: 15,
+                                                  ),
+                                                ),
+                                                if (estudiante.curso != null)
+                                                  Text(
+                                                    estudiante.curso!,
+                                                    style: const TextStyle(
+                                                      color:
+                                                          AppColors.lightGray,
+                                                      fontSize: 12,
+                                                    ),
+                                                  ),
+                                              ],
+                                            ),
+                                          ),
+                                          const Icon(
+                                            Icons.arrow_forward_ios,
+                                            color: AppColors.lightGray,
+                                            size: 16,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
                                   ),
                                 ),
-                                onTap: () async {
-                                  setState(() {
-                                    selectedClient = estudiante.nombre;
-                                    selectedClientId = estudiante.id;
-                                    _searchController.clear();
-                                    filteredEstudiantes = [];
-                                    _isSearching = false;
-                                  });
-                                  await _fetchStudentBalance(estudiante.id);
-                                },
                               );
                             },
                           ),
