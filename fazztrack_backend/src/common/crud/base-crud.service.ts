@@ -1,5 +1,5 @@
 import { NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
+import { DatabaseService } from '../../database/database.service';
 import { BaseDto, CreateDto, UpdateDto, PrismaModel } from './base.interface';
 
 export abstract class BaseCrudService<
@@ -9,14 +9,14 @@ export abstract class BaseCrudService<
   M extends PrismaModel,
 > {
   protected constructor(
-    protected readonly prisma: PrismaService,
+    protected readonly database: DatabaseService,
     private readonly modelName: string,
   ) {}
 
   protected abstract mapToDto(model: M): T;
 
   async create(createDto: C): Promise<T> {
-    const model = await this.prisma[this.modelName].create({
+    const model = await this.database[this.modelName].create({
       data: createDto,
     });
 
@@ -24,13 +24,13 @@ export abstract class BaseCrudService<
   }
 
   async findAll(): Promise<T[]> {
-    const models = await this.prisma[this.modelName].findMany();
+    const models = await this.database[this.modelName].findMany();
 
     return models.map((model) => this.mapToDto(model as M));
   }
 
   async findOne(id: number): Promise<T> {
-    const model = await this.prisma[this.modelName].findUnique({
+    const model = await this.database[this.modelName].findUnique({
       where: { id },
     });
 
@@ -43,7 +43,7 @@ export abstract class BaseCrudService<
 
   async update(id: number, updateDto: U): Promise<T> {
     try {
-      const model = await this.prisma[this.modelName].update({
+      const model = await this.database[this.modelName].update({
         where: { id },
         data: updateDto,
       });
@@ -61,7 +61,7 @@ export abstract class BaseCrudService<
 
   async remove(id: number): Promise<void> {
     try {
-      await this.prisma[this.modelName].delete({
+      await this.database[this.modelName].delete({
         where: { id },
       });
     } catch (error) {

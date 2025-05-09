@@ -1,11 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { PrismaService } from './prisma/prisma.service';
+import { DatabaseService } from './database/database.service';
 
 @Injectable()
 export class AppService {
   private readonly logger = new Logger(AppService.name);
 
-  constructor(private prisma: PrismaService) {}
+  constructor(private database: DatabaseService) {}
 
   getHello(): string {
     this.logger.log('Database connection status: Active');
@@ -14,7 +14,7 @@ export class AppService {
 
   async testDatabaseConnection(): Promise<boolean> {
     try {
-      await this.prisma.$queryRaw`SELECT 1`;
+      await this.database.$queryRaw`SELECT 1`;
       this.logger.log('Database connection test successful');
       return true;
     } catch (error) {

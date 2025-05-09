@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
+import { DatabaseService } from '../../database/database.service';
 import { CreateVentaDto, UpdateVentaDto, VentaDto } from './dto';
 import { BaseCrudService } from '../../common/crud/base-crud.service';
 
@@ -10,8 +10,8 @@ export class VentasService extends BaseCrudService<
   UpdateVentaDto,
   any
 > {
-  constructor(prisma: PrismaService) {
-    super(prisma, 'ventas');
+  constructor(database: DatabaseService) {
+    super(database, 'ventas');
   }
 
   protected mapToDto(model: any): VentaDto {
