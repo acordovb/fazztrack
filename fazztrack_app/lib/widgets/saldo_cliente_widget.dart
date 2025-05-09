@@ -43,7 +43,6 @@ class _SaldoClienteWidgetState extends State<SaldoClienteWidget> {
 
       if (controlHistorico != null) {
         setState(() {
-          // Calculate balance as totalAbono - totalVenta
           balance = controlHistorico.totalAbono - controlHistorico.totalVenta;
           _isLoadingBalance = false;
         });
@@ -98,7 +97,12 @@ class _SaldoClienteWidgetState extends State<SaldoClienteWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final balanceColor = balance >= 0 ? AppColors.success : AppColors.error;
+    final balanceColor =
+        balance > 0
+            ? AppColors.success
+            : balance < 0
+            ? AppColors.error
+            : Colors.white;
     final balanceText = NumberFormat.currency(
       locale: 'es_MX',
       symbol: '\$',
@@ -128,7 +132,6 @@ class _SaldoClienteWidgetState extends State<SaldoClienteWidget> {
               ),
               child: Column(
                 children: [
-                  // Botón para mostrar/ocultar buscador
                   Row(
                     children: [
                       Expanded(
@@ -228,8 +231,6 @@ class _SaldoClienteWidgetState extends State<SaldoClienteWidget> {
                                                 _isSearching = false;
                                                 _searchController.clear();
                                               });
-
-                                              // Fetch student balance
                                               await _fetchStudentBalance(
                                                 estudiante.id,
                                               );
@@ -248,7 +249,6 @@ class _SaldoClienteWidgetState extends State<SaldoClienteWidget> {
 
         const SizedBox(height: 10),
 
-        // Balance indicator with loading state
         _isLoadingBalance
             ? const Center(
               child: CircularProgressIndicator(
