@@ -6,7 +6,6 @@ import {
   Patch,
   Param,
   Delete,
-  ParseIntPipe,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
@@ -28,13 +27,13 @@ export class ProductosController {
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number): Promise<ProductoDto> {
+  findOne(@Param('id') id: string): Promise<ProductoDto> {
     return this.productosService.findOne(id);
   }
 
   @Patch(':id')
   update(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id') id: string,
     @Body() updateProductoDto: UpdateProductoDto,
   ): Promise<ProductoDto> {
     return this.productosService.update(id, updateProductoDto);
@@ -42,7 +41,7 @@ export class ProductosController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
+  remove(@Param('id') id: string): Promise<void> {
     return this.productosService.remove(id);
   }
 }

@@ -3,6 +3,7 @@ import { AbonosService } from './abonos.service';
 import { AbonosController } from './abonos.controller';
 
 @Module({
+  imports: [],
   controllers: [AbonosController],
   providers: [AbonosService],
   exports: [AbonosService],

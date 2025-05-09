@@ -3,6 +3,7 @@ import { BarsService } from './bars.service';
 import { BarsController } from './bars.controller';
 
 @Module({
+  imports: [],
   controllers: [BarsController],
   providers: [BarsService],
   exports: [BarsService],

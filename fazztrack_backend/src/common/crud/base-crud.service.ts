@@ -1,6 +1,7 @@
 import { NotFoundException } from '@nestjs/common';
 import { DatabaseService } from '../../database/database.service';
 import { BaseDto, CreateDto, UpdateDto, PrismaModel } from './base.interface';
+import { decodeId } from 'src/shared/hashid/hashid.utils';
 
 export abstract class BaseCrudService<
   T extends BaseDto,
@@ -29,9 +30,11 @@ export abstract class BaseCrudService<
     return models.map((model) => this.mapToDto(model as M));
   }
 
-  async findOne(id: number): Promise<T> {
+  async findOne(id: string): Promise<T> {
+    const numericId = decodeId(id);
+
     const model = await this.database[this.modelName].findUnique({
-      where: { id },
+      where: { id: numericId },
     });
 
     if (!model) {
@@ -41,10 +44,12 @@ export abstract class BaseCrudService<
     return this.mapToDto(model as M);
   }
 
-  async update(id: number, updateDto: U): Promise<T> {
+  async update(id: string, updateDto: U): Promise<T> {
     try {
+      const numericId = decodeId(id);
+
       const model = await this.database[this.modelName].update({
-        where: { id },
+        where: { id: numericId },
         data: updateDto,
       });
 
@@ -59,10 +64,12 @@ export abstract class BaseCrudService<
     }
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: string): Promise<void> {
     try {
+      const numericId = decodeId(id);
+
       await this.database[this.modelName].delete({
-        where: { id },
+        where: { id: numericId },
       });
     } catch (error) {
       if (error.code === 'P2025') {

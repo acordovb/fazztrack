@@ -1,7 +1,5 @@
 import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { DatabaseModule } from './database/database.module';
 import { BarsModule } from './modules/bars/bars.module';
 import { ProductosModule } from './modules/productos/productos.module';
@@ -25,8 +23,6 @@ import configuration from './config/configuration';
     VentasModule,
     LoggerModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { DatabaseService } from '../../database/database.service';
 import { CreateVentaDto, UpdateVentaDto, VentaDto } from './dto';
 import { BaseCrudService } from '../../common/crud/base-crud.service';
+import { encodeId } from 'src/shared/hashid/hashid.utils';
 
 @Injectable()
 export class VentasService extends BaseCrudService<
@@ -16,7 +17,7 @@ export class VentasService extends BaseCrudService<
 
   protected mapToDto(model: any): VentaDto {
     return {
-      id: model.id,
+      id: encodeId(model.id),
       id_estudiante: model.id_estudiante,
       id_producto: model.id_producto,
       fecha_transaccion: model.fecha_transaccion,

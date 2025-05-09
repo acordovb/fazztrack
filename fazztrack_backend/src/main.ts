@@ -8,6 +8,6 @@ async function bootstrap() {
   app.setGlobalPrefix('api/v1');
   const port = configService.get('port') || 3000;
   await app.listen(port);
-  console.log(`Application is running on: ${await app.getUrl()}`);
+  console.log(`Fazztrack is running on: ${await app.getUrl()}`);
 }
 bootstrap();

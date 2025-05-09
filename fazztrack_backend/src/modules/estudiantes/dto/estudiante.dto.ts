@@ -1,5 +1,5 @@
 export class EstudianteDto {
-  id: number;
+  id: string; // Changed from number to string to store hashed IDs
   nombre: string;
   celular: string | null;
   curso: string | null;
