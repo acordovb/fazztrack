@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fazztrack_app/common/colors.dart';
-import 'package:fazztrack_app/services/bar_storage_service.dart';
+import 'package:fazztrack_app/services/local_storages/bar_storage_service.dart';
 
 class BarSelectionScreen extends StatefulWidget {
   final Widget nextScreen;

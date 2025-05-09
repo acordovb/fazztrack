@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fazztrack_app/services/bar_storage_service.dart';
+import 'package:fazztrack_app/services/local_storages/bar_storage_service.dart';
 import 'package:fazztrack_app/pages/init/bar_selection_screen.dart';
 import 'package:fazztrack_app/pages/procedures/base_procedures_screen.dart';
 
