@@ -6,6 +6,7 @@ import { ProductosModule } from './modules/productos/productos.module';
 import { EstudiantesModule } from './modules/estudiantes/estudiantes.module';
 import { AbonosModule } from './modules/abonos/abonos.module';
 import { VentasModule } from './modules/ventas/ventas.module';
+import { ControlHistoricoModule } from './modules/control-historico/control-historico.module';
 import { LoggerModule, LoggerMiddleware } from './common/logger';
 import configuration from './config/configuration';
 
@@ -21,6 +22,7 @@ import configuration from './config/configuration';
     EstudiantesModule,
     AbonosModule,
     VentasModule,
+    ControlHistoricoModule,
     LoggerModule,
   ],
 })

@@ -11,9 +11,9 @@ export class CreateProductoDto {
   @IsString({ message: 'El nombre del producto debe ser una cadena de texto' })
   nombre: string;
 
-  @IsOptional()
+  @IsNotEmpty({ message: 'El ID del bar es requerido' })
   @IsNumber({}, { message: 'El ID del bar debe ser un número' })
-  id_bar?: number;
+  id_bar: number;
 
   @IsNotEmpty({ message: 'El precio es requerido' })
   @IsNumber({}, { message: 'El precio debe ser un número' })

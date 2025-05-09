@@ -1,8 +1,8 @@
 export class VentaDto {
-  id: string; // Changed from number to string to store hashed IDs
-  id_estudiante: number | null;
-  id_producto: number | null;
+  id: string;
+  id_estudiante: number;
+  id_producto: number;
   fecha_transaccion: Date | null;
-  id_bar: number | null;
+  id_bar: number;
   n_productos: number;
 }

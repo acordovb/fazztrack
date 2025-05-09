@@ -7,11 +7,11 @@ import {
 } from 'class-validator';
 
 export class CreateVentaDto {
-  @IsOptional()
+  @IsNotEmpty({ message: 'El ID del estudiante es requerido' })
   @IsNumber({}, { message: 'El ID del estudiante debe ser un número' })
   id_estudiante?: number;
 
-  @IsOptional()
+  @IsNotEmpty({ message: 'El ID del producto es requerido' })
   @IsNumber({}, { message: 'El ID del producto debe ser un número' })
   id_producto?: number;
 
@@ -19,7 +19,7 @@ export class CreateVentaDto {
   @IsDate({ message: 'La fecha de transacción debe ser una fecha válida' })
   fecha_transaccion?: Date;
 
-  @IsOptional()
+  @IsNotEmpty({ message: 'El ID del bar es requerido' })
   @IsNumber({}, { message: 'El ID del bar debe ser un número' })
   id_bar?: number;
 

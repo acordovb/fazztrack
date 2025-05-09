@@ -10,26 +10,11 @@ class ConsumoScreen extends StatefulWidget {
 }
 
 class _ConsumoScreenState extends State<ConsumoScreen> {
-  String selectedClient = 'Cliente 1';
-  double balance = 500.00;
-
-  final List<String> clients = [
-    'Cliente 1',
-    'Cliente 2',
-    'Cliente 3',
-    'Cliente 4',
-    'Cliente 5',
-    'Cliente 6',
-    'Cliente 7',
-    'Cliente 8',
-    'Cliente 9',
-    'Cliente 10',
-  ];
-
+  double balance = 0.0;
   void _onClientSelected(String client) {
     setState(() {
-      selectedClient = client;
-      balance = client == 'Cliente 2' ? -350.00 : 500.00;
+      // Update balance based on selected client
+      balance = 0.0; // This would be replaced with actual balance fetching
     });
   }
 
@@ -44,8 +29,6 @@ class _ConsumoScreenState extends State<ConsumoScreen> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SaldoClienteWidget(
-            clients: clients,
-            initialClient: selectedClient,
             balance: balance,
             onClientSelected: _onClientSelected,
           ),

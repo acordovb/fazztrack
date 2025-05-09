@@ -1,19 +1,18 @@
 import 'package:fazztrack_app/common/constants/colors_constants.dart';
+import 'package:fazztrack_app/common/model/estudiante_model.dart';
+import 'package:fazztrack_app/services/estudiantes/estudiantes_api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'dart:async';
 
 class SaldoClienteWidget extends StatefulWidget {
   final Function(String)? onClientSelected;
   final double balance;
-  final List<String> clients;
-  final String initialClient;
 
   const SaldoClienteWidget({
     super.key,
     this.onClientSelected,
     this.balance = 0.0,
-    required this.clients,
-    required this.initialClient,
   });
 
   @override
@@ -21,37 +20,55 @@ class SaldoClienteWidget extends StatefulWidget {
 }
 
 class _SaldoClienteWidgetState extends State<SaldoClienteWidget> {
-  late String selectedClient;
+  String? selectedClient;
   final TextEditingController _searchController = TextEditingController();
   bool _isSearching = false;
-  List<String> filteredClients = [];
-
+  List<EstudianteModel> filteredEstudiantes = [];
+  Timer? _debounceTimer;
+  final EstudiantesApiService _estudiantesService = EstudiantesApiService();
+  bool _isLoading = false;
   @override
   void initState() {
     super.initState();
-    selectedClient = widget.initialClient;
-    filteredClients = widget.clients;
   }
 
-  void _filterClients(String query) {
+  void _searchEstudiantes(String query) {
+    if (_debounceTimer?.isActive ?? false) {
+      _debounceTimer!.cancel();
+    }
+
     setState(() {
+      _isLoading = true;
+    });
+
+    _debounceTimer = Timer(const Duration(seconds: 1), () async {
       if (query.isEmpty) {
-        filteredClients = widget.clients;
-      } else {
-        filteredClients =
-            widget.clients
-                .where(
-                  (client) =>
-                      client.toLowerCase().contains(query.toLowerCase()),
-                )
-                .toList();
+        setState(() {
+          filteredEstudiantes = [];
+          _isLoading = false;
+        });
+        return;
+      }
+
+      try {
+        final estudiantes = await _estudiantesService.searchEstudiantesByName(
+          query,
+        );
+        setState(() {
+          filteredEstudiantes = estudiantes;
+          _isLoading = false;
+        });
+      } catch (e) {
+        setState(() {
+          filteredEstudiantes = [];
+          _isLoading = false;
+        });
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    // Determinamos color basado en el saldo
     final balanceColor =
         widget.balance >= 0 ? AppColors.success : AppColors.error;
     final balanceText = NumberFormat.currency(
@@ -71,7 +88,7 @@ class _SaldoClienteWidgetState extends State<SaldoClienteWidget> {
                 _isSearching = !_isSearching;
                 if (!_isSearching) {
                   _searchController.clear();
-                  filteredClients = widget.clients;
+                  filteredEstudiantes = [];
                 }
               });
             },
@@ -88,7 +105,7 @@ class _SaldoClienteWidgetState extends State<SaldoClienteWidget> {
                     children: [
                       Expanded(
                         child: Text(
-                          selectedClient,
+                          selectedClient ?? 'Buscar estudiante...',
                           style: const TextStyle(
                             color: AppColors.textPrimary,
                             fontSize: 16,
@@ -96,9 +113,8 @@ class _SaldoClienteWidgetState extends State<SaldoClienteWidget> {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      // Eliminamos el icono de lupa aquí
                       Icon(
-                        _isSearching ? Icons.close : Icons.arrow_drop_down,
+                        _isSearching ? Icons.close : Icons.search,
                         color: AppColors.textPrimary,
                       ),
                     ],
@@ -118,26 +134,23 @@ class _SaldoClienteWidgetState extends State<SaldoClienteWidget> {
                                 prefixIconConstraints: BoxConstraints(
                                   minWidth: 40,
                                 ),
-                                hintText: "Buscar cliente...",
+                                hintText: "Buscar estudiante...",
                                 hintStyle: TextStyle(
                                   color: AppColors.lightGray,
                                 ),
                                 border: InputBorder.none,
                                 contentPadding: EdgeInsets.symmetric(
                                   vertical: 15,
-                                ), // Ajustamos el padding vertical
-                                isDense:
-                                    true, // Ayuda a controlar el tamaño del campo
-                                alignLabelWithHint:
-                                    true, // Alinea el hint con el icono
+                                ),
+                                isDense: true,
+                                alignLabelWithHint: true,
                               ),
-                              textAlignVertical:
-                                  TextAlignVertical
-                                      .center, // Centra el texto verticalmente
+                              textAlignVertical: TextAlignVertical.center,
                               style: const TextStyle(
                                 color: AppColors.textPrimary,
                               ),
-                              onChanged: _filterClients,
+                              onChanged: _searchEstudiantes,
+                              autofocus: true,
                             )
                             : null,
                   ),
@@ -153,33 +166,48 @@ class _SaldoClienteWidgetState extends State<SaldoClienteWidget> {
                                 color: AppColors.backgroundSecondary,
                                 borderRadius: BorderRadius.circular(4),
                               ),
-                              child: ListView.builder(
-                                shrinkWrap: true,
-                                itemCount: filteredClients.length,
-                                itemBuilder: (context, index) {
-                                  return ListTile(
-                                    dense: true,
-                                    title: Text(
-                                      filteredClients[index],
-                                      style: const TextStyle(
-                                        color: AppColors.textPrimary,
+                              child:
+                                  _isLoading
+                                      ? const Center(
+                                        child: Padding(
+                                          padding: EdgeInsets.all(8.0),
+                                          child: CircularProgressIndicator(
+                                            color: AppColors.primaryTurquoise,
+                                            strokeWidth: 2,
+                                          ),
+                                        ),
+                                      )
+                                      : ListView.builder(
+                                        shrinkWrap: true,
+                                        itemCount: filteredEstudiantes.length,
+                                        itemBuilder: (context, index) {
+                                          final estudiante =
+                                              filteredEstudiantes[index];
+                                          return ListTile(
+                                            dense: true,
+                                            title: Text(
+                                              estudiante.nombre,
+                                              style: const TextStyle(
+                                                color: AppColors.textPrimary,
+                                              ),
+                                            ),
+                                            onTap: () {
+                                              setState(() {
+                                                selectedClient =
+                                                    estudiante.nombre;
+                                                _isSearching = false;
+                                                _searchController.clear();
+                                              });
+                                              if (widget.onClientSelected !=
+                                                  null) {
+                                                widget.onClientSelected!(
+                                                  estudiante.nombre,
+                                                );
+                                              }
+                                            },
+                                          );
+                                        },
                                       ),
-                                    ),
-                                    onTap: () {
-                                      setState(() {
-                                        selectedClient = filteredClients[index];
-                                        _isSearching = false;
-                                        _searchController.clear();
-                                      });
-                                      if (widget.onClientSelected != null) {
-                                        widget.onClientSelected!(
-                                          selectedClient,
-                                        );
-                                      }
-                                    },
-                                  );
-                                },
-                              ),
                             )
                             : null,
                   ),
@@ -230,6 +258,7 @@ class _SaldoClienteWidgetState extends State<SaldoClienteWidget> {
 
   @override
   void dispose() {
+    _debounceTimer?.cancel();
     _searchController.dispose();
     super.dispose();
   }

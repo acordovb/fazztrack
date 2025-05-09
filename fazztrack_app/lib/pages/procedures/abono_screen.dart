@@ -10,26 +10,13 @@ class AbonoScreen extends StatefulWidget {
 }
 
 class _AbonoScreenState extends State<AbonoScreen> {
-  String selectedClient = 'Cliente 1';
   double balance = 500.00;
-
-  final List<String> clients = [
-    'Cliente 1',
-    'Cliente 2',
-    'Cliente 3',
-    'Cliente 4',
-    'Cliente 5',
-    'Cliente 6',
-    'Cliente 7',
-    'Cliente 8',
-    'Cliente 9',
-    'Cliente 10',
-  ];
 
   void _onClientSelected(String client) {
     setState(() {
-      selectedClient = client;
-      balance = client == 'Cliente 2' ? -350.00 : 500.00;
+      // Set balance based on the selected student
+      // For demonstration purposes, we'll set different balances based on student name
+      balance = client.contains('2') ? -350.00 : 500.00;
     });
   }
 
@@ -44,8 +31,6 @@ class _AbonoScreenState extends State<AbonoScreen> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SaldoClienteWidget(
-            clients: clients,
-            initialClient: selectedClient,
             balance: balance,
             onClientSelected: _onClientSelected,
           ),

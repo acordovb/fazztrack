@@ -1,7 +1,7 @@
 export class ProductoDto {
-  id: string; // Changed from number to string to store hashed IDs
+  id: string;
   nombre: string;
-  id_bar?: number | null;
+  id_bar: number;
   precio: number;
   categoria?: string | null;
 }
