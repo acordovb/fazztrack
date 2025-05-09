@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:fazztrack_app/common/model/estudiante_model.dart';
+import 'package:fazztrack_app/model/estudiante_model.dart';
 import 'package:fazztrack_app/services/api/api_routes.dart';
 import 'package:fazztrack_app/services/api/api_service.dart';
 

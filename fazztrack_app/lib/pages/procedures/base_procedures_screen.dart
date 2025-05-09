@@ -1,4 +1,4 @@
-import 'package:fazztrack_app/common/constants/colors_constants.dart';
+import 'package:fazztrack_app/constants/colors_constants.dart';
 import 'package:fazztrack_app/pages/procedures/abono_screen.dart';
 import 'package:flutter/material.dart';
 

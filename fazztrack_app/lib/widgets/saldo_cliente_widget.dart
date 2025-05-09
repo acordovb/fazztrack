@@ -1,5 +1,5 @@
-import 'package:fazztrack_app/common/constants/colors_constants.dart';
-import 'package:fazztrack_app/common/model/estudiante_model.dart';
+import 'package:fazztrack_app/constants/colors_constants.dart';
+import 'package:fazztrack_app/model/estudiante_model.dart';
 import 'package:fazztrack_app/services/estudiantes/estudiantes_api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
