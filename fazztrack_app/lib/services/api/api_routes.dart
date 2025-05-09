@@ -1,5 +1,7 @@
+import 'package:fazztrack_app/config/build.config.dart';
+
 class API {
-  static const String baseUrl = 'http://10.0.2.2:3000/api/v1';
+  static final String baseUrl = DeployConfig.baseUrl;
   static const String getUser = '/user';
   static const String getAllUsers = '/users';
   static const String getAllProducts = '/products';
