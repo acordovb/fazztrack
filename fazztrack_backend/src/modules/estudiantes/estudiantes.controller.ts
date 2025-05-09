@@ -8,6 +8,7 @@ import {
   Delete,
   HttpCode,
   HttpStatus,
+  Query,
 } from '@nestjs/common';
 import { EstudiantesService } from './estudiantes.service';
 import { CreateEstudianteDto, UpdateEstudianteDto, EstudianteDto } from './dto';
@@ -26,6 +27,11 @@ export class EstudiantesController {
   @Get()
   findAll(): Promise<EstudianteDto[]> {
     return this.estudiantesService.findAll();
+  }
+
+  @Get('search')
+  search(@Query('nombre') nombre: string): Promise<EstudianteDto[]> {
+    return this.estudiantesService.searchByName(nombre);
   }
 
   @Get(':id')

@@ -24,4 +24,17 @@ export class EstudiantesService extends BaseCrudService<
       nombre_representante: model.nombre_representante,
     };
   }
+
+  async searchByName(searchTerm: string): Promise<EstudianteDto[]> {
+    const estudiantes = await this.database.estudiantes.findMany({
+      where: {
+        nombre: {
+          contains: searchTerm,
+          mode: 'insensitive',
+        },
+      },
+    });
+
+    return estudiantes.map((estudiante) => this.mapToDto(estudiante));
+  }
 }
