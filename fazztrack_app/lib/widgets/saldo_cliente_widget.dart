@@ -187,7 +187,7 @@ class _SaldoClienteWidgetState extends State<SaldoClienteWidget> {
                     color: AppColors.backgroundSecondary,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: AppColors.primaryTurquoise.withOpacity(0.3),
+                      color: AppColors.primaryTurquoise.withAlpha(50),
                       width: 1,
                     ),
                     boxShadow: const [
