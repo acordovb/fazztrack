@@ -18,7 +18,6 @@ class ProductosApiService {
       }
 
       final response = await _apiService.get(searchUrl);
-      print('Response: ${response.body}');
       final data = jsonDecode(response.body) as List;
       return data.map((json) => ProductoModel.fromJson(json)).toList();
     } catch (e) {

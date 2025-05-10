@@ -8,7 +8,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class SaldoClienteWidget extends StatefulWidget {
-  const SaldoClienteWidget({super.key});
+  final Function(EstudianteModel? estudiante, double balance)? onUserChange;
+
+  const SaldoClienteWidget({super.key, this.onUserChange});
 
   @override
   State<SaldoClienteWidget> createState() => _SaldoClienteWidgetState();
@@ -18,6 +20,7 @@ class _SaldoClienteWidgetState extends State<SaldoClienteWidget> {
   String? selectedClient;
   String? selectedClientId;
   double balance = 0.0;
+  EstudianteModel? selectedEstudiante;
   final TextEditingController _searchController = TextEditingController();
   bool _isSearching = false;
   List<EstudianteModel> filteredEstudiantes = [];
@@ -53,11 +56,21 @@ class _SaldoClienteWidgetState extends State<SaldoClienteWidget> {
           _isLoadingBalance = false;
         });
       }
+
+      // Notify parent widget about the user change and balance
+      if (widget.onUserChange != null) {
+        widget.onUserChange!(selectedEstudiante, balance);
+      }
     } catch (e) {
       setState(() {
         balance = 0.0;
         _isLoadingBalance = false;
       });
+
+      // Notify parent widget even in case of error
+      if (widget.onUserChange != null) {
+        widget.onUserChange!(selectedEstudiante, balance);
+      }
     }
   }
 
@@ -239,6 +252,7 @@ class _SaldoClienteWidgetState extends State<SaldoClienteWidget> {
                                       setState(() {
                                         selectedClient = estudiante.nombre;
                                         selectedClientId = estudiante.id;
+                                        selectedEstudiante = estudiante;
                                         _searchController.clear();
                                         filteredEstudiantes = [];
                                         _isSearching = false;
