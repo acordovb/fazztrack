@@ -70,7 +70,7 @@ class _SaldoClienteWidgetState extends State<SaldoClienteWidget> {
       _isLoading = true;
     });
 
-    _debounceTimer = Timer(const Duration(seconds: 1), () async {
+    _debounceTimer = Timer(const Duration(milliseconds: 400), () async {
       if (query.isEmpty) {
         setState(() {
           filteredEstudiantes = [];

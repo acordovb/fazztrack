@@ -1,5 +1,5 @@
 export interface BaseDto {
-  id: number | string; // Updated to support both number and hashed string IDs
+  id: number | string;
 }
 
 export interface CreateDto {}

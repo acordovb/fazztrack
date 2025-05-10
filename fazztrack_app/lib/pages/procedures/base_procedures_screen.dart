@@ -28,14 +28,12 @@ class _BaseProceduresScreenState extends State<BaseProceduresScreen> {
     PageType.admin: 'Administración',
   };
 
-  // Cambiar la página actual
   void _changePage(PageType page) {
     setState(() {
       _currentPage = page;
     });
   }
 
-  // Obtener el contenido de la página actual
   Widget _getCurrentPageContent() {
     switch (_currentPage) {
       case PageType.consumo:
@@ -97,8 +95,7 @@ class CustomDrawer extends StatelessWidget {
                   fit: BoxFit.cover,
                 ),
               ),
-              child:
-                  Container(), // Container vacío ya que la imagen está en la decoración
+              child: Container(),
             ),
             Expanded(
               child: ListView(
