@@ -19,7 +19,7 @@ export class ProductosService extends BaseCrudService<
     return {
       id: encodeId(model.id),
       nombre: model.nombre,
-      id_bar: model.id_bar,
+      idBar: encodeId(model.id_bar),
       precio: model.precio.toNumber(),
       categoria: model.categoria,
     };
@@ -38,7 +38,6 @@ export class ProductosService extends BaseCrudService<
         const numericBarId = decodeId(idBar);
         whereClause.id_bar = numericBarId;
       }
-
       const productos = await this.database.productos.findMany({
         where: whereClause,
       });

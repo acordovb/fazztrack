@@ -105,7 +105,7 @@ class _SaldoClienteWidgetState extends State<SaldoClienteWidget> {
             ? AppColors.error
             : Colors.white;
     final balanceText = NumberFormat.currency(
-      locale: 'es_MX',
+      locale: 'en_US',
       symbol: '\$',
     ).format(balance);
 

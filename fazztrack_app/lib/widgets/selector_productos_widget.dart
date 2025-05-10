@@ -158,7 +158,7 @@ class _FilaProductoWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final formatCurrency = NumberFormat.currency(locale: 'es_MX', symbol: '\$');
+    final formatCurrency = NumberFormat.currency(locale: 'en_US', symbol: '\$');
 
     return InkWell(
       onTap: () => _mostrarDialogoSeleccion(context),
@@ -418,7 +418,7 @@ class _DialogoSeleccionProductoState extends State<_DialogoSeleccionProducto> {
                   itemBuilder: (context, index) {
                     final producto = _productosEncontrados[index];
                     final formatCurrency = NumberFormat.currency(
-                      locale: 'es_MX',
+                      locale: 'en_US',
                       symbol: '\$',
                     );
 
@@ -469,7 +469,7 @@ class _DialogoSeleccionProductoState extends State<_DialogoSeleccionProducto> {
                   ),
                   Text(
                     NumberFormat.currency(
-                      locale: 'es_MX',
+                      locale: 'en_US',
                       symbol: '\$',
                     ).format(_productoSeleccionado!.precio),
                     style: const TextStyle(

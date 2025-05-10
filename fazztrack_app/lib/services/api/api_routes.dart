@@ -5,4 +5,5 @@ class API {
   static final String bares = '/bares';
   static final String estudiantes = '/estudiantes';
   static final String controlHistorico = '/control-historico';
+  static final String productos = '/productos';
 }

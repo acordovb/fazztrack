@@ -29,7 +29,7 @@ export class ProductosController {
   @Get('search')
   search(
     @Query('nombre') nombre?: string,
-    @Query('id_bar') idBar?: string,
+    @Query('idBar') idBar?: string,
   ): Promise<ProductoDto[]> {
     if (nombre) {
       return this.productosService.searchByNombre(nombre, idBar);

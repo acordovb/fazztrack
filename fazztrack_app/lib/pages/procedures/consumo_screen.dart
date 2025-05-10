@@ -27,7 +27,7 @@ class _ConsumoScreenState extends State<ConsumoScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final formatCurrency = NumberFormat.currency(locale: 'es_MX', symbol: '\$');
+    final formatCurrency = NumberFormat.currency(locale: 'en_US', symbol: '\$');
 
     return Container(
       width: double.infinity,

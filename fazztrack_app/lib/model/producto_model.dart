@@ -3,16 +3,14 @@ class ProductoModel {
   final String nombre;
   final double precio;
   final String categoria;
-  final String? imagen;
-  final String? descripcion;
+  final String idBar;
 
   ProductoModel({
     required this.id,
     required this.nombre,
     required this.precio,
     required this.categoria,
-    this.imagen,
-    this.descripcion,
+    required this.idBar,
   });
 
   factory ProductoModel.fromJson(Map<String, dynamic> json) {
@@ -21,8 +19,7 @@ class ProductoModel {
       nombre: json['nombre'],
       precio: json['precio'].toDouble(),
       categoria: json['categoria'],
-      imagen: json['imagen'],
-      descripcion: json['descripcion'],
+      idBar: json['idBar'],
     );
   }
 
@@ -32,8 +29,7 @@ class ProductoModel {
       'nombre': nombre,
       'precio': precio,
       'categoria': categoria,
-      'imagen': imagen,
-      'descripcion': descripcion,
+      'idBar': idBar,
     };
   }
 }
