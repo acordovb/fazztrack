@@ -8,6 +8,7 @@ import {
   Delete,
   HttpCode,
   HttpStatus,
+  Query,
 } from '@nestjs/common';
 import { ProductosService } from './productos.service';
 import { CreateProductoDto, UpdateProductoDto, ProductoDto } from './dto';
@@ -23,6 +24,16 @@ export class ProductosController {
 
   @Get()
   findAll(): Promise<ProductoDto[]> {
+    return this.productosService.findAll();
+  }
+  @Get('search')
+  search(
+    @Query('nombre') nombre?: string,
+    @Query('id_bar') idBar?: string,
+  ): Promise<ProductoDto[]> {
+    if (nombre) {
+      return this.productosService.searchByNombre(nombre, idBar);
+    }
     return this.productosService.findAll();
   }
 
