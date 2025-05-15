@@ -22,7 +22,7 @@ export class ControlHistoricoService extends BaseCrudService<
   protected mapToDto(model: any): ControlHistoricoDto {
     return {
       id: encodeId(model.id),
-      id_estudiante: model.id_estudiante,
+      id_estudiante: encodeId(model.id_estudiante),
       total_abono: model.total_abono.toNumber(),
       total_venta: model.total_venta.toNumber(),
       total_pendiente_ult_mes_abono:

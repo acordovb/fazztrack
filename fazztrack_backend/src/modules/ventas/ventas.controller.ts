@@ -11,14 +11,23 @@ import {
 } from '@nestjs/common';
 import { VentasService } from './ventas.service';
 import { CreateVentaDto, UpdateVentaDto, VentaDto } from './dto';
+import { UpdateControlHistoricoDto } from '../control-historico/dto';
 
 @Controller('ventas')
 export class VentasController {
   constructor(private readonly ventasService: VentasService) {}
 
-  @Post()
-  create(@Body() createVentaDto: CreateVentaDto): Promise<VentaDto> {
-    return this.ventasService.create(createVentaDto);
+  @Post('bulk')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async createBulk(
+    @Body()
+    body: {
+      ventas: CreateVentaDto[];
+      control_historico: UpdateControlHistoricoDto & { id_estudiante: string };
+    },
+  ): Promise<void> {
+    const { ventas, control_historico } = body;
+    return this.ventasService.createBulk(ventas, control_historico);
   }
 
   @Get()
@@ -29,19 +38,5 @@ export class VentasController {
   @Get(':id')
   findOne(@Param('id') id: string): Promise<VentaDto> {
     return this.ventasService.findOne(id);
-  }
-
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateVentaDto: UpdateVentaDto,
-  ): Promise<VentaDto> {
-    return this.ventasService.update(id, updateVentaDto);
-  }
-
-  @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@Param('id') id: string): Promise<void> {
-    return this.ventasService.remove(id);
   }
 }

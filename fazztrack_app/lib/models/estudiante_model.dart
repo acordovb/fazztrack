@@ -34,20 +34,4 @@ class EstudianteModel {
   static List<EstudianteModel> fromJsonList(List<dynamic> jsonList) {
     return jsonList.map((json) => EstudianteModel.fromJson(json)).toList();
   }
-
-  EstudianteModel copyWith({
-    String? id,
-    String? nombre,
-    String? celular,
-    String? curso,
-    String? nombreRepresentante,
-  }) {
-    return EstudianteModel(
-      id: id ?? this.id,
-      nombre: nombre ?? this.nombre,
-      celular: celular ?? this.celular,
-      curso: curso ?? this.curso,
-      nombreRepresentante: nombreRepresentante ?? this.nombreRepresentante,
-    );
-  }
 }

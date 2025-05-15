@@ -1,6 +1,8 @@
 import 'package:fazztrack_app/constants/colors_constants.dart';
+import 'package:fazztrack_app/models/control_historico_model.dart';
 import 'package:fazztrack_app/models/estudiante_model.dart';
 import 'package:fazztrack_app/models/producto_seleccionado_model.dart';
+import 'package:fazztrack_app/providers/consumo_provider.dart';
 import 'package:fazztrack_app/widgets/saldo_cliente_widget.dart';
 import 'package:fazztrack_app/widgets/selector_productos_widget.dart';
 import 'package:flutter/material.dart';
@@ -17,7 +19,7 @@ class _ConsumoScreenState extends State<ConsumoScreen> {
   List<ProductoSeleccionadoModel> _productosSeleccionados = [];
   double _total = 0.0;
   EstudianteModel? _estudianteSeleccionado;
-  double _balance = 0.0;
+  ControlHistoricoModel? _controlHistorico;
 
   void _actualizarProductosSeleccionados(
     List<ProductoSeleccionadoModel> productos,
@@ -43,10 +45,10 @@ class _ConsumoScreenState extends State<ConsumoScreen> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               SaldoClienteWidget(
-                onUserChange: (estudiante, balance) {
+                onUserChange: (estudiante, controlHistorico) {
                   setState(() {
                     _estudianteSeleccionado = estudiante;
-                    _balance = balance;
+                    _controlHistorico = controlHistorico;
                   });
                 },
               ),
@@ -54,7 +56,8 @@ class _ConsumoScreenState extends State<ConsumoScreen> {
               SelectorProductosWidget(
                 onProductosChanged: _actualizarProductosSeleccionados,
               ),
-              if (_productosSeleccionados.isNotEmpty) ...[
+              if (_productosSeleccionados.isNotEmpty &&
+                  _controlHistorico != null) ...[
                 const SizedBox(height: 20),
                 Container(
                   constraints: const BoxConstraints(maxWidth: 500),
@@ -105,10 +108,17 @@ class _ConsumoScreenState extends State<ConsumoScreen> {
                         ),
                       ),
                       Text(
-                        formatCurrency.format(_balance - _total),
+                        formatCurrency.format(
+                          _controlHistorico!.totalAbono -
+                              _controlHistorico!.totalVenta -
+                              _total,
+                        ),
                         style: TextStyle(
                           color:
-                              (_balance - _total) < 0
+                              (_controlHistorico!.totalAbono -
+                                          _controlHistorico!.totalVenta -
+                                          _total) <
+                                      0
                                   ? Colors.red
                                   : AppColors.primaryTurquoise,
                           fontSize: 18,
@@ -128,17 +138,13 @@ class _ConsumoScreenState extends State<ConsumoScreen> {
       floatingActionButton:
           _productosSeleccionados.isNotEmpty && _estudianteSeleccionado != null
               ? FloatingActionButton.extended(
-                onPressed: () {
-                  print('Estudiante: ${_estudianteSeleccionado!.nombre}');
-                  print('Balance actual: $_balance');
-                  print('Total compra: $_total');
-                  print('Nuevo saldo: ${_balance - _total}');
-                  print('Productos:');
-                  for (var producto in _productosSeleccionados) {
-                    print(
-                      '- ${producto.producto?.nombre ?? "Sin nombre"} x ${producto.cantidad} = \$${producto.subtotal}',
-                    );
-                  }
+                onPressed: () async {
+                  await ConsumoProvider().registrarConsumo(
+                    _estudianteSeleccionado!,
+                    _productosSeleccionados,
+                    _controlHistorico!,
+                    _total,
+                  );
                 },
                 label: const Text('Registrar Consumo'),
                 icon: const Icon(Icons.check_circle),

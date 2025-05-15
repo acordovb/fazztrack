@@ -16,6 +16,7 @@ import {
   CreateControlHistoricoDto,
   UpdateControlHistoricoDto,
 } from './dto';
+import { decodeId } from 'src/shared/hashid/hashid.utils';
 
 @Controller('control-historico')
 export class ControlHistoricoController {
@@ -34,15 +35,23 @@ export class ControlHistoricoController {
   async findByEstudianteId(
     @Param('idEstudiante') idEstudiante: string,
   ): Promise<ControlHistoricoDto> {
-    const controlHistorico =
+    let controlHistorico =
       await this.controlHistoricoService.findByEstudianteId(idEstudiante);
 
     if (!controlHistorico) {
-      throw new NotFoundException(
-        `No se encontró historial para el estudiante con ID ${idEstudiante}`,
+      const newControlHistoricoDto = new CreateControlHistoricoDto();
+      newControlHistoricoDto.id_estudiante = decodeId(idEstudiante);
+      newControlHistoricoDto.total_abono = 0;
+      newControlHistoricoDto.total_venta = 0;
+      newControlHistoricoDto.total_pendiente_ult_mes_abono = 0;
+      newControlHistoricoDto.total_pendiente_ult_mes_venta = 0;
+      controlHistorico = await this.controlHistoricoService.create(
+        newControlHistoricoDto,
       );
+      if (!controlHistorico) {
+        throw new NotFoundException('Control historico not found');
+      }
     }
-
     return controlHistorico;
   }
 

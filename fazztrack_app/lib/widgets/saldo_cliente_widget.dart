@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:fazztrack_app/constants/colors_constants.dart';
+import 'package:fazztrack_app/models/control_historico_model.dart';
 import 'package:fazztrack_app/models/estudiante_model.dart';
 import 'package:fazztrack_app/services/estudiantes/control_historico_api_service.dart';
 import 'package:fazztrack_app/services/estudiantes/estudiantes_api_service.dart';
@@ -8,7 +9,11 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class SaldoClienteWidget extends StatefulWidget {
-  final Function(EstudianteModel? estudiante, double balance)? onUserChange;
+  final Function(
+    EstudianteModel? estudiante,
+    ControlHistoricoModel controlHistorico,
+  )?
+  onUserChange;
 
   const SaldoClienteWidget({super.key, this.onUserChange});
 
@@ -28,6 +33,7 @@ class _SaldoClienteWidgetState extends State<SaldoClienteWidget> {
   final EstudiantesApiService _estudiantesService = EstudiantesApiService();
   final ControlHistoricoApiService _controlHistoricoService =
       ControlHistoricoApiService();
+  ControlHistoricoModel? _controlHistorico;
   bool _isLoading = false;
   bool _isLoadingBalance = false;
 
@@ -42,12 +48,13 @@ class _SaldoClienteWidgetState extends State<SaldoClienteWidget> {
     });
 
     try {
-      final controlHistorico = await _controlHistoricoService
+      _controlHistorico = await _controlHistoricoService
           .getControlHistoricoByEstudianteId(estudianteId);
 
-      if (controlHistorico != null) {
+      if (_controlHistorico != null) {
         setState(() {
-          balance = controlHistorico.totalAbono - controlHistorico.totalVenta;
+          balance =
+              _controlHistorico!.totalAbono - _controlHistorico!.totalVenta;
           _isLoadingBalance = false;
         });
       } else {
@@ -59,7 +66,7 @@ class _SaldoClienteWidgetState extends State<SaldoClienteWidget> {
 
       // Notify parent widget about the user change and balance
       if (widget.onUserChange != null) {
-        widget.onUserChange!(selectedEstudiante, balance);
+        widget.onUserChange!(selectedEstudiante, _controlHistorico!);
       }
     } catch (e) {
       setState(() {
@@ -69,7 +76,7 @@ class _SaldoClienteWidgetState extends State<SaldoClienteWidget> {
 
       // Notify parent widget even in case of error
       if (widget.onUserChange != null) {
-        widget.onUserChange!(selectedEstudiante, balance);
+        widget.onUserChange!(selectedEstudiante, _controlHistorico!);
       }
     }
   }

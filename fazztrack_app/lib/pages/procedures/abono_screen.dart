@@ -1,4 +1,5 @@
 import 'package:fazztrack_app/constants/colors_constants.dart';
+import 'package:fazztrack_app/models/control_historico_model.dart';
 import 'package:fazztrack_app/models/estudiante_model.dart';
 import 'package:fazztrack_app/widgets/saldo_cliente_widget.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +19,7 @@ class _AbonoScreenState extends State<AbonoScreen> {
   String _selectedPaymentMethod = 'Transferencia';
   final TextEditingController _montoController = TextEditingController();
   final TextEditingController _comentarioController = TextEditingController();
+  ControlHistoricoModel? _controlHistorico;
   double _nuevoSaldo = 0.0;
 
   @override
@@ -76,10 +78,10 @@ class _AbonoScreenState extends State<AbonoScreen> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               SaldoClienteWidget(
-                onUserChange: (estudiante, balance) {
+                onUserChange: (estudiante, controlHistorico) {
                   setState(() {
                     _estudianteSeleccionado = estudiante;
-                    _balance = balance;
+                    _controlHistorico = controlHistorico;
                     _calcularNuevoSaldo();
                   });
                 },

@@ -1,12 +1,12 @@
-class ControlHistorico {
+class ControlHistoricoModel {
   final String id;
-  final int idEstudiante;
+  final String idEstudiante;
   final double totalAbono;
   final double totalVenta;
   final double totalPendienteUltMesAbono;
   final double totalPendienteUltMesVenta;
 
-  ControlHistorico({
+  ControlHistoricoModel({
     required this.id,
     required this.idEstudiante,
     required this.totalAbono,
@@ -15,8 +15,8 @@ class ControlHistorico {
     required this.totalPendienteUltMesVenta,
   });
 
-  factory ControlHistorico.fromJson(Map<String, dynamic> json) {
-    return ControlHistorico(
+  factory ControlHistoricoModel.fromJson(Map<String, dynamic> json) {
+    return ControlHistoricoModel(
       id: json['id'],
       idEstudiante: json['id_estudiante'],
       totalAbono: json['total_abono'].toDouble(),
@@ -37,5 +37,25 @@ class ControlHistorico {
       'total_pendiente_ult_mes_abono': totalPendienteUltMesAbono,
       'total_pendiente_ult_mes_venta': totalPendienteUltMesVenta,
     };
+  }
+
+  ControlHistoricoModel copyWith({
+    String? id,
+    String? idEstudiante,
+    double? totalAbono,
+    double? totalVenta,
+    double? totalPendienteUltMesAbono,
+    double? totalPendienteUltMesVenta,
+  }) {
+    return ControlHistoricoModel(
+      id: id ?? this.id,
+      idEstudiante: idEstudiante ?? this.idEstudiante,
+      totalAbono: totalAbono ?? this.totalAbono,
+      totalVenta: totalVenta ?? this.totalVenta,
+      totalPendienteUltMesAbono:
+          totalPendienteUltMesAbono ?? this.totalPendienteUltMesAbono,
+      totalPendienteUltMesVenta:
+          totalPendienteUltMesVenta ?? this.totalPendienteUltMesVenta,
+    );
   }
 }
