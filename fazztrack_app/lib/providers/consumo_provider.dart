@@ -6,7 +6,7 @@ import 'package:fazztrack_app/services/api/api_service.dart';
 class ConsumoProvider {
   final ApiService _apiService = ApiService();
 
-  Future<void> registrarConsumo(
+  Future<String> registrarConsumo(
     EstudianteModel estudiante,
     List<ProductoSeleccionadoModel> productos,
     ControlHistoricoModel controlHistorico,
@@ -33,8 +33,15 @@ class ConsumoProvider {
     };
     try {
       await _apiService.post('/ventas/bulk', body);
+      return 'OK';
     } catch (e) {
-      print('Error al registrar el consumo: $e');
+      if (e.toString().contains('HTTP error: 404')) {
+        return 'Error: No se encontró el recurso';
+      } else if (e.toString().contains('HTTP error: 500')) {
+        return 'Error: Error interno del servidor';
+      } else {
+        return 'Error: ${e.toString()}';
+      }
     }
   }
 }

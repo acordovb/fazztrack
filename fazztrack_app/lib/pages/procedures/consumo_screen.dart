@@ -5,6 +5,7 @@ import 'package:fazztrack_app/models/producto_seleccionado_model.dart';
 import 'package:fazztrack_app/providers/consumo_provider.dart';
 import 'package:fazztrack_app/widgets/saldo_cliente_widget.dart';
 import 'package:fazztrack_app/widgets/selector_productos_widget.dart';
+import 'package:fazztrack_app/widgets/transaction_alert_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -16,6 +17,9 @@ class ConsumoScreen extends StatefulWidget {
 }
 
 class _ConsumoScreenState extends State<ConsumoScreen> {
+  Key _saldoClienteKey = UniqueKey();
+  Key _selectorProductosKey = UniqueKey();
+
   List<ProductoSeleccionadoModel> _productosSeleccionados = [];
   double _total = 0.0;
   EstudianteModel? _estudianteSeleccionado;
@@ -27,6 +31,18 @@ class _ConsumoScreenState extends State<ConsumoScreen> {
     setState(() {
       _productosSeleccionados = productos;
       _total = productos.fold(0, (sum, producto) => sum + producto.subtotal);
+    });
+  }
+
+  void _reiniciarValores() {
+    setState(() {
+      _saldoClienteKey = UniqueKey();
+      _selectorProductosKey = UniqueKey();
+
+      _productosSeleccionados = [];
+      _total = 0.0;
+      _estudianteSeleccionado = null;
+      _controlHistorico = null;
     });
   }
 
@@ -45,6 +61,7 @@ class _ConsumoScreenState extends State<ConsumoScreen> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               SaldoClienteWidget(
+                key: _saldoClienteKey,
                 onUserChange: (estudiante, controlHistorico) {
                   setState(() {
                     _estudianteSeleccionado = estudiante;
@@ -54,6 +71,7 @@ class _ConsumoScreenState extends State<ConsumoScreen> {
               ),
               const SizedBox(height: 20),
               SelectorProductosWidget(
+                key: _selectorProductosKey,
                 onProductosChanged: _actualizarProductosSeleccionados,
               ),
               if (_productosSeleccionados.isNotEmpty &&
@@ -139,12 +157,28 @@ class _ConsumoScreenState extends State<ConsumoScreen> {
           _productosSeleccionados.isNotEmpty && _estudianteSeleccionado != null
               ? FloatingActionButton.extended(
                 onPressed: () async {
-                  await ConsumoProvider().registrarConsumo(
+                  final result = await ConsumoProvider().registrarConsumo(
                     _estudianteSeleccionado!,
                     _productosSeleccionados,
                     _controlHistorico!,
                     _total,
                   );
+                  if (result == 'OK') {
+                    await TransactionAlertWidget.show(
+                      context: context,
+                      title: 'Registro Exitoso',
+                      message: 'El consumo ha sido registrado correctamente.',
+                      isError: false,
+                    );
+                    _reiniciarValores(); // Reiniciar valores después del registro exitoso
+                  } else {
+                    await TransactionAlertWidget.show(
+                      context: context,
+                      title: 'Error',
+                      message: result,
+                      isError: true,
+                    );
+                  }
                 },
                 label: const Text('Registrar Consumo'),
                 icon: const Icon(Icons.check_circle),

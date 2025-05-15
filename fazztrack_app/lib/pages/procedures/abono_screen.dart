@@ -2,6 +2,7 @@ import 'package:fazztrack_app/constants/colors_constants.dart';
 import 'package:fazztrack_app/models/control_historico_model.dart';
 import 'package:fazztrack_app/models/estudiante_model.dart';
 import 'package:fazztrack_app/widgets/saldo_cliente_widget.dart';
+import 'package:fazztrack_app/widgets/transaction_alert_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -13,9 +14,7 @@ class AbonoScreen extends StatefulWidget {
 }
 
 class _AbonoScreenState extends State<AbonoScreen> {
-  // ignore: unused_field
   EstudianteModel? _estudianteSeleccionado;
-  double _balance = 0.0;
   String _selectedPaymentMethod = 'Transferencia';
   final TextEditingController _montoController = TextEditingController();
   final TextEditingController _comentarioController = TextEditingController();
@@ -42,8 +41,20 @@ class _AbonoScreenState extends State<AbonoScreen> {
               ? 0.0
               : double.tryParse(_montoController.text.replaceAll(',', '.')) ??
                   0.0;
-      _nuevoSaldo = _balance + monto;
+      _nuevoSaldo =
+          _controlHistorico!.totalAbono - _controlHistorico!.totalVenta + monto;
     });
+  }
+
+  // Simular registro de abono
+  Future<bool> _registrarAbono() async {
+    // Aquí iría la lógica real para guardar el abono en la base de datos
+    // Simulamos un tiempo de procesamiento
+    await Future.delayed(const Duration(seconds: 1));
+
+    // Simulamos un éxito o fracaso aleatorio para demostración
+    // En una implementación real, esto dependería del resultado de la operación de guardado
+    return true; // Cambiar a false para probar el caso de error
   }
 
   @override
@@ -60,7 +71,35 @@ class _AbonoScreenState extends State<AbonoScreen> {
       floatingActionButton:
           mostrarBoton
               ? FloatingActionButton.extended(
-                onPressed: () {},
+                onPressed: () async {
+                  final bool resultado = await _registrarAbono();
+
+                  if (!mounted) return;
+
+                  if (resultado) {
+                    // Mostrar alerta de éxito
+                    await TransactionAlertWidget.show(
+                      context: context,
+                      title: 'Abono Registrado',
+                      message:
+                          'El abono de \$${_montoController.text} ha sido registrado exitosamente para ${_estudianteSeleccionado!.nombre}.',
+                      isError: false,
+                    );
+
+                    // Limpiar campos después del éxito
+                    _montoController.clear();
+                    _comentarioController.clear();
+                  } else {
+                    // Mostrar alerta de error
+                    await TransactionAlertWidget.show(
+                      context: context,
+                      title: 'Error al Registrar',
+                      message:
+                          'No se pudo procesar el abono. Por favor intente nuevamente.',
+                      isError: true,
+                    );
+                  }
+                },
                 backgroundColor: AppColors.primaryTurquoise,
                 label: Text(
                   'Registrar Abono',
