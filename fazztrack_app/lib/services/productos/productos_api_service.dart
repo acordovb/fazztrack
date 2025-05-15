@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:fazztrack_app/model/producto_model.dart';
+import 'package:fazztrack_app/models/producto_model.dart';
 import 'package:fazztrack_app/services/api/api_routes.dart';
 import 'package:fazztrack_app/services/api/api_service.dart';
 import 'package:fazztrack_app/services/bar/bar_storage_service.dart';

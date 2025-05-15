@@ -1,5 +1,5 @@
 import 'package:fazztrack_app/constants/colors_constants.dart';
-import 'package:fazztrack_app/model/estudiante_model.dart';
+import 'package:fazztrack_app/models/estudiante_model.dart';
 import 'package:fazztrack_app/widgets/saldo_cliente_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

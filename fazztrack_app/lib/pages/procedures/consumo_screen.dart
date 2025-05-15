@@ -1,6 +1,6 @@
 import 'package:fazztrack_app/constants/colors_constants.dart';
-import 'package:fazztrack_app/model/estudiante_model.dart';
-import 'package:fazztrack_app/model/producto_seleccionado_model.dart';
+import 'package:fazztrack_app/models/estudiante_model.dart';
+import 'package:fazztrack_app/models/producto_seleccionado_model.dart';
 import 'package:fazztrack_app/widgets/saldo_cliente_widget.dart';
 import 'package:fazztrack_app/widgets/selector_productos_widget.dart';
 import 'package:flutter/material.dart';
@@ -129,7 +129,6 @@ class _ConsumoScreenState extends State<ConsumoScreen> {
           _productosSeleccionados.isNotEmpty && _estudianteSeleccionado != null
               ? FloatingActionButton.extended(
                 onPressed: () {
-                  // Por ahora, solo imprime los datos seleccionados
                   print('Estudiante: ${_estudianteSeleccionado!.nombre}');
                   print('Balance actual: $_balance');
                   print('Total compra: $_total');

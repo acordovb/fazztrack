@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:fazztrack_app/constants/colors_constants.dart';
-import 'package:fazztrack_app/model/estudiante_model.dart';
+import 'package:fazztrack_app/models/estudiante_model.dart';
 import 'package:fazztrack_app/services/estudiantes/control_historico_api_service.dart';
 import 'package:fazztrack_app/services/estudiantes/estudiantes_api_service.dart';
 import 'package:flutter/material.dart';

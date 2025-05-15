@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import '../api/api_routes.dart';
 import '../api/api_service.dart';
-import '../../model/control_historico.dart';
+import '../../models/control_historico.dart';
 
 class ControlHistoricoApiService {
   final ApiService _apiService = ApiService();

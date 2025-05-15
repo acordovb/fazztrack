@@ -1,4 +1,4 @@
-import 'package:fazztrack_app/model/producto_model.dart';
+import 'package:fazztrack_app/models/producto_model.dart';
 
 class ProductoSeleccionadoModel {
   final ProductoModel? producto;

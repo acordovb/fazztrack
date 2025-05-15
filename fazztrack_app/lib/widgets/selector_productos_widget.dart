@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:fazztrack_app/constants/colors_constants.dart';
-import 'package:fazztrack_app/model/producto_model.dart';
-import 'package:fazztrack_app/model/producto_seleccionado_model.dart';
+import 'package:fazztrack_app/models/producto_model.dart';
+import 'package:fazztrack_app/models/producto_seleccionado_model.dart';
 import 'package:fazztrack_app/services/productos/productos_api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
