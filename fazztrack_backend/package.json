@@ -1,10 +1,21 @@
 {
   "name": "fazztrack_backend",
   "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "description": "Payment and installment management system for multiple bars administration",
+  "author": "Alex Córdova Balón",
+  "contributors": [
+    {
+      "name": "Alex Córdova Balón",
+      "email": "alexcordova111@gmail.com",
+      "github": "https://github.com/acordovb"
+    },
+    {
+      "name": "Gema Zambrano Zambrano",
+      "email": "gemita0897@hotmail.com"
+    }
+  ],
   "private": true,
-  "license": "PERSONAL",
+  "license": "Personal",
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
