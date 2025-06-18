@@ -86,52 +86,65 @@ class CustomDrawer extends StatelessWidget {
     return Drawer(
       child: Container(
         color: AppColors.background,
-        child: ListView(
-          padding: EdgeInsets.only(top: 60.0),
-          children: [
-            _buildDrawerItem(
-              context: context,
-              title: 'Reportar Consumo',
-              icon: Icons.point_of_sale,
-              isSelected: currentPage == PageType.consumo,
-              onTap: () {
-                Navigator.pop(context);
-                changePage(PageType.consumo);
-              },
-            ),
-            _buildDrawerItem(
-              context: context,
-              title: 'Reportar Abono',
-              icon: Icons.attach_money,
-              isSelected: currentPage == PageType.abono,
-              onTap: () {
-                Navigator.pop(context);
-                changePage(PageType.abono);
-              },
-            ),
-            if (BuildConfig.appLevel == AppConfig.appLevel.admin) ...[
+        child: SafeArea(
+          child: ListView(
+            padding: const EdgeInsets.symmetric(vertical: 20),
+            children: [
               _buildDrawerItem(
                 context: context,
-                title: 'Reportes',
-                icon: Icons.bar_chart,
-                isSelected: currentPage == PageType.reports,
+                title: 'Reportar Consumo',
+                subtitle: 'Registrar ventas y transacciones',
+                icon: Icons.point_of_sale_rounded,
+                isSelected: currentPage == PageType.consumo,
                 onTap: () {
                   Navigator.pop(context);
-                  changePage(PageType.reports);
+                  changePage(PageType.consumo);
                 },
               ),
               _buildDrawerItem(
                 context: context,
-                title: 'Administración',
-                icon: Icons.admin_panel_settings,
-                isSelected: currentPage == PageType.admin,
+                title: 'Reportar Abono',
+                subtitle: 'Gestionar pagos y abonos',
+                icon: Icons.account_balance_wallet_rounded,
+                isSelected: currentPage == PageType.abono,
                 onTap: () {
                   Navigator.pop(context);
-                  changePage(PageType.admin);
+                  changePage(PageType.abono);
                 },
               ),
+              if (BuildConfig.appLevel == AppConfig.appLevel.admin) ...[
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  child: Divider(
+                    color: AppColors.textSecondary,
+                    thickness: 0.5,
+                  ),
+                ),
+                _buildDrawerItem(
+                  context: context,
+                  title: 'Reportes',
+                  subtitle: 'Análisis y estadísticas',
+                  icon: Icons.bar_chart_rounded,
+                  isSelected: currentPage == PageType.reports,
+                  onTap: () {
+                    Navigator.pop(context);
+                    changePage(PageType.reports);
+                  },
+                ),
+                _buildDrawerItem(
+                  context: context,
+                  title: 'Administración',
+                  subtitle: 'Configuración del sistema',
+                  icon: Icons.admin_panel_settings_rounded,
+                  isSelected: currentPage == PageType.admin,
+                  onTap: () {
+                    Navigator.pop(context);
+                    changePage(PageType.admin);
+                  },
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );
@@ -143,22 +156,94 @@ class CustomDrawer extends StatelessWidget {
     required IconData icon,
     required VoidCallback onTap,
     required bool isSelected,
+    String? subtitle,
   }) {
-    return ListTile(
-      leading: Icon(
-        icon,
-        color: isSelected ? AppColors.primaryTurquoise : AppColors.primary,
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        color:
+            isSelected
+                ? AppColors.primaryTurquoise.withAlpha(15)
+                : Colors.transparent,
+        border:
+            isSelected
+                ? Border.all(
+                  color: AppColors.primaryTurquoise.withAlpha(30),
+                  width: 1,
+                )
+                : null,
       ),
-      title: Text(
-        title,
-        style: TextStyle(
-          color: AppColors.textPrimary,
-          fontSize: 16,
-          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color:
+                        isSelected
+                            ? AppColors.primaryTurquoise
+                            : AppColors.primary.withAlpha(10),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: isSelected ? Colors.white : AppColors.primary,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: TextStyle(
+                          color:
+                              isSelected
+                                  ? AppColors.primaryTurquoise
+                                  : AppColors.textPrimary,
+                          fontSize: 16,
+                          fontWeight:
+                              isSelected ? FontWeight.w600 : FontWeight.w500,
+                        ),
+                      ),
+                      if (subtitle != null) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          subtitle,
+                          style: TextStyle(
+                            color: AppColors.primaryWhite,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                if (isSelected)
+                  Container(
+                    width: 4,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryTurquoise,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+              ],
+            ),
+          ),
         ),
       ),
-      tileColor: isSelected ? AppColors.secondaryBlue : null,
-      onTap: onTap,
     );
   }
 }
