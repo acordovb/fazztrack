@@ -41,8 +41,15 @@ class _AbonoScreenState extends State<AbonoScreen> {
               ? 0.0
               : double.tryParse(_montoController.text.replaceAll(',', '.')) ??
                   0.0;
-      _nuevoSaldo =
-          _controlHistorico!.totalAbono - _controlHistorico!.totalVenta + monto;
+
+      if (_controlHistorico != null) {
+        _nuevoSaldo =
+            _controlHistorico!.totalAbono -
+            _controlHistorico!.totalVenta +
+            monto;
+      } else {
+        _nuevoSaldo = 0.0;
+      }
     });
   }
 
