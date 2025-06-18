@@ -86,66 +86,51 @@ class CustomDrawer extends StatelessWidget {
     return Drawer(
       child: Container(
         color: AppColors.background,
-        child: Column(
+        child: ListView(
+          padding: EdgeInsets.only(top: 60.0),
           children: [
-            DrawerHeader(
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage('assets/app-logo-simple.png'),
-                  fit: BoxFit.cover,
-                ),
-              ),
-              child: Container(),
+            _buildDrawerItem(
+              context: context,
+              title: 'Reportar Consumo',
+              icon: Icons.point_of_sale,
+              isSelected: currentPage == PageType.consumo,
+              onTap: () {
+                Navigator.pop(context);
+                changePage(PageType.consumo);
+              },
             ),
-            Expanded(
-              child: ListView(
-                padding: EdgeInsets.zero,
-                children: [
-                  _buildDrawerItem(
-                    context: context,
-                    title: 'Reportar Consumo',
-                    icon: Icons.point_of_sale,
-                    isSelected: currentPage == PageType.consumo,
-                    onTap: () {
-                      Navigator.pop(context);
-                      changePage(PageType.consumo);
-                    },
-                  ),
-                  _buildDrawerItem(
-                    context: context,
-                    title: 'Reportar Abono',
-                    icon: Icons.attach_money,
-                    isSelected: currentPage == PageType.abono,
-                    onTap: () {
-                      Navigator.pop(context);
-                      changePage(PageType.abono);
-                    },
-                  ),
-                  if (BuildConfig.appLevel == AppConfig.appLevel.admin) ...[
-                    _buildDrawerItem(
-                      context: context,
-                      title: 'Reportes',
-                      icon: Icons.bar_chart,
-                      isSelected: currentPage == PageType.reports,
-                      onTap: () {
-                        Navigator.pop(context);
-                        changePage(PageType.reports);
-                      },
-                    ),
-                    _buildDrawerItem(
-                      context: context,
-                      title: 'Administración',
-                      icon: Icons.admin_panel_settings,
-                      isSelected: currentPage == PageType.admin,
-                      onTap: () {
-                        Navigator.pop(context);
-                        changePage(PageType.admin);
-                      },
-                    ),
-                  ],
-                ],
-              ),
+            _buildDrawerItem(
+              context: context,
+              title: 'Reportar Abono',
+              icon: Icons.attach_money,
+              isSelected: currentPage == PageType.abono,
+              onTap: () {
+                Navigator.pop(context);
+                changePage(PageType.abono);
+              },
             ),
+            if (BuildConfig.appLevel == AppConfig.appLevel.admin) ...[
+              _buildDrawerItem(
+                context: context,
+                title: 'Reportes',
+                icon: Icons.bar_chart,
+                isSelected: currentPage == PageType.reports,
+                onTap: () {
+                  Navigator.pop(context);
+                  changePage(PageType.reports);
+                },
+              ),
+              _buildDrawerItem(
+                context: context,
+                title: 'Administración',
+                icon: Icons.admin_panel_settings,
+                isSelected: currentPage == PageType.admin,
+                onTap: () {
+                  Navigator.pop(context);
+                  changePage(PageType.admin);
+                },
+              ),
+            ],
           ],
         ),
       ),
