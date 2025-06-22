@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { DatabaseService } from '../../database/database.service';
-import { CreateAbonoDto, UpdateAbonoDto, AbonoDto } from './dto';
+import { decodeId, encodeId } from 'src/shared/hashid/hashid.utils';
 import { BaseCrudService } from '../../common/crud/base-crud.service';
-import { encodeId } from 'src/shared/hashid/hashid.utils';
+import { DatabaseService } from '../../database/database.service';
+import { AbonoDto, CreateAbonoDto, UpdateAbonoDto } from './dto';
+import { UpdateControlHistoricoDto } from '../control-historico/dto';
 
 @Injectable()
 export class AbonosService extends BaseCrudService<
@@ -13,6 +14,36 @@ export class AbonosService extends BaseCrudService<
 > {
   constructor(database: DatabaseService) {
     super(database, 'abonos');
+  }
+
+  async newAbono(
+    createAbonoDto: CreateAbonoDto,
+    controlHistorico: UpdateControlHistoricoDto,
+  ): Promise<AbonoDto> {
+    const idEstudiante = createAbonoDto.id_estudiante;
+    await this.database.$transaction([
+      this.database.abonos.create({
+        data: {
+          id_estudiante: idEstudiante,
+          total: createAbonoDto.total,
+          tipo_abono: createAbonoDto.tipo_abono,
+          fecha_abono: createAbonoDto.fecha_abono,
+        },
+      }),
+      this.database.control_historico.updateMany({
+        where: { id_estudiante: idEstudiante },
+        data: {
+          total_abono: controlHistorico.total_abono,
+        },
+      }),
+    ]);
+    return this.mapToDto({
+      id: createAbonoDto.id_estudiante,
+      id_estudiante: createAbonoDto.id_estudiante,
+      total: createAbonoDto.total,
+      tipo_abono: createAbonoDto.tipo_abono,
+      fecha_abono: createAbonoDto.fecha_abono,
+    });
   }
 
   protected mapToDto(model: any): AbonoDto {

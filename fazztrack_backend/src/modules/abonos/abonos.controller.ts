@@ -11,14 +11,18 @@ import {
 } from '@nestjs/common';
 import { AbonosService } from './abonos.service';
 import { CreateAbonoDto, UpdateAbonoDto, AbonoDto } from './dto';
+import { UpdateControlHistoricoDto } from '../control-historico/dto';
 
 @Controller('abonos')
 export class AbonosController {
   constructor(private readonly abonosService: AbonosService) {}
 
   @Post()
-  create(@Body() createAbonoDto: CreateAbonoDto): Promise<AbonoDto> {
-    return this.abonosService.create(createAbonoDto);
+  create(
+    @Body() createAbonoDto: CreateAbonoDto,
+    control_historico: UpdateControlHistoricoDto & { id_estudiante: string },
+  ): Promise<AbonoDto> {
+    return this.abonosService.newAbono(createAbonoDto, control_historico);
   }
 
   @Get()

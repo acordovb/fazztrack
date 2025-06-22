@@ -1,17 +1,15 @@
 import {
+  Body,
   Controller,
   Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
   HttpCode,
   HttpStatus,
+  Param,
+  Post,
 } from '@nestjs/common';
-import { VentasService } from './ventas.service';
-import { CreateVentaDto, UpdateVentaDto, VentaDto } from './dto';
 import { UpdateControlHistoricoDto } from '../control-historico/dto';
+import { CreateVentaDto, VentaDto } from './dto';
+import { VentasService } from './ventas.service';
 
 @Controller('ventas')
 export class VentasController {
@@ -23,7 +21,7 @@ export class VentasController {
     @Body()
     body: {
       ventas: CreateVentaDto[];
-      control_historico: UpdateControlHistoricoDto & { id_estudiante: string };
+      control_historico: UpdateControlHistoricoDto & { id_estudiante: number };
     },
   ): Promise<void> {
     const { ventas, control_historico } = body;

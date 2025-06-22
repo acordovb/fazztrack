@@ -9,20 +9,23 @@ import {
 
 export class CreateVentaDto {
   @IsNotEmpty({ message: 'El ID del estudiante es requerido' })
-  @IsString({ message: 'El ID del estudiante debe ser un string (hasheado)' })
-  id_estudiante?: string;
+  @IsNumber(
+    {},
+    { message: 'El ID del estudiante debe ser un string (hasheado)' },
+  )
+  id_estudiante: number;
 
   @IsNotEmpty({ message: 'El ID del producto es requerido' })
-  @IsString({ message: 'El ID del producto debe ser un string (hasheado)' })
-  id_producto?: string;
+  @IsNumber({}, { message: 'El ID del producto debe ser un string (hasheado)' })
+  id_producto: number;
 
   @IsOptional()
   @IsDate({ message: 'La fecha de transacción debe ser una fecha válida' })
   fecha_transaccion?: Date;
 
   @IsNotEmpty({ message: 'El ID del bar es requerido' })
-  @IsString({ message: 'El ID del bar debe ser un string (hasheado)' })
-  id_bar?: string;
+  @IsNumber({}, { message: 'El ID del bar debe ser un string (hasheado)' })
+  id_bar: number;
 
   @IsNotEmpty({ message: 'El número de productos es requerido' })
   @IsNumber({}, { message: 'El número de productos debe ser un número' })

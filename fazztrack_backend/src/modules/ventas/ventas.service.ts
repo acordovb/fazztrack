@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { DatabaseService } from '../../database/database.service';
-import { CreateVentaDto, UpdateVentaDto, VentaDto } from './dto';
-import { BaseCrudService } from '../../common/crud/base-crud.service';
 import { decodeId, encodeId } from 'src/shared/hashid/hashid.utils';
+import { BaseCrudService } from '../../common/crud/base-crud.service';
+import { DatabaseService } from '../../database/database.service';
 import { UpdateControlHistoricoDto } from '../control-historico/dto';
+import { CreateVentaDto, UpdateVentaDto, VentaDto } from './dto';
 
 @Injectable()
 export class VentasService extends BaseCrudService<
@@ -28,20 +28,19 @@ export class VentasService extends BaseCrudService<
 
   async createBulk(
     ventas: CreateVentaDto[],
-    controlHistorico: UpdateControlHistoricoDto & { id_estudiante: string },
+    controlHistorico: UpdateControlHistoricoDto & { id_estudiante: number },
   ): Promise<void> {
     const ventasData = ventas.map((venta) => ({
-      id_estudiante: decodeId(venta.id_estudiante!),
-      id_producto: decodeId(venta.id_producto!),
+      id_estudiante: venta.id_estudiante,
+      id_producto: venta.id_producto,
       fecha_transaccion: venta.fecha_transaccion
         ? new Date(venta.fecha_transaccion)
         : new Date(),
-      id_bar: decodeId(venta.id_bar!),
+      id_bar: venta.id_bar,
       n_productos: venta.n_productos,
     }));
 
-    // Decodificar el ID del estudiante en el control histórico
-    const estudianteId = decodeId(controlHistorico.id_estudiante);
+    const estudianteId = controlHistorico.id_estudiante;
 
     await this.database.$transaction([
       this.database.ventas.createMany({
