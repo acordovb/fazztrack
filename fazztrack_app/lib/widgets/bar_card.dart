@@ -80,36 +80,6 @@ class BarCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.success.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: AppColors.success, width: 1),
-                    ),
-                    child: const Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.check_circle,
-                          color: AppColors.success,
-                          size: 16,
-                        ),
-                        SizedBox(width: 4),
-                        Text(
-                          'Activo',
-                          style: TextStyle(
-                            color: AppColors.success,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
                 ],
               ),
               const SizedBox(height: 12),
@@ -146,25 +116,40 @@ class BarCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     if (onEdit != null) ...[
-                      IconButton(
+                      ElevatedButton.icon(
                         onPressed: onEdit,
-                        icon: const Icon(
-                          Icons.edit,
-                          color: AppColors.primaryTurquoise,
-                          size: 20,
+                        icon: const Icon(Icons.edit, size: 16),
+                        label: const Text('Editar'),
+                        style: ElevatedButton.styleFrom(
+                          foregroundColor: AppColors.primaryTurquoise,
+                          backgroundColor: AppColors.card,
+                          side: const BorderSide(
+                            color: AppColors.primaryTurquoise,
+                          ),
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
                         ),
-                        tooltip: 'Editar local',
                       ),
+                      const SizedBox(width: 8),
                     ],
                     if (onDelete != null) ...[
-                      IconButton(
+                      ElevatedButton.icon(
                         onPressed: onDelete,
-                        icon: const Icon(
-                          Icons.delete,
-                          color: AppColors.error,
-                          size: 20,
+                        icon: const Icon(Icons.delete, size: 16),
+                        label: const Text('Eliminar'),
+                        style: ElevatedButton.styleFrom(
+                          foregroundColor: AppColors.error,
+                          backgroundColor: AppColors.card,
+                          side: const BorderSide(color: AppColors.error),
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
                         ),
-                        tooltip: 'Eliminar local',
                       ),
                     ],
                   ],
