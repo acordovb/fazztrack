@@ -75,129 +75,6 @@ class _StoreAdminScreenState extends State<StoreAdminScreen> {
     });
   }
 
-  void _showBarDetails(BarModel bar) {
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            backgroundColor: AppColors.card,
-            title: Row(
-              children: [
-                const Icon(Icons.store, color: AppColors.primaryTurquoise),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    bar.nombre,
-                    style: const TextStyle(color: AppColors.textPrimary),
-                  ),
-                ),
-              ],
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryDarkBlue.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.tag,
-                            color: AppColors.primaryTurquoise,
-                            size: 16,
-                          ),
-                          const SizedBox(width: 8),
-                          const Text(
-                            'Identificador:',
-                            style: TextStyle(
-                              color: AppColors.textPrimary,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        bar.id,
-                        style: const TextStyle(
-                          color: AppColors.textPrimary,
-                          fontFamily: 'monospace',
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.business,
-                      color: AppColors.primaryTurquoise,
-                      size: 18,
-                    ),
-                    const SizedBox(width: 8),
-                    const Text(
-                      'Tipo:',
-                      style: TextStyle(
-                        color: AppColors.textPrimary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Local Comercial',
-                      style: const TextStyle(color: AppColors.textPrimary),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.check_circle,
-                      color: AppColors.success,
-                      size: 18,
-                    ),
-                    const SizedBox(width: 8),
-                    const Text(
-                      'Estado:',
-                      style: TextStyle(
-                        color: AppColors.textPrimary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Activo',
-                      style: const TextStyle(
-                        color: AppColors.success,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text(
-                  'Cerrar',
-                  style: TextStyle(color: AppColors.primaryTurquoise),
-                ),
-              ),
-            ],
-          ),
-    );
-  }
-
   void _showDeleteConfirmation(BarModel bar) {
     showDialog(
       context: context,
@@ -501,7 +378,6 @@ class _StoreAdminScreenState extends State<StoreAdminScreen> {
                           final bar = _filteredBars[index];
                           return BarCard(
                             bar: bar,
-                            onTap: () => _showBarDetails(bar),
                             onEdit: () => _showEditBarDialog(bar),
                             onDelete: () => _showDeleteConfirmation(bar),
                           );

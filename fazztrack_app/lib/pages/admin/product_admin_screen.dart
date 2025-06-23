@@ -111,95 +111,6 @@ class _ProductAdminScreenState extends State<ProductAdminScreen> {
     _filterProductos();
   }
 
-  void _showProductoDetails(ProductoModel producto) {
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            backgroundColor: AppColors.card,
-            title: Text(
-              producto.nombre,
-              style: const TextStyle(color: AppColors.textPrimary),
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.category,
-                      color: AppColors.primaryTurquoise,
-                      size: 18,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Categoría: ${producto.categoria}',
-                      style: const TextStyle(color: AppColors.textPrimary),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.monetization_on,
-                      color: AppColors.primaryTurquoise,
-                      size: 18,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Precio: \$${producto.precio.toStringAsFixed(2)}',
-                      style: const TextStyle(
-                        color: AppColors.textPrimary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.store,
-                      color: AppColors.primaryTurquoise,
-                      size: 18,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'ID Bar: ${producto.idBar}',
-                        style: const TextStyle(
-                          color: AppColors.textPrimary,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'ID: ${producto.id}',
-                  style: const TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text(
-                  'Cerrar',
-                  style: TextStyle(color: AppColors.primaryTurquoise),
-                ),
-              ),
-            ],
-          ),
-    );
-  }
-
   void _showDeleteConfirmation(ProductoModel producto) {
     showDialog(
       context: context,
@@ -455,7 +366,6 @@ class _ProductAdminScreenState extends State<ProductAdminScreen> {
                           final producto = _filteredProductos[index];
                           return ProductoCard(
                             producto: producto,
-                            onTap: () => _showProductoDetails(producto),
                             onEdit: () {
                               // TODO: Implementar edición
                               ScaffoldMessenger.of(context).showSnackBar(

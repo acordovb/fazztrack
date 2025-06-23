@@ -87,6 +87,63 @@ class _StudentAdminScreenState extends State<StudentAdminScreen> {
     );
   }
 
+  void _showDeleteConfirmation(EstudianteModel estudiante) {
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            backgroundColor: AppColors.card,
+            title: const Text(
+              'Confirmar eliminación',
+              style: TextStyle(color: AppColors.textPrimary),
+            ),
+            content: Text(
+              '¿Estás seguro de que deseas eliminar al estudiante "${estudiante.nombre}"?\n\nEsta acción no se puede deshacer.',
+              style: const TextStyle(color: AppColors.textPrimary),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text(
+                  'Cancelar',
+                  style: TextStyle(color: AppColors.textPrimary),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  _deleteEstudiante(estudiante.id);
+                },
+                child: const Text(
+                  'Eliminar',
+                  style: TextStyle(color: AppColors.error),
+                ),
+              ),
+            ],
+          ),
+    );
+  }
+
+  Future<void> _deleteEstudiante(String id) async {
+    try {
+      await _estudiantesService.deleteEstudiante(id);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Estudiante eliminado exitosamente'),
+          backgroundColor: AppColors.success,
+        ),
+      );
+      _loadEstudiantes(); // Recargar la lista
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error al eliminar estudiante: ${e.toString()}'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -241,17 +298,7 @@ class _StudentAdminScreenState extends State<StudentAdminScreen> {
                                 ),
                               );
                             },
-                            onDelete: () {
-                              // TODO: Implementar eliminación
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    'Función de eliminar próximamente',
-                                  ),
-                                  backgroundColor: AppColors.warning,
-                                ),
-                              );
-                            },
+                            onDelete: () => _showDeleteConfirmation(estudiante),
                           );
                         },
                       ),
