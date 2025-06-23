@@ -77,62 +77,6 @@ class _StudentAdminScreenState extends State<StudentAdminScreen> {
     });
   }
 
-  void _showEstudianteDetails(EstudianteModel estudiante) {
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            backgroundColor: AppColors.card,
-            title: Text(
-              estudiante.nombre,
-              style: const TextStyle(color: AppColors.textPrimary),
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (estudiante.curso != null) ...[
-                  Text(
-                    'Curso: ${estudiante.curso}',
-                    style: const TextStyle(color: AppColors.textPrimary),
-                  ),
-                  const SizedBox(height: 8),
-                ],
-                if (estudiante.celular != null) ...[
-                  Text(
-                    'Celular: ${estudiante.celular}',
-                    style: const TextStyle(color: AppColors.textPrimary),
-                  ),
-                  const SizedBox(height: 8),
-                ],
-                if (estudiante.nombreRepresentante != null) ...[
-                  Text(
-                    'Representante: ${estudiante.nombreRepresentante}',
-                    style: const TextStyle(color: AppColors.textPrimary),
-                  ),
-                ],
-                Text(
-                  'ID: ${estudiante.id}',
-                  style: const TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text(
-                  'Cerrar',
-                  style: TextStyle(color: AppColors.primaryTurquoise),
-                ),
-              ),
-            ],
-          ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -276,7 +220,6 @@ class _StudentAdminScreenState extends State<StudentAdminScreen> {
                           final estudiante = _filteredEstudiantes[index];
                           return EstudianteCard(
                             estudiante: estudiante,
-                            onTap: () => _showEstudianteDetails(estudiante),
                             onEdit: () {
                               // TODO: Implementar edición
                               ScaffoldMessenger.of(context).showSnackBar(
