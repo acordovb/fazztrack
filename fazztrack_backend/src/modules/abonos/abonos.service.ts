@@ -21,13 +21,19 @@ export class AbonosService extends BaseCrudService<
     controlHistorico: UpdateControlHistoricoDto,
   ): Promise<AbonoDto> {
     const idEstudiante = createAbonoDto.id_estudiante;
+
+    // Convertir fecha_abono a Date si viene como string, o usar la fecha actual
+    const fechaAbono = createAbonoDto.fecha_abono
+      ? new Date(createAbonoDto.fecha_abono)
+      : new Date();
+
     await this.database.$transaction([
       this.database.abonos.create({
         data: {
           id_estudiante: idEstudiante,
           total: createAbonoDto.total,
           tipo_abono: createAbonoDto.tipo_abono,
-          fecha_abono: createAbonoDto.fecha_abono,
+          fecha_abono: fechaAbono,
         },
       }),
       this.database.control_historico.updateMany({
@@ -42,7 +48,7 @@ export class AbonosService extends BaseCrudService<
       id_estudiante: createAbonoDto.id_estudiante,
       total: createAbonoDto.total,
       tipo_abono: createAbonoDto.tipo_abono,
-      fecha_abono: createAbonoDto.fecha_abono,
+      fecha_abono: fechaAbono,
     });
   }
 
@@ -50,7 +56,7 @@ export class AbonosService extends BaseCrudService<
     return {
       id: encodeId(model.id),
       id_estudiante: model.id_estudiante,
-      total: model.total.toNumber(),
+      total: model.total,
       tipo_abono: model.tipo_abono,
       fecha_abono: model.fecha_abono,
     };

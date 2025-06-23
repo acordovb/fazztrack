@@ -21,11 +21,11 @@ export class VentasController {
     @Body()
     body: {
       ventas: CreateVentaDto[];
-      control_historico: UpdateControlHistoricoDto & { id_estudiante: number };
+      controlHistorico: UpdateControlHistoricoDto & { id_estudiante: number };
     },
   ): Promise<void> {
-    const { ventas, control_historico } = body;
-    return this.ventasService.createBulk(ventas, control_historico);
+    const { ventas, controlHistorico } = body;
+    return this.ventasService.createBulk(ventas, controlHistorico);
   }
 
   @Get()

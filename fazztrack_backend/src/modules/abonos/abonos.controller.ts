@@ -1,17 +1,17 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  Get,
   HttpCode,
   HttpStatus,
+  Param,
+  Patch,
+  Post,
 } from '@nestjs/common';
-import { AbonosService } from './abonos.service';
-import { CreateAbonoDto, UpdateAbonoDto, AbonoDto } from './dto';
 import { UpdateControlHistoricoDto } from '../control-historico/dto';
+import { AbonosService } from './abonos.service';
+import { AbonoDto, CreateAbonoDto, UpdateAbonoDto } from './dto';
 
 @Controller('abonos')
 export class AbonosController {
@@ -19,10 +19,15 @@ export class AbonosController {
 
   @Post()
   create(
-    @Body() createAbonoDto: CreateAbonoDto,
-    control_historico: UpdateControlHistoricoDto & { id_estudiante: string },
+    @Body()
+    body: {
+      abono: CreateAbonoDto;
+      controlHistorico: UpdateControlHistoricoDto & { id_estudiante: number };
+    },
   ): Promise<AbonoDto> {
-    return this.abonosService.newAbono(createAbonoDto, control_historico);
+    console.log('Creating new abono with body:', body);
+    const { abono, controlHistorico } = body;
+    return this.abonosService.newAbono(abono, controlHistorico);
   }
 
   @Get()

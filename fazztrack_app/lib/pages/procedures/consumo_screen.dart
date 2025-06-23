@@ -170,7 +170,7 @@ class _ConsumoScreenState extends State<ConsumoScreen> {
                       message: 'El consumo ha sido registrado correctamente.',
                       isError: false,
                     );
-                    _reiniciarValores(); // Reiniciar valores después del registro exitoso
+                    _reiniciarValores();
                   } else {
                     await TransactionAlertWidget.show(
                       context: context,

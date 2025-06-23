@@ -29,7 +29,7 @@ class ConsumoProvider {
 
     final body = {
       'ventas': ventasJson,
-      'control_historico': newControlHistorico.toJson(),
+      'controlHistorico': newControlHistorico.toJson(),
     };
     try {
       await _apiService.post('/ventas/bulk', body);

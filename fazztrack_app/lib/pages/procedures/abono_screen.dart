@@ -1,6 +1,8 @@
 import 'package:fazztrack_app/constants/colors_constants.dart';
+import 'package:fazztrack_app/models/abono_model.dart';
 import 'package:fazztrack_app/models/control_historico_model.dart';
 import 'package:fazztrack_app/models/estudiante_model.dart';
+import 'package:fazztrack_app/providers/abono_provider.dart';
 import 'package:fazztrack_app/widgets/saldo_cliente_widget.dart';
 import 'package:fazztrack_app/widgets/transaction_alert_widget.dart';
 import 'package:flutter/material.dart';
@@ -53,15 +55,35 @@ class _AbonoScreenState extends State<AbonoScreen> {
     });
   }
 
-  // Simular registro de abono
-  Future<bool> _registrarAbono() async {
-    // Aquí iría la lógica real para guardar el abono en la base de datos
-    // Simulamos un tiempo de procesamiento
-    await Future.delayed(const Duration(seconds: 1));
+  Future<String> _registrarAbonoConResultado() async {
+    if (_estudianteSeleccionado == null || _controlHistorico == null) {
+      return 'Error: No se ha seleccionado un estudiante';
+    }
 
-    // Simulamos un éxito o fracaso aleatorio para demostración
-    // En una implementación real, esto dependería del resultado de la operación de guardado
-    return true; // Cambiar a false para probar el caso de error
+    final monto =
+        double.tryParse(_montoController.text.replaceAll(',', '.')) ?? 0.0;
+    if (monto <= 0) {
+      return 'Error: El monto debe ser mayor a 0';
+    }
+
+    try {
+      final abono = AbonoModel(
+        idEstudiante: _estudianteSeleccionado!.id,
+        total: monto,
+        tipoAbono: _selectedPaymentMethod,
+        fechaAbono: DateTime.now(),
+      );
+
+      final resultado = await AbonoProvider().registrarAbono(
+        _estudianteSeleccionado!,
+        abono,
+        _controlHistorico!,
+      );
+
+      return resultado;
+    } catch (e) {
+      return 'Error: ${e.toString()}';
+    }
   }
 
   @override
@@ -79,12 +101,11 @@ class _AbonoScreenState extends State<AbonoScreen> {
           mostrarBoton
               ? FloatingActionButton.extended(
                 onPressed: () async {
-                  final bool resultado = await _registrarAbono();
+                  final String resultado = await _registrarAbonoConResultado();
 
                   if (!mounted) return;
 
-                  if (resultado) {
-                    // Mostrar alerta de éxito
+                  if (resultado == 'OK') {
                     await TransactionAlertWidget.show(
                       context: context,
                       title: 'Abono Registrado',
@@ -93,16 +114,16 @@ class _AbonoScreenState extends State<AbonoScreen> {
                       isError: false,
                     );
 
-                    // Limpiar campos después del éxito
                     _montoController.clear();
                     _comentarioController.clear();
                   } else {
-                    // Mostrar alerta de error
                     await TransactionAlertWidget.show(
                       context: context,
                       title: 'Error al Registrar',
                       message:
-                          'No se pudo procesar el abono. Por favor intente nuevamente.',
+                          resultado.startsWith('Error:')
+                              ? resultado
+                              : 'No se pudo procesar el abono. Por favor intente nuevamente.',
                       isError: true,
                     );
                   }
