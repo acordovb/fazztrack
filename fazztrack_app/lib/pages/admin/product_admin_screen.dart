@@ -175,7 +175,7 @@ class _ProductAdminScreenState extends State<ProductAdminScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text(
-          'Administración de Productos',
+          'Productos',
           style: TextStyle(
             color: AppColors.textPrimary,
             fontWeight: FontWeight.bold,

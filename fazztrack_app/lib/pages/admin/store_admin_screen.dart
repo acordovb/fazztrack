@@ -228,7 +228,7 @@ class _StoreAdminScreenState extends State<StoreAdminScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text(
-          'Administración de Locales',
+          'Locales',
           style: TextStyle(
             color: AppColors.textPrimary,
             fontWeight: FontWeight.bold,

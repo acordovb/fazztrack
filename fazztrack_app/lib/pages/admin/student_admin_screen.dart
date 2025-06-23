@@ -162,7 +162,7 @@ class _StudentAdminScreenState extends State<StudentAdminScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text(
-          'Administración de Estudiantes',
+          'Estudiantes',
           style: TextStyle(
             color: AppColors.textPrimary,
             fontWeight: FontWeight.bold,
