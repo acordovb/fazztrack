@@ -2,6 +2,7 @@ import 'package:fazztrack_app/constants/colors_constants.dart';
 import 'package:fazztrack_app/models/bar_model.dart';
 import 'package:fazztrack_app/services/bar/bar_api_service.dart';
 import 'package:fazztrack_app/widgets/bar_card.dart';
+import 'package:fazztrack_app/widgets/create_bar_dialog.dart';
 import 'package:flutter/material.dart';
 
 class StoreAdminScreen extends StatefulWidget {
@@ -235,66 +236,9 @@ class _StoreAdminScreenState extends State<StoreAdminScreen> {
   }
 
   void _showAddBarDialog() {
-    _nameController.clear();
     showDialog(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            backgroundColor: AppColors.card,
-            title: const Text(
-              'Agregar Local',
-              style: TextStyle(color: AppColors.textPrimary),
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: _nameController,
-                  style: const TextStyle(color: AppColors.textPrimary),
-                  decoration: InputDecoration(
-                    labelText: 'Nombre del local',
-                    labelStyle: const TextStyle(color: AppColors.textPrimary),
-                    hintText: 'Ingresa el nombre del local',
-                    hintStyle: const TextStyle(color: AppColors.textPrimary),
-                    filled: true,
-                    fillColor: AppColors.primaryDarkBlue.withOpacity(0.3),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide.none,
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(
-                        color: AppColors.primaryTurquoise,
-                        width: 2,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text(
-                  'Cancelar',
-                  style: TextStyle(color: AppColors.textPrimary),
-                ),
-              ),
-              TextButton(
-                onPressed: () {
-                  if (_nameController.text.trim().isNotEmpty) {
-                    Navigator.of(context).pop();
-                    _createBar(_nameController.text.trim());
-                  }
-                },
-                child: const Text(
-                  'Crear',
-                  style: TextStyle(color: AppColors.primaryTurquoise),
-                ),
-              ),
-            ],
-          ),
+      builder: (context) => CreateBarDialog(onBarCreated: _loadBars),
     );
   }
 
@@ -360,26 +304,6 @@ class _StoreAdminScreenState extends State<StoreAdminScreen> {
             ],
           ),
     );
-  }
-
-  Future<void> _createBar(String name) async {
-    try {
-      await _barService.createBar(name);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Local creado exitosamente'),
-          backgroundColor: AppColors.success,
-        ),
-      );
-      _loadBars(); // Recargar la lista
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error al crear local: ${e.toString()}'),
-          backgroundColor: AppColors.error,
-        ),
-      );
-    }
   }
 
   Future<void> _updateBar(String id, String name) async {

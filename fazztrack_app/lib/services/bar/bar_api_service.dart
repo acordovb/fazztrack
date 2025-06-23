@@ -22,7 +22,7 @@ class BarApiService {
   }
 
   Future<BarModel> createBar(String name) async {
-    final Map<String, dynamic> data = {'name': name};
+    final Map<String, dynamic> data = {'nombre': name};
 
     final response = await _apiService.post(API.bares, data);
     final Map<String, dynamic> barJson = jsonDecode(response.body);
@@ -30,7 +30,7 @@ class BarApiService {
   }
 
   Future<BarModel> updateBar(String id, String name) async {
-    final Map<String, dynamic> data = {'name': name};
+    final Map<String, dynamic> data = {'nombre': name};
 
     final response = await _apiService.patch('${API.bares}/$id', data);
     final Map<String, dynamic> barJson = jsonDecode(response.body);
