@@ -1,12 +1,11 @@
-import 'package:fazztrack_app/constants/colors_constants.dart';
-import 'package:fazztrack_app/pages/procedures/abono_screen.dart';
-import 'package:flutter/material.dart';
-
-import 'package:fazztrack_app/pages/procedures/consumo_screen.dart';
-import 'package:fazztrack_app/pages/reports/reports_screen.dart';
-import 'package:fazztrack_app/pages/admin/admin_screen.dart';
 import 'package:fazztrack_app/config/build.config.dart';
 import 'package:fazztrack_app/config/general.config.dart';
+import 'package:fazztrack_app/constants/colors_constants.dart';
+import 'package:fazztrack_app/pages/admin/admin_screen.dart';
+import 'package:fazztrack_app/pages/procedures/abono_screen.dart';
+import 'package:fazztrack_app/pages/procedures/consumo_screen.dart';
+import 'package:fazztrack_app/pages/reports/reports_screen.dart';
+import 'package:flutter/material.dart';
 
 enum PageType { consumo, abono, reports, admin }
 
