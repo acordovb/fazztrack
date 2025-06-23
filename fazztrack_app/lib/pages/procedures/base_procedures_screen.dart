@@ -113,22 +113,11 @@ class CustomDrawer extends StatelessWidget {
               ),
               if (BuildConfig.appLevel == AppConfig.appLevel.admin) ...[
                 const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 0),
                   child: Divider(
                     color: AppColors.textSecondary,
                     thickness: 0.5,
                   ),
-                ),
-                _buildDrawerItem(
-                  context: context,
-                  title: 'Reportes',
-                  subtitle: 'Análisis y estadísticas',
-                  icon: Icons.bar_chart_rounded,
-                  isSelected: currentPage == PageType.reports,
-                  onTap: () {
-                    Navigator.pop(context);
-                    changePage(PageType.reports);
-                  },
                 ),
                 _buildDrawerItem(
                   context: context,
@@ -139,6 +128,17 @@ class CustomDrawer extends StatelessWidget {
                   onTap: () {
                     Navigator.pop(context);
                     changePage(PageType.admin);
+                  },
+                ),
+                _buildDrawerItem(
+                  context: context,
+                  title: 'Reportes',
+                  subtitle: 'Análisis y estadísticas',
+                  icon: Icons.bar_chart_rounded,
+                  isSelected: currentPage == PageType.reports,
+                  onTap: () {
+                    Navigator.pop(context);
+                    changePage(PageType.reports);
                   },
                 ),
               ],
