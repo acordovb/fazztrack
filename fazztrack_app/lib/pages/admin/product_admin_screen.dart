@@ -4,6 +4,7 @@ import 'package:fazztrack_app/models/producto_model.dart';
 import 'package:fazztrack_app/services/bar/bar_api_service.dart';
 import 'package:fazztrack_app/services/productos/productos_api_service.dart';
 import 'package:fazztrack_app/widgets/create_producto_dialog.dart';
+import 'package:fazztrack_app/widgets/edit_producto_dialog.dart';
 import 'package:fazztrack_app/widgets/producto_card.dart';
 import 'package:flutter/material.dart';
 
@@ -367,14 +368,23 @@ class _ProductAdminScreenState extends State<ProductAdminScreen> {
                           return ProductoCard(
                             producto: producto,
                             onEdit: () {
-                              // TODO: Implementar edición
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    'Función de editar próximamente',
-                                  ),
-                                  backgroundColor: AppColors.warning,
-                                ),
+                              // Buscar el bar del producto
+                              final productoBar = _allBars.firstWhere(
+                                (bar) => bar.id == producto.idBar,
+                                orElse:
+                                    () => _allBars.firstWhere(
+                                      (bar) => bar.id == _selectedBarId,
+                                    ),
+                              );
+
+                              showDialog(
+                                context: context,
+                                builder:
+                                    (context) => EditProductoDialog(
+                                      producto: producto,
+                                      selectedBar: productoBar,
+                                      onProductoUpdated: _loadData,
+                                    ),
                               );
                             },
                             onDelete: () => _showDeleteConfirmation(producto),
