@@ -2,6 +2,7 @@ import 'package:fazztrack_app/constants/colors_constants.dart';
 import 'package:fazztrack_app/models/estudiante_model.dart';
 import 'package:fazztrack_app/services/estudiantes/estudiantes_api_service.dart';
 import 'package:fazztrack_app/widgets/create_estudiante_dialog.dart';
+import 'package:fazztrack_app/widgets/edit_estudiante_dialog.dart';
 import 'package:fazztrack_app/widgets/estudiante_card.dart';
 import 'package:flutter/material.dart';
 
@@ -84,6 +85,17 @@ class _StudentAdminScreenState extends State<StudentAdminScreen> {
       builder:
           (context) =>
               CreateEstudianteDialog(onEstudianteCreated: _loadEstudiantes),
+    );
+  }
+
+  void _showEditEstudianteDialog(EstudianteModel estudiante) {
+    showDialog(
+      context: context,
+      builder:
+          (context) => EditEstudianteDialog(
+            estudiante: estudiante,
+            onEstudianteUpdated: _loadEstudiantes,
+          ),
     );
   }
 
@@ -288,15 +300,7 @@ class _StudentAdminScreenState extends State<StudentAdminScreen> {
                           return EstudianteCard(
                             estudiante: estudiante,
                             onEdit: () {
-                              // TODO: Implementar edición
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    'Función de editar próximamente',
-                                  ),
-                                  backgroundColor: AppColors.warning,
-                                ),
-                              );
+                              _showEditEstudianteDialog(estudiante);
                             },
                             onDelete: () => _showDeleteConfirmation(estudiante),
                           );
