@@ -126,9 +126,8 @@ class _StoreAdminScreenState extends State<StoreAdminScreen> {
       builder:
           (context) => AlertDialog(
             backgroundColor: AppColors.card,
-            title: const Text(
-              'Editar Local',
-              style: TextStyle(color: AppColors.textPrimary),
+            title: const Center(
+              child: Icon(Icons.edit, color: AppColors.primaryTurquoise),
             ),
             content: Column(
               mainAxisSize: MainAxisSize.min,
