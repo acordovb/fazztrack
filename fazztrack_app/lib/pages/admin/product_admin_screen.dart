@@ -1,6 +1,9 @@
 import 'package:fazztrack_app/constants/colors_constants.dart';
+import 'package:fazztrack_app/models/bar_model.dart';
 import 'package:fazztrack_app/models/producto_model.dart';
+import 'package:fazztrack_app/services/bar/bar_api_service.dart';
 import 'package:fazztrack_app/services/productos/productos_api_service.dart';
+import 'package:fazztrack_app/widgets/create_producto_dialog.dart';
 import 'package:fazztrack_app/widgets/producto_card.dart';
 import 'package:flutter/material.dart';
 
@@ -13,17 +16,20 @@ class ProductAdminScreen extends StatefulWidget {
 
 class _ProductAdminScreenState extends State<ProductAdminScreen> {
   final ProductosApiService _productosService = ProductosApiService();
+  final BarApiService _barService = BarApiService();
   final TextEditingController _searchController = TextEditingController();
 
   List<ProductoModel> _allProductos = [];
   List<ProductoModel> _filteredProductos = [];
+  List<BarModel> _allBars = [];
+  String? _selectedBarId;
   bool _isLoading = false;
   String _errorMessage = '';
 
   @override
   void initState() {
     super.initState();
-    _loadProductos();
+    _loadData();
     _searchController.addListener(_filterProductos);
   }
 
@@ -33,22 +39,36 @@ class _ProductAdminScreenState extends State<ProductAdminScreen> {
     super.dispose();
   }
 
-  Future<void> _loadProductos() async {
+  Future<void> _loadData() async {
     setState(() {
       _isLoading = true;
       _errorMessage = '';
     });
 
     try {
-      final productos = await _productosService.getAllProductos();
+      // Cargar bares y productos en paralelo
+      final results = await Future.wait([
+        _barService.getAllBars(),
+        _productosService.getAllProductos(),
+      ]);
+
+      final bars = results[0] as List<BarModel>;
+      final productos = results[1] as List<ProductoModel>;
+
       setState(() {
+        _allBars = bars;
         _allProductos = productos;
-        _filteredProductos = productos;
+
+        if (_selectedBarId == null && bars.isNotEmpty) {
+          _selectedBarId = bars.first.id;
+        }
+
+        _filterProductos();
         _isLoading = false;
       });
     } catch (e) {
       setState(() {
-        _errorMessage = 'Error al cargar productos: ${e.toString()}';
+        _errorMessage = 'Error al cargar datos: ${e.toString()}';
         _isLoading = false;
       });
     }
@@ -57,11 +77,22 @@ class _ProductAdminScreenState extends State<ProductAdminScreen> {
   void _filterProductos() {
     final query = _searchController.text.toLowerCase();
     setState(() {
+      List<ProductoModel> productosFiltradosPorBar = _allProductos;
+
+      // Filtrar por bar seleccionado
+      if (_selectedBarId != null) {
+        productosFiltradosPorBar =
+            _allProductos
+                .where((producto) => producto.idBar == _selectedBarId)
+                .toList();
+      }
+
+      // Filtrar por búsqueda de texto
       if (query.isEmpty) {
-        _filteredProductos = _allProductos;
+        _filteredProductos = productosFiltradosPorBar;
       } else {
         _filteredProductos =
-            _allProductos
+            productosFiltradosPorBar
                 .where(
                   (producto) =>
                       producto.nombre.toLowerCase().contains(query) ||
@@ -71,6 +102,13 @@ class _ProductAdminScreenState extends State<ProductAdminScreen> {
                 .toList();
       }
     });
+  }
+
+  void _selectBar(String barId) {
+    setState(() {
+      _selectedBarId = barId;
+    });
+    _filterProductos();
   }
 
   void _showProductoDetails(ProductoModel producto) {
@@ -208,7 +246,7 @@ class _ProductAdminScreenState extends State<ProductAdminScreen> {
           backgroundColor: AppColors.success,
         ),
       );
-      _loadProductos(); // Recargar la lista
+      _loadData(); // Recargar la lista
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -236,7 +274,7 @@ class _ProductAdminScreenState extends State<ProductAdminScreen> {
         elevation: 0,
         actions: [
           IconButton(
-            onPressed: _loadProductos,
+            onPressed: _loadData,
             icon: const Icon(Icons.refresh),
             tooltip: 'Actualizar',
           ),
@@ -291,6 +329,57 @@ class _ProductAdminScreenState extends State<ProductAdminScreen> {
               ),
             ),
 
+            // Filtro de bares
+            if (_allBars.isNotEmpty)
+              Container(
+                height: 50,
+                margin: const EdgeInsets.only(bottom: 16),
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  itemCount: _allBars.length,
+                  itemBuilder: (context, index) {
+                    final bar = _allBars[index];
+                    final isSelected = _selectedBarId == bar.id;
+
+                    return Container(
+                      margin: const EdgeInsets.only(right: 8),
+                      child: FilterChip(
+                        label: Text(
+                          bar.nombre,
+                          style: TextStyle(
+                            color:
+                                isSelected
+                                    ? AppColors.primaryDarkBlue
+                                    : AppColors.textPrimary,
+                            fontWeight:
+                                isSelected
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
+                          ),
+                        ),
+                        selected: isSelected,
+                        onSelected: (selected) {
+                          if (selected) {
+                            _selectBar(bar.id);
+                          }
+                        },
+                        backgroundColor: AppColors.card,
+                        selectedColor: AppColors.primaryTurquoise,
+                        checkmarkColor: AppColors.primaryDarkBlue,
+                        side: BorderSide(
+                          color:
+                              isSelected
+                                  ? AppColors.primaryTurquoise
+                                  : AppColors.card,
+                          width: 1,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+
             // Contenido principal
             Expanded(
               child:
@@ -321,7 +410,7 @@ class _ProductAdminScreenState extends State<ProductAdminScreen> {
                             ),
                             const SizedBox(height: 16),
                             ElevatedButton(
-                              onPressed: _loadProductos,
+                              onPressed: _loadData,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppColors.primaryTurquoise,
                                 foregroundColor: AppColors.primaryDarkBlue,
@@ -385,12 +474,29 @@ class _ProductAdminScreenState extends State<ProductAdminScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // TODO: Implementar agregar nuevo producto
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Función de agregar producto próximamente'),
-              backgroundColor: AppColors.warning,
-            ),
+          if (_selectedBarId == null || _allBars.isEmpty) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  'Debe seleccionar un bar antes de crear un producto',
+                ),
+                backgroundColor: AppColors.error,
+              ),
+            );
+            return;
+          }
+
+          final selectedBar = _allBars.firstWhere(
+            (bar) => bar.id == _selectedBarId,
+          );
+
+          showDialog(
+            context: context,
+            builder:
+                (context) => CreateProductoDialog(
+                  onProductoCreated: _loadData,
+                  selectedBar: selectedBar,
+                ),
           );
         },
         backgroundColor: AppColors.primaryTurquoise,

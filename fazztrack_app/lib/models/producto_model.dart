@@ -29,7 +29,7 @@ class ProductoModel {
       'nombre': nombre,
       'precio': precio,
       'categoria': categoria,
-      'idBar': idBar,
+      'id_bar': idBar,
     };
   }
 }

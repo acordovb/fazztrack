@@ -47,7 +47,9 @@ class ProductosApiService {
 
   Future<ProductoModel> createProducto(ProductoModel producto) async {
     try {
-      final response = await _apiService.post(API.productos, producto.toJson());
+      final productoData = producto.toJson();
+      productoData.remove('id');
+      final response = await _apiService.post(API.productos, productoData);
       final data = jsonDecode(response.body);
       return ProductoModel.fromJson(data);
     } catch (e) {

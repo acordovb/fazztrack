@@ -19,6 +19,7 @@ export class ProductosController {
 
   @Post()
   create(@Body() createProductoDto: CreateProductoDto): Promise<ProductoDto> {
+    console.log('Creating producto:', createProductoDto);
     return this.productosService.create(createProductoDto);
   }
 
