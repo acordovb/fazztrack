@@ -334,49 +334,52 @@ class _ProductAdminScreenState extends State<ProductAdminScreen> {
               Container(
                 height: 50,
                 margin: const EdgeInsets.only(bottom: 16),
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: _allBars.length,
-                  itemBuilder: (context, index) {
-                    final bar = _allBars[index];
-                    final isSelected = _selectedBarId == bar.id;
+                child: Center(
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    shrinkWrap: true,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: _allBars.length,
+                    itemBuilder: (context, index) {
+                      final bar = _allBars[index];
+                      final isSelected = _selectedBarId == bar.id;
 
-                    return Container(
-                      margin: const EdgeInsets.only(right: 8),
-                      child: FilterChip(
-                        label: Text(
-                          bar.nombre,
-                          style: TextStyle(
+                      return Container(
+                        margin: const EdgeInsets.only(right: 8),
+                        child: FilterChip(
+                          label: Text(
+                            bar.nombre,
+                            style: TextStyle(
+                              color:
+                                  isSelected
+                                      ? AppColors.primaryDarkBlue
+                                      : AppColors.textPrimary,
+                              fontWeight:
+                                  isSelected
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                            ),
+                          ),
+                          selected: isSelected,
+                          onSelected: (selected) {
+                            if (selected) {
+                              _selectBar(bar.id);
+                            }
+                          },
+                          backgroundColor: AppColors.card,
+                          selectedColor: AppColors.primaryTurquoise,
+                          checkmarkColor: AppColors.primaryDarkBlue,
+                          side: BorderSide(
                             color:
                                 isSelected
-                                    ? AppColors.primaryDarkBlue
-                                    : AppColors.textPrimary,
-                            fontWeight:
-                                isSelected
-                                    ? FontWeight.bold
-                                    : FontWeight.normal,
+                                    ? AppColors.primaryTurquoise
+                                    : AppColors.card,
+                            width: 1,
                           ),
                         ),
-                        selected: isSelected,
-                        onSelected: (selected) {
-                          if (selected) {
-                            _selectBar(bar.id);
-                          }
-                        },
-                        backgroundColor: AppColors.card,
-                        selectedColor: AppColors.primaryTurquoise,
-                        checkmarkColor: AppColors.primaryDarkBlue,
-                        side: BorderSide(
-                          color:
-                              isSelected
-                                  ? AppColors.primaryTurquoise
-                                  : AppColors.card,
-                          width: 1,
-                        ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
               ),
 
