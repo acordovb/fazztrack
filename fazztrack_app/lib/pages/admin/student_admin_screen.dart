@@ -1,6 +1,7 @@
 import 'package:fazztrack_app/constants/colors_constants.dart';
 import 'package:fazztrack_app/models/estudiante_model.dart';
 import 'package:fazztrack_app/services/estudiantes/estudiantes_api_service.dart';
+import 'package:fazztrack_app/widgets/create_estudiante_dialog.dart';
 import 'package:fazztrack_app/widgets/estudiante_card.dart';
 import 'package:flutter/material.dart';
 
@@ -75,6 +76,15 @@ class _StudentAdminScreenState extends State<StudentAdminScreen> {
                 .toList();
       }
     });
+  }
+
+  void _showCreateEstudianteDialog() {
+    showDialog(
+      context: context,
+      builder:
+          (context) =>
+              CreateEstudianteDialog(onEstudianteCreated: _loadEstudiantes),
+    );
   }
 
   @override
@@ -250,15 +260,7 @@ class _StudentAdminScreenState extends State<StudentAdminScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // TODO: Implementar agregar nuevo estudiante
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Función de agregar estudiante próximamente'),
-              backgroundColor: AppColors.warning,
-            ),
-          );
-        },
+        onPressed: _showCreateEstudianteDialog,
         backgroundColor: AppColors.primaryTurquoise,
         foregroundColor: AppColors.primaryDarkBlue,
         child: const Icon(Icons.add),
