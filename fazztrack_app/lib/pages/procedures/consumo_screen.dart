@@ -46,6 +46,92 @@ class _ConsumoScreenState extends State<ConsumoScreen> {
     });
   }
 
+  Widget _buildRightColumn(NumberFormat formatCurrency) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        SelectorProductosWidget(
+          key: _selectorProductosKey,
+          onProductosChanged: _actualizarProductosSeleccionados,
+        ),
+        if (_productosSeleccionados.isNotEmpty &&
+            _controlHistorico != null) ...[
+          const SizedBox(height: 20),
+          Container(
+            constraints: const BoxConstraints(maxWidth: 500),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.secondaryBlue,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Total:',
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  formatCurrency.format(_total),
+                  style: const TextStyle(
+                    color: AppColors.primaryTurquoise,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 10),
+          Container(
+            constraints: const BoxConstraints(maxWidth: 500),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.secondaryBlue,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Nuevo Saldo:',
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  formatCurrency.format(
+                    _controlHistorico!.totalAbono -
+                        _controlHistorico!.totalVenta -
+                        _total,
+                  ),
+                  style: TextStyle(
+                    color:
+                        (_controlHistorico!.totalAbono -
+                                    _controlHistorico!.totalVenta -
+                                    _total) <
+                                0
+                            ? Colors.red
+                            : AppColors.primaryTurquoise,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 100),
+        ],
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final formatCurrency = NumberFormat.currency(locale: 'en_US', symbol: '\$');
@@ -55,100 +141,64 @@ class _ConsumoScreenState extends State<ConsumoScreen> {
         width: double.infinity,
         height: double.infinity,
         color: AppColors.background,
-        padding: const EdgeInsets.symmetric(horizontal: 20),
+        padding: const EdgeInsets.all(20),
         child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SaldoClienteWidget(
-                key: _saldoClienteKey,
-                onUserChange: (estudiante, controlHistorico) {
-                  setState(() {
-                    _estudianteSeleccionado = estudiante;
-                    _controlHistorico = controlHistorico;
-                  });
-                },
-              ),
-              const SizedBox(height: 20),
-              SelectorProductosWidget(
-                key: _selectorProductosKey,
-                onProductosChanged: _actualizarProductosSeleccionados,
-              ),
-              if (_productosSeleccionados.isNotEmpty &&
-                  _controlHistorico != null) ...[
-                const SizedBox(height: 20),
-                Container(
-                  constraints: const BoxConstraints(maxWidth: 500),
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: AppColors.secondaryBlue,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'Total:',
-                        style: TextStyle(
-                          color: AppColors.textPrimary,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              // Determinar si usar layout de una o dos columnas
+              final isWideScreen = constraints.maxWidth > 800;
+
+              if (isWideScreen) {
+                // Layout de dos columnas para pantallas grandes
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Columna izquierda - SaldoClienteWidget
+                    Expanded(
+                      flex: 1,
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 10),
+                        child: SaldoClienteWidget(
+                          key: _saldoClienteKey,
+                          onUserChange: (estudiante, controlHistorico) {
+                            setState(() {
+                              _estudianteSeleccionado = estudiante;
+                              _controlHistorico = controlHistorico;
+                            });
+                          },
                         ),
                       ),
-                      Text(
-                        formatCurrency.format(_total),
-                        style: const TextStyle(
-                          color: AppColors.primaryTurquoise,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
+                    ),
+                    // Columna derecha - Resto del contenido
+                    Expanded(
+                      flex: 1,
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 10),
+                        child: _buildRightColumn(formatCurrency),
                       ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Container(
-                  constraints: const BoxConstraints(maxWidth: 500),
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: AppColors.secondaryBlue,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'Nuevo Saldo:',
-                        style: TextStyle(
-                          color: AppColors.textPrimary,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        formatCurrency.format(
-                          _controlHistorico!.totalAbono -
-                              _controlHistorico!.totalVenta -
-                              _total,
-                        ),
-                        style: TextStyle(
-                          color:
-                              (_controlHistorico!.totalAbono -
-                                          _controlHistorico!.totalVenta -
-                                          _total) <
-                                      0
-                                  ? Colors.red
-                                  : AppColors.primaryTurquoise,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 100),
-              ],
-            ],
+                    ),
+                  ],
+                );
+              } else {
+                // Layout de una columna para pantallas pequeñas
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SaldoClienteWidget(
+                      key: _saldoClienteKey,
+                      onUserChange: (estudiante, controlHistorico) {
+                        setState(() {
+                          _estudianteSeleccionado = estudiante;
+                          _controlHistorico = controlHistorico;
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    _buildRightColumn(formatCurrency),
+                  ],
+                );
+              }
+            },
           ),
         ),
       ),
