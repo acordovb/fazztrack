@@ -86,6 +86,292 @@ class _AbonoScreenState extends State<AbonoScreen> {
     }
   }
 
+  Widget _buildFormulario() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          constraints: const BoxConstraints(maxWidth: 500),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Método de pago',
+                style: TextStyle(
+                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _selectedPaymentMethod = 'Transferencia';
+                        });
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          color:
+                              _selectedPaymentMethod == 'Transferencia'
+                                  ? AppColors.primary
+                                  : AppColors.secondaryBlue,
+                          borderRadius: const BorderRadius.horizontal(
+                            left: Radius.circular(8),
+                          ),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          'Transferencia',
+                          style: TextStyle(
+                            color:
+                                _selectedPaymentMethod == 'Transferencia'
+                                    ? AppColors.textSecondary
+                                    : AppColors.textPrimary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _selectedPaymentMethod = 'Efectivo';
+                        });
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          color:
+                              _selectedPaymentMethod == 'Efectivo'
+                                  ? AppColors.primary
+                                  : AppColors.secondaryBlue,
+                          borderRadius: const BorderRadius.horizontal(
+                            right: Radius.circular(8),
+                          ),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          'Efectivo',
+                          style: TextStyle(
+                            color:
+                                _selectedPaymentMethod == 'Efectivo'
+                                    ? AppColors.textSecondary
+                                    : AppColors.textPrimary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 20),
+        Container(
+          constraints: const BoxConstraints(maxWidth: 500),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Monto a abonar',
+                style: TextStyle(
+                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Container(
+                padding: const EdgeInsets.all(15),
+                decoration: BoxDecoration(
+                  color: AppColors.secondaryBlue,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Cantidad (USD):',
+                      style: TextStyle(
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    SizedBox(
+                      width: 140,
+                      child: TextField(
+                        controller: _montoController,
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(
+                            RegExp(r'^\d+\.?\d{0,2}'),
+                          ),
+                        ],
+                        textAlign: TextAlign.right,
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                        decoration: InputDecoration(
+                          isDense: true,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 8,
+                          ),
+                          filled: true,
+                          fillColor: AppColors.secondaryBlue,
+                          prefixIcon: Icon(
+                            Icons.attach_money,
+                            color: AppColors.primary,
+                            size: 18,
+                          ),
+                          prefixIconConstraints: const BoxConstraints(
+                            minWidth: 25,
+                            minHeight: 25,
+                          ),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              Icons.clear,
+                              color: AppColors.primary,
+                              size: 18,
+                            ),
+                            constraints: const BoxConstraints(
+                              minWidth: 32,
+                              minHeight: 32,
+                            ),
+                            padding: EdgeInsets.zero,
+                            splashRadius: 20,
+                            onPressed: () {
+                              _montoController.clear();
+                              _calcularNuevoSaldo();
+                            },
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: AppColors.primary),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: AppColors.primary,
+                              width: 2,
+                            ),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          hintText: '0.00',
+                          hintStyle: TextStyle(
+                            color: AppColors.textPrimary.withAlpha(50),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              Container(
+                padding: const EdgeInsets.all(15),
+                decoration: BoxDecoration(
+                  color: AppColors.secondaryBlue,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Nuevo Saldo:',
+                      style: TextStyle(
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    Text(
+                      '\$${_nuevoSaldo.toStringAsFixed(2)}',
+                      style: TextStyle(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 20),
+        Container(
+          constraints: const BoxConstraints(maxWidth: 500),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Comentario',
+                style: TextStyle(
+                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Container(
+                padding: const EdgeInsets.all(15),
+                decoration: BoxDecoration(
+                  color: AppColors.secondaryBlue,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: TextField(
+                  maxLines: 3,
+                  controller: _comentarioController,
+                  decoration: InputDecoration(
+                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 8,
+                    ),
+                    filled: true,
+                    fillColor: AppColors.secondaryBlue,
+                    hintText: 'Añade un comentario sobre este abono...',
+                    hintStyle: TextStyle(
+                      color: AppColors.textPrimary.withAlpha(80),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.primary),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: AppColors.primary,
+                        width: 2,
+                      ),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  style: TextStyle(color: AppColors.textPrimary),
+                ),
+              ),
+              const SizedBox(height: 80),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final bool mostrarBoton =
@@ -140,302 +426,63 @@ class _AbonoScreenState extends State<AbonoScreen> {
       body: SingleChildScrollView(
         child: Container(
           width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SaldoClienteWidget(
-                onUserChange: (estudiante, controlHistorico) {
-                  setState(() {
-                    _estudianteSeleccionado = estudiante;
-                    _controlHistorico = controlHistorico;
-                    _calcularNuevoSaldo();
-                  });
-                },
-              ),
-              const SizedBox(height: 20),
-              Container(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                constraints: const BoxConstraints(maxWidth: 500),
-                child: Column(
+          padding: const EdgeInsets.all(20),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              // Determinar si usar layout de una o dos columnas
+              final isWideScreen = constraints.maxWidth > 800;
+
+              if (isWideScreen) {
+                // Layout de dos columnas para pantallas grandes
+                return Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Método de pago',
-                      style: TextStyle(
-                        color: AppColors.textPrimary,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
+                    // Columna izquierda - SaldoClienteWidget
+                    Expanded(
+                      flex: 1,
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 10),
+                        child: SaldoClienteWidget(
+                          onUserChange: (estudiante, controlHistorico) {
+                            setState(() {
+                              _estudianteSeleccionado = estudiante;
+                              _controlHistorico = controlHistorico;
+                              _calcularNuevoSaldo();
+                            });
+                          },
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 10),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _selectedPaymentMethod = 'Transferencia';
-                              });
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              decoration: BoxDecoration(
-                                color:
-                                    _selectedPaymentMethod == 'Transferencia'
-                                        ? AppColors.primary
-                                        : AppColors.secondaryBlue,
-                                borderRadius: const BorderRadius.horizontal(
-                                  left: Radius.circular(8),
-                                ),
-                              ),
-                              alignment: Alignment.center,
-                              child: Text(
-                                'Transferencia',
-                                style: TextStyle(
-                                  color:
-                                      _selectedPaymentMethod == 'Transferencia'
-                                          ? AppColors.textSecondary
-                                          : AppColors.textPrimary,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _selectedPaymentMethod = 'Efectivo';
-                              });
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              decoration: BoxDecoration(
-                                color:
-                                    _selectedPaymentMethod == 'Efectivo'
-                                        ? AppColors.primary
-                                        : AppColors.secondaryBlue,
-                                borderRadius: const BorderRadius.horizontal(
-                                  right: Radius.circular(8),
-                                ),
-                              ),
-                              alignment: Alignment.center,
-                              child: Text(
-                                'Efectivo',
-                                style: TextStyle(
-                                  color:
-                                      _selectedPaymentMethod == 'Efectivo'
-                                          ? AppColors.textSecondary
-                                          : AppColors.textPrimary,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+                    // Columna derecha - Formulario
+                    Expanded(
+                      flex: 1,
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 10),
+                        child: _buildFormulario(),
+                      ),
                     ),
                   ],
-                ),
-              ),
-              const SizedBox(height: 20),
-              Container(
-                constraints: const BoxConstraints(maxWidth: 500),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                );
+              } else {
+                // Layout de una columna para pantallas pequeñas
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text(
-                      'Monto a abonar',
-                      style: TextStyle(
-                        color: AppColors.textPrimary,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Container(
-                      padding: const EdgeInsets.all(15),
-                      decoration: BoxDecoration(
-                        color: AppColors.secondaryBlue,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Cantidad (USD):',
-                            style: TextStyle(
-                              color: AppColors.textPrimary,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          ),
-                          SizedBox(
-                            width: 140,
-                            child: TextField(
-                              controller: _montoController,
-                              keyboardType:
-                                  const TextInputType.numberWithOptions(
-                                    decimal: true,
-                                  ),
-                              inputFormatters: [
-                                FilteringTextInputFormatter.allow(
-                                  RegExp(r'^\d+\.?\d{0,2}'),
-                                ),
-                              ],
-                              textAlign: TextAlign.right,
-                              style: TextStyle(
-                                color: AppColors.primary,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18,
-                              ),
-                              decoration: InputDecoration(
-                                isDense: true,
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 8,
-                                ),
-                                filled: true,
-                                fillColor: AppColors.secondaryBlue,
-                                prefixIcon: Icon(
-                                  Icons.attach_money,
-                                  color: AppColors.primary,
-                                  size: 18,
-                                ),
-                                prefixIconConstraints: const BoxConstraints(
-                                  minWidth: 25,
-                                  minHeight: 25,
-                                ),
-                                suffixIcon: IconButton(
-                                  icon: Icon(
-                                    Icons.clear,
-                                    color: AppColors.primary,
-                                    size: 18,
-                                  ),
-                                  constraints: const BoxConstraints(
-                                    minWidth: 32,
-                                    minHeight: 32,
-                                  ),
-                                  padding: EdgeInsets.zero,
-                                  splashRadius: 20,
-                                  onPressed: () {
-                                    _montoController.clear();
-                                    _calcularNuevoSaldo();
-                                  },
-                                ),
-                                enabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color: AppColors.primary,
-                                  ),
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color: AppColors.primary,
-                                    width: 2,
-                                  ),
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                hintText: '0.00',
-                                hintStyle: TextStyle(
-                                  color: AppColors.textPrimary.withAlpha(50),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                    SaldoClienteWidget(
+                      onUserChange: (estudiante, controlHistorico) {
+                        setState(() {
+                          _estudianteSeleccionado = estudiante;
+                          _controlHistorico = controlHistorico;
+                          _calcularNuevoSaldo();
+                        });
+                      },
                     ),
                     const SizedBox(height: 20),
-                    Container(
-                      padding: const EdgeInsets.all(15),
-                      decoration: BoxDecoration(
-                        color: AppColors.secondaryBlue,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Nuevo Saldo:',
-                            style: TextStyle(
-                              color: AppColors.textPrimary,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          ),
-                          Text(
-                            '\$${_nuevoSaldo.toStringAsFixed(2)}',
-                            style: TextStyle(
-                              color: AppColors.primary,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    _buildFormulario(),
                   ],
-                ),
-              ),
-              const SizedBox(height: 20),
-              Container(
-                constraints: const BoxConstraints(maxWidth: 500),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Comentario',
-                      style: TextStyle(
-                        color: AppColors.textPrimary,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Container(
-                      padding: const EdgeInsets.all(15),
-                      decoration: BoxDecoration(
-                        color: AppColors.secondaryBlue,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: TextField(
-                        maxLines: 3,
-                        controller: _comentarioController,
-                        decoration: InputDecoration(
-                          isDense: true,
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 8,
-                          ),
-                          filled: true,
-                          fillColor: AppColors.secondaryBlue,
-                          hintText: 'Añade un comentario sobre este abono...',
-                          hintStyle: TextStyle(
-                            color: AppColors.textPrimary.withAlpha(80),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: AppColors.primary),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: AppColors.primary,
-                              width: 2,
-                            ),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                        ),
-                        style: TextStyle(color: AppColors.textPrimary),
-                      ),
-                    ),
-                    const SizedBox(height: 80),
-                  ],
-                ),
-              ),
-            ],
+                );
+              }
+            },
           ),
         ),
       ),
