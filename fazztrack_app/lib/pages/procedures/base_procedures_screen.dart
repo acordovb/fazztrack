@@ -70,7 +70,7 @@ class _BaseProceduresScreenState extends State<BaseProceduresScreen> {
   }
 }
 
-class CustomDrawer extends StatelessWidget {
+class CustomDrawer extends StatefulWidget {
   const CustomDrawer({
     super.key,
     required this.changePage,
@@ -79,6 +79,48 @@ class CustomDrawer extends StatelessWidget {
 
   final Function(PageType) changePage;
   final PageType currentPage;
+
+  @override
+  State<CustomDrawer> createState() => _CustomDrawerState();
+}
+
+class _CustomDrawerState extends State<CustomDrawer> {
+  bool _isNavigating = false;
+
+  void _handlePageChange(PageType page) async {
+    // Prevenir múltiples navegaciones simultáneas
+    if (_isNavigating) return;
+
+    // No hacer nada si ya estamos en la página seleccionada
+    if (widget.currentPage == page) {
+      if (Navigator.canPop(context)) {
+        Navigator.pop(context);
+      }
+      return;
+    }
+
+    setState(() {
+      _isNavigating = true;
+    });
+
+    // Cerrar el drawer si está abierto
+    if (Navigator.canPop(context)) {
+      Navigator.pop(context);
+    }
+
+    // Esperar un momento para que se complete la animación del drawer
+    await Future.delayed(const Duration(milliseconds: 100));
+
+    // Cambiar la página
+    widget.changePage(page);
+
+    // Resetear el flag después de un momento
+    if (mounted) {
+      setState(() {
+        _isNavigating = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -94,22 +136,16 @@ class CustomDrawer extends StatelessWidget {
                 title: 'Reportar Consumo',
                 subtitle: 'Registrar ventas y transacciones',
                 icon: Icons.point_of_sale_rounded,
-                isSelected: currentPage == PageType.consumo,
-                onTap: () {
-                  Navigator.pop(context);
-                  changePage(PageType.consumo);
-                },
+                isSelected: widget.currentPage == PageType.consumo,
+                onTap: () => _handlePageChange(PageType.consumo),
               ),
               _buildDrawerItem(
                 context: context,
                 title: 'Reportar Abono',
                 subtitle: 'Gestionar pagos y abonos',
                 icon: Icons.account_balance_wallet_rounded,
-                isSelected: currentPage == PageType.abono,
-                onTap: () {
-                  Navigator.pop(context);
-                  changePage(PageType.abono);
-                },
+                isSelected: widget.currentPage == PageType.abono,
+                onTap: () => _handlePageChange(PageType.abono),
               ),
               if (BuildConfig.appLevel == AppConfig.appLevel.admin) ...[
                 const Padding(
@@ -124,22 +160,16 @@ class CustomDrawer extends StatelessWidget {
                   title: 'Administración',
                   subtitle: 'Configuración del sistema',
                   icon: Icons.admin_panel_settings_rounded,
-                  isSelected: currentPage == PageType.admin,
-                  onTap: () {
-                    Navigator.pop(context);
-                    changePage(PageType.admin);
-                  },
+                  isSelected: widget.currentPage == PageType.admin,
+                  onTap: () => _handlePageChange(PageType.admin),
                 ),
                 _buildDrawerItem(
                   context: context,
                   title: 'Reportes',
                   subtitle: 'Análisis y estadísticas',
                   icon: Icons.bar_chart_rounded,
-                  isSelected: currentPage == PageType.reports,
-                  onTap: () {
-                    Navigator.pop(context);
-                    changePage(PageType.reports);
-                  },
+                  isSelected: widget.currentPage == PageType.reports,
+                  onTap: () => _handlePageChange(PageType.reports),
                 ),
               ],
             ],
