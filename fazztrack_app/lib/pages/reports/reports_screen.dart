@@ -1,6 +1,7 @@
 import 'package:fazztrack_app/constants/colors_constants.dart';
 import 'package:fazztrack_app/models/estudiante_model.dart';
 import 'package:fazztrack_app/services/estudiantes/estudiantes_api_service.dart';
+import 'package:fazztrack_app/widgets/buscador_reporte.dart';
 import 'package:flutter/material.dart';
 
 class ReportsContent extends StatefulWidget {
@@ -26,7 +27,6 @@ class _ReportsContentState extends State<ReportsContent> {
   void initState() {
     super.initState();
     _loadEstudiantes();
-    _searchController.addListener(_filterEstudiantes);
   }
 
   @override
@@ -57,21 +57,36 @@ class _ReportsContentState extends State<ReportsContent> {
     }
   }
 
-  void _filterEstudiantes() {
-    final query = _searchController.text.toLowerCase();
+  void _filterEstudiantes(String query) {
     setState(() {
-      _filteredEstudiantes =
-          _allEstudiantes.where((estudiante) {
-            return estudiante.nombre.toLowerCase().contains(query) ||
-                (estudiante.curso?.toLowerCase().contains(query) ?? false) ||
-                (estudiante.nombreRepresentante?.toLowerCase().contains(
-                      query,
-                    ) ??
-                    false);
-          }).toList();
+      if (query.isEmpty) {
+        _filteredEstudiantes = _allEstudiantes;
+      } else {
+        final lowerQuery = query.toLowerCase();
+        _filteredEstudiantes =
+            _allEstudiantes.where((estudiante) {
+              return estudiante.nombre.toLowerCase().contains(lowerQuery) ||
+                  (estudiante.curso?.toLowerCase().contains(lowerQuery) ??
+                      false) ||
+                  (estudiante.nombreRepresentante?.toLowerCase().contains(
+                        lowerQuery,
+                      ) ??
+                      false) ||
+                  (estudiante.celular?.toLowerCase().contains(lowerQuery) ??
+                      false);
+            }).toList();
+      }
       _selectedEstudiantes.clear();
       _selectAll = false;
+      if (!_isMultiSelectMode) {
+        _selectedEstudiante = null;
+      }
     });
+  }
+
+  void _clearSearch() {
+    _searchController.clear();
+    _filterEstudiantes('');
   }
 
   void _toggleMultiSelectMode() {
@@ -207,34 +222,11 @@ class _ReportsContentState extends State<ReportsContent> {
         // Search Bar
         Expanded(
           flex: 2,
-          child: Container(
-            height: 48,
-            decoration: BoxDecoration(
-              color: AppColors.card,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: AppColors.primaryTurquoise.withOpacity(0.3),
-              ),
-            ),
-            child: TextField(
-              controller: _searchController,
-              style: const TextStyle(color: AppColors.textPrimary),
-              decoration: InputDecoration(
-                hintText: 'Buscar por nombre, curso o representante...',
-                hintStyle: TextStyle(
-                  color: AppColors.textPrimary.withOpacity(0.6),
-                ),
-                prefixIcon: Icon(
-                  Icons.search,
-                  color: AppColors.primaryTurquoise,
-                ),
-                border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-              ),
-            ),
+          child: BuscadorReporte(
+            controller: _searchController,
+            hintText: 'Buscar por nombre, curso, representante o celular...',
+            onChanged: _filterEstudiantes,
+            onClear: _clearSearch,
           ),
         ),
         const SizedBox(width: 16),
