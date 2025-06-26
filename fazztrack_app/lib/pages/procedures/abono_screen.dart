@@ -16,6 +16,7 @@ class AbonoScreen extends StatefulWidget {
 }
 
 class _AbonoScreenState extends State<AbonoScreen> {
+  Key _saldoClienteKey = UniqueKey();
   EstudianteModel? _estudianteSeleccionado;
   String _selectedPaymentMethod = 'Transferencia';
   final TextEditingController _montoController = TextEditingController();
@@ -53,6 +54,18 @@ class _AbonoScreenState extends State<AbonoScreen> {
         _nuevoSaldo = 0.0;
       }
     });
+  }
+
+  void _reiniciarValores() {
+    setState(() {
+      _saldoClienteKey = UniqueKey();
+      _selectedPaymentMethod = 'Transferencia';
+      _estudianteSeleccionado = null;
+      _controlHistorico = null;
+      _nuevoSaldo = 0.0;
+    });
+    _montoController.clear();
+    _comentarioController.clear();
   }
 
   Future<String> _registrarAbonoConResultado() async {
@@ -400,15 +413,7 @@ class _AbonoScreenState extends State<AbonoScreen> {
                       isError: false,
                     );
 
-                    // Limpiar todos los campos después del abono exitoso
-                    _montoController.clear();
-                    _comentarioController.clear();
-                    setState(() {
-                      _selectedPaymentMethod = 'Transferencia';
-                      _estudianteSeleccionado = null;
-                      _controlHistorico = null;
-                      _nuevoSaldo = 0.0;
-                    });
+                    _reiniciarValores();
                   } else {
                     await TransactionAlertWidget.show(
                       context: context,
@@ -450,6 +455,7 @@ class _AbonoScreenState extends State<AbonoScreen> {
                       child: Padding(
                         padding: const EdgeInsets.only(right: 10),
                         child: SaldoClienteWidget(
+                          key: _saldoClienteKey,
                           onUserChange: (estudiante, controlHistorico) {
                             setState(() {
                               _estudianteSeleccionado = estudiante;
@@ -476,6 +482,7 @@ class _AbonoScreenState extends State<AbonoScreen> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     SaldoClienteWidget(
+                      key: _saldoClienteKey,
                       onUserChange: (estudiante, controlHistorico) {
                         setState(() {
                           _estudianteSeleccionado = estudiante;
