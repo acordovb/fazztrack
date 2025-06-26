@@ -400,8 +400,15 @@ class _AbonoScreenState extends State<AbonoScreen> {
                       isError: false,
                     );
 
+                    // Limpiar todos los campos después del abono exitoso
                     _montoController.clear();
                     _comentarioController.clear();
+                    setState(() {
+                      _selectedPaymentMethod = 'Transferencia';
+                      _estudianteSeleccionado = null;
+                      _controlHistorico = null;
+                      _nuevoSaldo = 0.0;
+                    });
                   } else {
                     await TransactionAlertWidget.show(
                       context: context,

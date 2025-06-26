@@ -22,7 +22,6 @@ export class AbonosService extends BaseCrudService<
   ): Promise<AbonoDto> {
     const idEstudiante = createAbonoDto.id_estudiante;
 
-    // Convertir fecha_abono a Date si viene como string, o usar la fecha actual
     const fechaAbono = createAbonoDto.fecha_abono
       ? new Date(createAbonoDto.fecha_abono)
       : new Date();

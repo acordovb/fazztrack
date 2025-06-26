@@ -12,7 +12,7 @@ class AbonoProvider {
     ControlHistoricoModel controlHistorico,
   ) async {
     final newControlHistorico = controlHistorico.copyWith(
-      totalVenta: controlHistorico.totalAbono + abono.total,
+      totalAbono: controlHistorico.totalAbono + abono.total,
     );
 
     final body = {
