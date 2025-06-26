@@ -53,7 +53,7 @@ class _BuscadorReporteState extends State<BuscadorReporte> {
       decoration: BoxDecoration(
         color: AppColors.card,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.primaryTurquoise.withOpacity(0.3)),
+        border: Border.all(color: AppColors.primaryTurquoise.withAlpha(30)),
       ),
       child: TextField(
         controller: widget.controller,
@@ -61,7 +61,7 @@ class _BuscadorReporteState extends State<BuscadorReporte> {
         style: const TextStyle(color: AppColors.textPrimary),
         decoration: InputDecoration(
           hintText: widget.hintText,
-          hintStyle: TextStyle(color: AppColors.textPrimary.withOpacity(0.6)),
+          hintStyle: TextStyle(color: AppColors.textPrimary.withAlpha(60)),
           prefixIcon: const Icon(
             Icons.search,
             color: AppColors.primaryTurquoise,
@@ -72,7 +72,7 @@ class _BuscadorReporteState extends State<BuscadorReporte> {
                     onPressed: _clearSearch,
                     icon: Icon(
                       Icons.clear,
-                      color: AppColors.textPrimary.withOpacity(0.6),
+                      color: AppColors.textPrimary.withAlpha(60),
                     ),
                     tooltip: 'Limpiar búsqueda',
                   )

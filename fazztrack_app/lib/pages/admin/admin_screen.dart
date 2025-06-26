@@ -124,7 +124,7 @@ class AdminContent extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(15),
                     decoration: BoxDecoration(
-                      color: AppColors.primaryTurquoise.withOpacity(0.2),
+                      color: AppColors.primaryTurquoise.withAlpha(20),
                       borderRadius: BorderRadius.circular(15),
                     ),
                     child: Icon(
@@ -148,7 +148,7 @@ class AdminContent extends StatelessWidget {
                     subtitle,
                     style: TextStyle(
                       fontSize: 14,
-                      color: AppColors.textPrimary.withOpacity(0.8),
+                      color: AppColors.textPrimary.withAlpha(80),
                     ),
                     textAlign: TextAlign.center,
                   ),

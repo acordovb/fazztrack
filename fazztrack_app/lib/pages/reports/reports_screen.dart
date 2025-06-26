@@ -182,7 +182,7 @@ class _ReportsContentState extends State<ReportsContent> {
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: AppColors.primaryTurquoise.withOpacity(0.1),
+            color: AppColors.primaryTurquoise.withAlpha(10),
             borderRadius: BorderRadius.circular(12),
           ),
           child: const Icon(
@@ -207,7 +207,7 @@ class _ReportsContentState extends State<ReportsContent> {
               'Gestiona y descarga reportes de estudiantes',
               style: TextStyle(
                 fontSize: 16,
-                color: AppColors.textPrimary.withOpacity(0.7),
+                color: AppColors.textPrimary.withAlpha(70),
               ),
             ),
           ],
@@ -292,7 +292,7 @@ class _ReportsContentState extends State<ReportsContent> {
         foregroundColor:
             isEnabled
                 ? AppColors.primaryDarkBlue
-                : AppColors.textPrimary.withOpacity(0.5),
+                : AppColors.textPrimary.withAlpha(50),
         elevation: isEnabled ? 2 : 0,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -315,7 +315,7 @@ class _ReportsContentState extends State<ReportsContent> {
             Icon(
               Icons.search_off,
               size: 64,
-              color: AppColors.textPrimary.withOpacity(0.3),
+              color: AppColors.textPrimary.withAlpha(30),
             ),
             const SizedBox(height: 16),
             Text(
@@ -324,7 +324,7 @@ class _ReportsContentState extends State<ReportsContent> {
                   : 'No se encontraron estudiantes',
               style: TextStyle(
                 fontSize: 18,
-                color: AppColors.textPrimary.withOpacity(0.7),
+                color: AppColors.textPrimary.withAlpha(70),
               ),
             ),
           ],
@@ -336,7 +336,7 @@ class _ReportsContentState extends State<ReportsContent> {
       decoration: BoxDecoration(
         color: AppColors.card,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.primaryTurquoise.withOpacity(0.2)),
+        border: Border.all(color: AppColors.primaryTurquoise.withAlpha(20)),
       ),
       child: Column(
         children: [
@@ -344,7 +344,7 @@ class _ReportsContentState extends State<ReportsContent> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: AppColors.primaryTurquoise.withOpacity(0.1),
+              color: AppColors.primaryTurquoise.withAlpha(10),
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(12),
                 topRight: Radius.circular(12),
@@ -419,13 +419,13 @@ class _ReportsContentState extends State<ReportsContent> {
                   decoration: BoxDecoration(
                     color:
                         _isMultiSelectMode && isSelected
-                            ? AppColors.primaryTurquoise.withOpacity(0.1)
+                            ? AppColors.primaryTurquoise.withAlpha(10)
                             : !_isMultiSelectMode &&
                                 _selectedEstudiante?.id == estudiante.id
-                            ? AppColors.primaryTurquoise.withOpacity(0.2)
+                            ? AppColors.primaryTurquoise.withAlpha(20)
                             : index % 2 == 0
                             ? AppColors.card
-                            : AppColors.background.withOpacity(0.3),
+                            : AppColors.background.withAlpha(30),
                     border: Border(
                       bottom: BorderSide(
                         color: AppColors.primaryTurquoise,
@@ -523,7 +523,7 @@ class _ReportsContentState extends State<ReportsContent> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                color: AppColors.primaryTurquoise.withOpacity(0.1),
+                color: AppColors.primaryTurquoise.withAlpha(10),
                 borderRadius: const BorderRadius.only(
                   bottomLeft: Radius.circular(12),
                   bottomRight: Radius.circular(12),
@@ -559,7 +559,7 @@ class _ReportsContentState extends State<ReportsContent> {
       decoration: BoxDecoration(
         color: AppColors.card,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.primaryTurquoise.withOpacity(0.2)),
+        border: Border.all(color: AppColors.primaryTurquoise.withAlpha(20)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -568,7 +568,7 @@ class _ReportsContentState extends State<ReportsContent> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: AppColors.primaryTurquoise.withOpacity(0.1),
+              color: AppColors.primaryTurquoise.withAlpha(10),
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(12),
                 topRight: Radius.circular(12),
@@ -596,7 +596,7 @@ class _ReportsContentState extends State<ReportsContent> {
                   },
                   icon: Icon(
                     Icons.close,
-                    color: AppColors.textPrimary.withOpacity(0.7),
+                    color: AppColors.textPrimary.withAlpha(70),
                   ),
                 ),
               ],
@@ -642,7 +642,7 @@ class _ReportsContentState extends State<ReportsContent> {
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: AppColors.background.withOpacity(0.3),
+                          color: AppColors.background.withAlpha(30),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Column(
@@ -650,13 +650,13 @@ class _ReportsContentState extends State<ReportsContent> {
                             Icon(
                               Icons.analytics_outlined,
                               size: 40,
-                              color: AppColors.textPrimary.withOpacity(0.5),
+                              color: AppColors.textPrimary.withAlpha(50),
                             ),
                             const SizedBox(height: 8),
                             Text(
                               'Resumen no implementado',
                               style: TextStyle(
-                                color: AppColors.textPrimary.withOpacity(0.7),
+                                color: AppColors.textPrimary.withAlpha(70),
                                 fontSize: 14,
                               ),
                             ),
@@ -704,7 +704,7 @@ class _ReportsContentState extends State<ReportsContent> {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: AppColors.background.withOpacity(0.2),
+        color: AppColors.background.withAlpha(20),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -746,13 +746,13 @@ class _ReportsContentState extends State<ReportsContent> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 80,
+            width: 120,
             child: Text(
               '$label:',
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
-                color: AppColors.textPrimary.withOpacity(0.8),
+                color: AppColors.textPrimary.withAlpha(80),
               ),
             ),
           ),

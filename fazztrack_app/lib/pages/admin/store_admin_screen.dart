@@ -141,7 +141,7 @@ class _StoreAdminScreenState extends State<StoreAdminScreen> {
                     hintText: 'Ingresa el nombre del local',
                     hintStyle: const TextStyle(color: AppColors.textPrimary),
                     filled: true,
-                    fillColor: AppColors.primaryDarkBlue.withOpacity(0.3),
+                    fillColor: AppColors.primaryDarkBlue.withAlpha(30),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                       borderSide: BorderSide.none,

@@ -92,7 +92,7 @@ class BarCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: AppColors.primaryDarkBlue.withOpacity(0.3),
+                      color: AppColors.primaryDarkBlue.withAlpha(30),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
