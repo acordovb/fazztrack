@@ -22,6 +22,7 @@ class _ReportsContentState extends State<ReportsContent> {
   bool _selectAll = false;
   bool _isMultiSelectMode = false;
   EstudianteModel? _selectedEstudiante;
+  bool _isDisposed = false;
 
   @override
   void initState() {
@@ -31,22 +32,26 @@ class _ReportsContentState extends State<ReportsContent> {
 
   @override
   void dispose() {
+    _isDisposed = true;
     _searchController.dispose();
     super.dispose();
   }
 
   Future<void> _loadEstudiantes() async {
+    if (!mounted || _isDisposed) return;
     setState(() => _isLoading = true);
     try {
       final estudiantes = await _estudiantesService.getAllEstudiantes();
+      if (!mounted || _isDisposed) return;
       setState(() {
         _allEstudiantes = estudiantes;
         _filteredEstudiantes = estudiantes;
         _isLoading = false;
       });
     } catch (e) {
+      if (!mounted || _isDisposed) return;
       setState(() => _isLoading = false);
-      if (mounted) {
+      if (mounted && !_isDisposed) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error al cargar estudiantes: $e'),
@@ -58,6 +63,7 @@ class _ReportsContentState extends State<ReportsContent> {
   }
 
   void _filterEstudiantes(String query) {
+    if (!mounted || _isDisposed) return;
     setState(() {
       if (query.isEmpty) {
         _filteredEstudiantes = _allEstudiantes;
@@ -90,6 +96,7 @@ class _ReportsContentState extends State<ReportsContent> {
   }
 
   void _toggleMultiSelectMode() {
+    if (!mounted || _isDisposed) return;
     setState(() {
       _isMultiSelectMode = !_isMultiSelectMode;
       if (!_isMultiSelectMode) {
@@ -101,6 +108,7 @@ class _ReportsContentState extends State<ReportsContent> {
   }
 
   void _selectEstudiante(EstudianteModel estudiante) {
+    if (!mounted || _isDisposed) return;
     setState(() {
       _selectedEstudiante = estudiante;
       if (_isMultiSelectMode) {
@@ -111,6 +119,7 @@ class _ReportsContentState extends State<ReportsContent> {
   }
 
   void _toggleSelectAll() {
+    if (!mounted || _isDisposed) return;
     setState(() {
       _selectAll = !_selectAll;
       if (_selectAll) {
@@ -122,6 +131,7 @@ class _ReportsContentState extends State<ReportsContent> {
   }
 
   void _toggleStudentSelection(String id) {
+    if (!mounted || _isDisposed) return;
     setState(() {
       if (_selectedEstudiantes.contains(id)) {
         _selectedEstudiantes.remove(id);
@@ -590,6 +600,7 @@ class _ReportsContentState extends State<ReportsContent> {
                 ),
                 IconButton(
                   onPressed: () {
+                    if (!mounted || _isDisposed) return;
                     setState(() {
                       _selectedEstudiante = null;
                     });
