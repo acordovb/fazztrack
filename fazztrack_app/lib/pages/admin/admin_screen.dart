@@ -2,6 +2,7 @@ import 'package:fazztrack_app/constants/colors_constants.dart';
 import 'package:fazztrack_app/pages/admin/student_admin_screen.dart';
 import 'package:fazztrack_app/pages/admin/product_admin_screen.dart';
 import 'package:fazztrack_app/pages/admin/store_admin_screen.dart';
+import 'package:fazztrack_app/pages/admin/transaction_admin_screen.dart';
 import 'package:flutter/material.dart';
 
 class AdminContent extends StatelessWidget {
@@ -23,7 +24,9 @@ class AdminContent extends StatelessWidget {
               builder: (context, constraints) {
                 // Determinar cuántas columnas usar basado en el ancho de pantalla
                 int crossAxisCount = 1;
-                if (constraints.maxWidth > 800) {
+                if (constraints.maxWidth > 1200) {
+                  crossAxisCount = 4;
+                } else if (constraints.maxWidth > 800) {
                   crossAxisCount = 3;
                 } else if (constraints.maxWidth > 500) {
                   crossAxisCount = 2;
@@ -73,6 +76,20 @@ class AdminContent extends StatelessWidget {
                             context,
                             MaterialPageRoute(
                               builder: (context) => const StoreAdminScreen(),
+                            ),
+                          ),
+                    ),
+                    _buildAdminCard(
+                      context,
+                      icon: Icons.receipt_long,
+                      title: 'Transacciones',
+                      subtitle: 'Editar ventas\ny abonos',
+                      onTap:
+                          () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (context) => const TransactionAdminScreen(),
                             ),
                           ),
                     ),
