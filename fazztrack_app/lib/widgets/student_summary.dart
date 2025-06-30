@@ -100,7 +100,10 @@ class _StudentSummaryWidgetState extends State<StudentSummaryWidget> {
   }
 
   double get balance {
-    return totalAbonos - totalVentas;
+    return totalAbonos -
+        totalVentas +
+        (controlHistorico?.totalPendienteUltMesAbono ?? 0) -
+        (controlHistorico?.totalPendienteUltMesVenta ?? 0);
   }
 
   @override
@@ -164,6 +167,26 @@ class _StudentSummaryWidgetState extends State<StudentSummaryWidget> {
                   ),
                 ),
                 const SizedBox(height: 16),
+                if (controlHistorico != null) ...[
+                  if (controlHistorico!.totalPendienteUltMesAbono > 0) ...[
+                    _buildSummaryRow(
+                      'Saldo a favor del mes anterior',
+                      '\$${controlHistorico!.totalPendienteUltMesAbono.toStringAsFixed(2)}',
+                      Icons.schedule,
+                      Colors.blue,
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+                  if (controlHistorico!.totalPendienteUltMesVenta > 0) ...[
+                    _buildSummaryRow(
+                      'Saldo pendiente del mes anterior',
+                      '\$${controlHistorico!.totalPendienteUltMesVenta.toStringAsFixed(2)}',
+                      Icons.schedule,
+                      Colors.red,
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+                ],
                 _buildSummaryRow(
                   'Ventas',
                   '\$${totalVentas.toStringAsFixed(2)}',
@@ -178,24 +201,8 @@ class _StudentSummaryWidgetState extends State<StudentSummaryWidget> {
                   Colors.green,
                 ),
                 const SizedBox(height: 8),
-                if (controlHistorico != null) ...[
-                  _buildSummaryRow(
-                    'Saldo a favor del mes anterior',
-                    '\$${controlHistorico!.totalPendienteUltMesAbono.toStringAsFixed(2)}',
-                    Icons.schedule,
-                    Colors.blue,
-                  ),
-                  const SizedBox(height: 8),
-                  _buildSummaryRow(
-                    'Saldo pendiente del mes anterior',
-                    '\$${controlHistorico!.totalPendienteUltMesVenta.toStringAsFixed(2)}',
-                    Icons.schedule,
-                    Colors.red,
-                  ),
-                  const SizedBox(height: 8),
-                ],
                 _buildSummaryRow(
-                  'Abonos - Ventas',
+                  'Saldo Actual',
                   '\$${balance.toStringAsFixed(2)}',
                   Icons.account_balance_wallet,
                   balance >= 0 ? Colors.green : Colors.red,
