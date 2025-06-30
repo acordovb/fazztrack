@@ -647,7 +647,10 @@ class _ReportsContentState extends State<ReportsContent> {
                   const SizedBox(height: 20),
 
                   // Sección de resumen
-                  StudentSummaryWidget(estudiante: _selectedEstudiante!),
+                  StudentSummaryWidget(
+                    key: ValueKey(_selectedEstudiante!.id),
+                    estudiante: _selectedEstudiante!,
+                  ),
 
                   const SizedBox(height: 20),
 
