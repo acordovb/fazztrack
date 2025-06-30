@@ -2,8 +2,10 @@ import 'package:fazztrack_app/constants/colors_constants.dart';
 import 'package:fazztrack_app/models/estudiante_model.dart';
 import 'package:fazztrack_app/models/venta_model.dart';
 import 'package:fazztrack_app/models/abono_model.dart';
+import 'package:fazztrack_app/models/control_historico_model.dart';
 import 'package:fazztrack_app/services/ventas/ventas_api_service.dart';
 import 'package:fazztrack_app/services/abonos/abono_api_service.dart';
+import 'package:fazztrack_app/services/estudiantes/control_historico_api_service.dart';
 import 'package:flutter/material.dart';
 
 class StudentSummaryWidget extends StatefulWidget {
@@ -19,9 +21,12 @@ class _StudentSummaryWidgetState extends State<StudentSummaryWidget> {
   late String selectedMonth;
   final VentasApiService _ventasApiService = VentasApiService();
   final AbonoApiService _abonoApiService = AbonoApiService();
+  final ControlHistoricoApiService _controlHistoricoApiService =
+      ControlHistoricoApiService();
 
   List<VentaModel> ventas = [];
   List<AbonoModel> abonos = [];
+  ControlHistoricoModel? controlHistorico;
   bool isLoading = true;
   String? error;
 
@@ -64,10 +69,13 @@ class _StudentSummaryWidgetState extends State<StudentSummaryWidget> {
         widget.estudiante.id,
         mes: month,
       );
+      final controlHistoricoData = await _controlHistoricoApiService
+          .getControlHistoricoByEstudianteId(widget.estudiante.id);
 
       setState(() {
         ventas = ventasData;
         abonos = abonosData;
+        controlHistorico = controlHistoricoData;
         isLoading = false;
       });
     } catch (e) {
@@ -170,6 +178,22 @@ class _StudentSummaryWidgetState extends State<StudentSummaryWidget> {
                   Colors.green,
                 ),
                 const SizedBox(height: 8),
+                if (controlHistorico != null) ...[
+                  _buildSummaryRow(
+                    'Saldo a favor del mes anterior',
+                    '\$${controlHistorico!.totalPendienteUltMesAbono.toStringAsFixed(2)}',
+                    Icons.schedule,
+                    Colors.blue,
+                  ),
+                  const SizedBox(height: 8),
+                  _buildSummaryRow(
+                    'Saldo pendiente del mes anterior',
+                    '\$${controlHistorico!.totalPendienteUltMesVenta.toStringAsFixed(2)}',
+                    Icons.schedule,
+                    Colors.red,
+                  ),
+                  const SizedBox(height: 8),
+                ],
                 _buildSummaryRow(
                   'Abonos - Ventas',
                   '\$${balance.toStringAsFixed(2)}',
