@@ -1,11 +1,14 @@
 // Modelo de Venta para la aplicación Flutter
+import 'package:fazztrack_app/models/producto_model.dart';
+
 class VentaModel {
   final String? id;
-  final int idEstudiante;
-  final int idProducto;
+  final String idEstudiante;
+  final String idProducto;
   final DateTime? fechaTransaccion;
-  final int idBar;
+  final String idBar;
   final int nProductos;
+  final ProductoModel? producto;
 
   VentaModel({
     this.id,
@@ -14,6 +17,7 @@ class VentaModel {
     this.fechaTransaccion,
     required this.idBar,
     required this.nProductos,
+    this.producto,
   });
 
   factory VentaModel.fromJson(Map<String, dynamic> json) {
@@ -27,6 +31,7 @@ class VentaModel {
               : null,
       idBar: json['id_bar'],
       nProductos: json['n_productos'],
+      producto: ProductoModel.fromJson(json['producto'] ?? <String, dynamic>{}),
     );
   }
 

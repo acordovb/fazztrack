@@ -1,11 +1,14 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
   Param,
+  Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { UpdateControlHistoricoDto } from '../control-historico/dto';
 import { CreateVentaDto, VentaDto } from './dto';
@@ -28,13 +31,26 @@ export class VentasController {
     return this.ventasService.createBulk(ventas, controlHistorico);
   }
 
-  @Get()
-  findAll(): Promise<VentaDto[]> {
-    return this.ventasService.findAll();
+  @Get(':idStudent')
+  findAllByStudent(
+    @Param('idStudent') idStudent: string,
+    @Query('mes') mes?: string,
+  ): Promise<VentaDto[]> {
+    const month = mes ? parseInt(mes) : new Date().getMonth() + 1;
+    return this.ventasService.findAllByStudent(idStudent, month);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string): Promise<VentaDto> {
-    return this.ventasService.findOne(id);
+  @Patch(':id')
+  update(
+    @Param('id') id: string,
+    @Body() updateVentaDto: CreateVentaDto,
+  ): Promise<VentaDto> {
+    return this.ventasService.update(id, updateVentaDto);
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  remove(@Param('id') id: string): Promise<void> {
+    return this.ventasService.remove(id);
   }
 }

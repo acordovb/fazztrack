@@ -17,7 +17,10 @@ class ProductoModel {
     return ProductoModel(
       id: json['id'],
       nombre: json['nombre'],
-      precio: json['precio'].toDouble(),
+      precio:
+          json['precio'] != null
+              ? double.parse(json['precio'].toString())
+              : 0.0,
       categoria: json['categoria'],
       idBar: json['idBar'],
     );

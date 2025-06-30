@@ -6,4 +6,6 @@ class API {
   static final String estudiantes = '/estudiantes';
   static final String controlHistorico = '/control-historico';
   static final String productos = '/productos';
+  static final String ventas = '/ventas';
+  static final String abonos = '/abonos';
 }

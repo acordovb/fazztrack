@@ -2,6 +2,7 @@ import 'package:fazztrack_app/constants/colors_constants.dart';
 import 'package:fazztrack_app/models/estudiante_model.dart';
 import 'package:fazztrack_app/services/estudiantes/estudiantes_api_service.dart';
 import 'package:fazztrack_app/widgets/buscador_reporte.dart';
+import 'package:fazztrack_app/widgets/student_summary.dart';
 import 'package:flutter/material.dart';
 
 class ReportsContent extends StatefulWidget {
@@ -645,37 +646,8 @@ class _ReportsContentState extends State<ReportsContent> {
 
                   const SizedBox(height: 20),
 
-                  // Sección de resumen (placeholder)
-                  _buildInfoCard(
-                    title: 'Resumen',
-                    icon: Icons.summarize,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: AppColors.background.withAlpha(30),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Column(
-                          children: [
-                            Icon(
-                              Icons.analytics_outlined,
-                              size: 40,
-                              color: AppColors.textPrimary.withAlpha(50),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Resumen no implementado',
-                              style: TextStyle(
-                                color: AppColors.textPrimary.withAlpha(70),
-                                fontSize: 14,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+                  // Sección de resumen
+                  StudentSummaryWidget(estudiante: _selectedEstudiante!),
 
                   const SizedBox(height: 20),
 

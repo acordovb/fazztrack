@@ -1,6 +1,6 @@
 export class AbonoDto {
   id: string;
-  id_estudiante: number;
+  id_estudiante: string;
   total: number;
   tipo_abono: string;
   fecha_abono: Date | null;

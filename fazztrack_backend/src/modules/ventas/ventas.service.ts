@@ -23,6 +23,15 @@ export class VentasService extends BaseCrudService<
       fecha_transaccion: model.fecha_transaccion,
       id_bar: encodeId(model.id_bar),
       n_productos: model.n_productos,
+      producto: model.productos
+        ? {
+            id: encodeId(model.productos.id),
+            nombre: model.productos.nombre,
+            precio: model.productos.precio,
+            idBar: encodeId(model.productos.id_bar),
+            categoria: model.productos.categoria,
+          }
+        : undefined,
     };
   }
 
@@ -53,5 +62,30 @@ export class VentasService extends BaseCrudService<
         },
       }),
     ]);
+  }
+
+  async findAllByStudent(
+    idStudent: string,
+    month: number,
+  ): Promise<VentaDto[]> {
+    const currentYear = new Date().getFullYear();
+
+    const startDate = new Date(currentYear, month - 1, 1);
+    const endDate = new Date(currentYear, month, 0, 23, 59, 59, 999);
+
+    const ventas = await this.database.ventas.findMany({
+      orderBy: { fecha_transaccion: 'desc' },
+      where: {
+        id_estudiante: decodeId(idStudent),
+        fecha_transaccion: {
+          gte: startDate,
+          lte: endDate,
+        },
+      },
+      include: {
+        productos: true,
+      },
+    });
+    return ventas.map((venta) => this.mapToDto(venta));
   }
 }

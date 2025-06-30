@@ -16,6 +16,16 @@ export class AbonosService extends BaseCrudService<
     super(database, 'abonos');
   }
 
+  protected mapToDto(model: any): AbonoDto {
+    return {
+      id: encodeId(model.id),
+      id_estudiante: encodeId(model.id_estudiante),
+      total: model.total,
+      tipo_abono: model.tipo_abono,
+      fecha_abono: model.fecha_abono,
+    };
+  }
+
   async newAbono(
     createAbonoDto: CreateAbonoDto,
     controlHistorico: UpdateControlHistoricoDto,
@@ -51,13 +61,25 @@ export class AbonosService extends BaseCrudService<
     });
   }
 
-  protected mapToDto(model: any): AbonoDto {
-    return {
-      id: encodeId(model.id),
-      id_estudiante: model.id_estudiante,
-      total: model.total,
-      tipo_abono: model.tipo_abono,
-      fecha_abono: model.fecha_abono,
-    };
+  async findAllByStudent(
+    idStudent: string,
+    month: number,
+  ): Promise<AbonoDto[]> {
+    const currentYear = new Date().getFullYear();
+
+    const startDate = new Date(currentYear, month - 1, 1);
+    const endDate = new Date(currentYear, month, 0, 23, 59, 59, 999);
+
+    const abonos = await this.database.abonos.findMany({
+      orderBy: { fecha_abono: 'desc' },
+      where: {
+        id_estudiante: decodeId(idStudent),
+        fecha_abono: {
+          gte: startDate,
+          lte: endDate,
+        },
+      },
+    });
+    return abonos.map((abono) => this.mapToDto(abono));
   }
 }

@@ -8,6 +8,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { UpdateControlHistoricoDto } from '../control-historico/dto';
 import { AbonosService } from './abonos.service';
@@ -30,14 +31,13 @@ export class AbonosController {
     return this.abonosService.newAbono(abono, controlHistorico);
   }
 
-  @Get()
-  findAll(): Promise<AbonoDto[]> {
-    return this.abonosService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string): Promise<AbonoDto> {
-    return this.abonosService.findOne(id);
+  @Get(':idStudent')
+  findAllByStudent(
+    @Param('idStudent') idStudent: string,
+    @Query('mes') mes?: string,
+  ): Promise<AbonoDto[]> {
+    const month = mes ? parseInt(mes) : new Date().getMonth() + 1;
+    return this.abonosService.findAllByStudent(idStudent, month);
   }
 
   @Patch(':id')

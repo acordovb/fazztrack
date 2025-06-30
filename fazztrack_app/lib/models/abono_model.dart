@@ -17,7 +17,8 @@ class AbonoModel {
     return AbonoModel(
       id: json['id'],
       idEstudiante: json['id_estudiante'],
-      total: json['total']?.toDouble() ?? 0.0,
+      total:
+          json['total'] != null ? double.parse(json['total'].toString()) : 0.0,
       tipoAbono: json['tipo_abono'],
       fechaAbono:
           json['fecha_abono'] != null
