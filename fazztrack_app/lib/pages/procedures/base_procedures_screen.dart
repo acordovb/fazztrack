@@ -67,7 +67,10 @@ class _BaseProceduresScreenState extends State<BaseProceduresScreen> {
               ),
             ),
             // Divisor vertical
-            Container(width: 1, color: AppColors.textSecondary.withAlpha(20)),
+            Container(
+              width: 0.1,
+              color: AppColors.primaryDarkBlue.withAlpha(30),
+            ),
             // Contenido principal con su propio AppBar
             Expanded(
               child: Scaffold(
