@@ -1,16 +1,12 @@
 class ControlHistoricoModel {
   final String id;
   final String idEstudiante;
-  final double totalAbono;
-  final double totalVenta;
   final double totalPendienteUltMesAbono;
   final double totalPendienteUltMesVenta;
 
   ControlHistoricoModel({
     required this.id,
     required this.idEstudiante,
-    required this.totalAbono,
-    required this.totalVenta,
     required this.totalPendienteUltMesAbono,
     required this.totalPendienteUltMesVenta,
   });
@@ -19,8 +15,6 @@ class ControlHistoricoModel {
     return ControlHistoricoModel(
       id: json['id'],
       idEstudiante: json['id_estudiante'],
-      totalAbono: json['total_abono'].toDouble(),
-      totalVenta: json['total_venta'].toDouble(),
       totalPendienteUltMesAbono:
           json['total_pendiente_ult_mes_abono'].toDouble(),
       totalPendienteUltMesVenta:
@@ -32,30 +26,24 @@ class ControlHistoricoModel {
     return {
       'id': id,
       'id_estudiante': idEstudiante,
-      'total_abono': totalAbono,
-      'total_venta': totalVenta,
       'total_pendiente_ult_mes_abono': totalPendienteUltMesAbono,
       'total_pendiente_ult_mes_venta': totalPendienteUltMesVenta,
     };
   }
 
-  ControlHistoricoModel copyWith({
-    String? id,
-    String? idEstudiante,
-    double? totalAbono,
-    double? totalVenta,
-    double? totalPendienteUltMesAbono,
-    double? totalPendienteUltMesVenta,
-  }) {
-    return ControlHistoricoModel(
-      id: id ?? this.id,
-      idEstudiante: idEstudiante ?? this.idEstudiante,
-      totalAbono: totalAbono ?? this.totalAbono,
-      totalVenta: totalVenta ?? this.totalVenta,
-      totalPendienteUltMesAbono:
-          totalPendienteUltMesAbono ?? this.totalPendienteUltMesAbono,
-      totalPendienteUltMesVenta:
-          totalPendienteUltMesVenta ?? this.totalPendienteUltMesVenta,
-    );
-  }
+  // ControlHistoricoModel copyWith({
+  //   String? id,
+  //   String? idEstudiante,
+  //   double? totalPendienteUltMesAbono,
+  //   double? totalPendienteUltMesVenta,
+  // }) {
+  //   return ControlHistoricoModel(
+  //     id: id ?? this.id,
+  //     idEstudiante: idEstudiante ?? this.idEstudiante,
+  //     totalPendienteUltMesAbono:
+  //         totalPendienteUltMesAbono ?? this.totalPendienteUltMesAbono,
+  //     totalPendienteUltMesVenta:
+  //         totalPendienteUltMesVenta ?? this.totalPendienteUltMesVenta,
+  //   );
+  // }
 }
