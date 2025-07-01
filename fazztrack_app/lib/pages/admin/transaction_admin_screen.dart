@@ -124,7 +124,7 @@ class _TransactionAdminScreenState extends State<TransactionAdminScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Left panel for controls
-        Container(
+        SizedBox(
           width: 350,
           child: Column(
             children: [
@@ -428,7 +428,7 @@ class _TransactionAdminScreenState extends State<TransactionAdminScreen> {
     required bool isSelected,
     required VoidCallback onPressed,
   }) {
-    return Container(
+    return SizedBox(
       height: 50,
       child: ElevatedButton(
         onPressed: onPressed,
