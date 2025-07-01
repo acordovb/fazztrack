@@ -14,6 +14,7 @@ model abonos {
   total         Decimal     @db.Decimal(10, 2)
   tipo_abono    String      @db.VarChar(100)
   fecha_abono   DateTime    @default(now()) @db.Timestamp(6)
+  comentario    String?     @db.VarChar(255)
   estudiantes   estudiantes @relation(fields: [id_estudiante], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
@@ -52,6 +53,7 @@ model ventas {
   fecha_transaccion DateTime    @default(now()) @db.Timestamp(6)
   id_bar            Int
   n_productos       Int
+  total             Decimal     @db.Decimal(10, 2)
   bares             bares       @relation(fields: [id_bar], references: [id], onDelete: Cascade, onUpdate: NoAction)
   estudiantes       estudiantes @relation(fields: [id_estudiante], references: [id], onDelete: Cascade, onUpdate: NoAction)
   productos         productos   @relation(fields: [id_producto], references: [id], onDelete: Cascade, onUpdate: NoAction)
@@ -60,8 +62,6 @@ model ventas {
 model control_historico {
   id                            Int         @id @default(autoincrement())
   id_estudiante                 Int
-  total_abono                   Decimal     @db.Decimal(10, 2)
-  total_venta                   Decimal     @db.Decimal(10, 2)
   total_pendiente_ult_mes_abono Decimal     @db.Decimal(10, 2)
   total_pendiente_ult_mes_venta Decimal     @db.Decimal(10, 2)
   estudiantes                   estudiantes @relation(fields: [id_estudiante], references: [id], onDelete: Cascade, onUpdate: NoAction)

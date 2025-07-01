@@ -3,5 +3,6 @@ export class AbonoDto {
   id_estudiante: string;
   total: number;
   tipo_abono: string;
-  fecha_abono: Date | null;
+  fecha_abono: Date;
+  comentario?: string;
 }

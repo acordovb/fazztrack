@@ -10,7 +10,6 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { UpdateControlHistoricoDto } from '../control-historico/dto';
 import { CreateVentaDto, VentaDto } from './dto';
 import { VentasService } from './ventas.service';
 
@@ -20,15 +19,8 @@ export class VentasController {
 
   @Post('bulk')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async createBulk(
-    @Body()
-    body: {
-      ventas: CreateVentaDto[];
-      controlHistorico: UpdateControlHistoricoDto & { id_estudiante: number };
-    },
-  ): Promise<void> {
-    const { ventas, controlHistorico } = body;
-    return this.ventasService.createBulk(ventas, controlHistorico);
+  async createBulk(@Body() ventas: CreateVentaDto[]): Promise<void> {
+    return this.ventasService.createBulk(ventas);
   }
 
   @Get(':idStudent')

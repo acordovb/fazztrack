@@ -1,4 +1,5 @@
 import { IsOptional, IsNumber, IsPositive, IsDate } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export class UpdateVentaDto {
   @IsOptional()
@@ -11,6 +12,7 @@ export class UpdateVentaDto {
 
   @IsOptional()
   @IsDate({ message: 'La fecha de transacción debe ser una fecha válida' })
+  @Transform(({ value }) => (value ? new Date(value) : undefined))
   fecha_transaccion?: Date;
 
   @IsOptional()
@@ -21,4 +23,9 @@ export class UpdateVentaDto {
   @IsNumber({}, { message: 'El número de productos debe ser un número' })
   @IsPositive({ message: 'El número de productos debe ser un valor positivo' })
   n_productos?: number;
+
+  @IsOptional()
+  @IsNumber({}, { message: 'El valor total debe ser un número' })
+  @IsPositive({ message: 'El valor total debe ser un valor positivo' })
+  total?: number;
 }

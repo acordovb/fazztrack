@@ -4,8 +4,8 @@ import {
   IsOptional,
   IsPositive,
   IsDate,
-  IsString,
 } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export class CreateVentaDto {
   @IsNotEmpty({ message: 'El ID del estudiante es requerido' })
@@ -21,6 +21,7 @@ export class CreateVentaDto {
 
   @IsOptional()
   @IsDate({ message: 'La fecha de transacción debe ser una fecha válida' })
+  @Transform(({ value }) => (value ? new Date(value) : new Date()))
   fecha_transaccion?: Date;
 
   @IsNotEmpty({ message: 'El ID del bar es requerido' })
@@ -31,4 +32,9 @@ export class CreateVentaDto {
   @IsNumber({}, { message: 'El número de productos debe ser un número' })
   @IsPositive({ message: 'El número de productos debe ser un valor positivo' })
   n_productos: number;
+
+  @IsNotEmpty({ message: 'El valor Total es requerido' })
+  @IsNumber({}, { message: 'El valor total debe ser un número' })
+  @IsPositive({ message: 'El valor total debe ser un valor positivo' })
+  total: number;
 }

@@ -5,6 +5,7 @@ import {
   IsString,
   IsDate,
 } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export class UpdateAbonoDto {
   @IsOptional()
@@ -22,5 +23,10 @@ export class UpdateAbonoDto {
 
   @IsOptional()
   @IsDate({ message: 'La fecha de abono debe ser una fecha válida' })
+  @Transform(({ value }) => (value ? new Date(value) : undefined))
   fecha_abono?: Date;
+
+  @IsOptional()
+  @IsString({ message: 'El comentario debe ser una cadena de texto' })
+  comentario?: string;
 }

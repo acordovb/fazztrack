@@ -10,7 +10,6 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { UpdateControlHistoricoDto } from '../control-historico/dto';
 import { AbonosService } from './abonos.service';
 import { AbonoDto, CreateAbonoDto, UpdateAbonoDto } from './dto';
 
@@ -19,15 +18,8 @@ export class AbonosController {
   constructor(private readonly abonosService: AbonosService) {}
 
   @Post()
-  create(
-    @Body()
-    body: {
-      abono: CreateAbonoDto;
-      controlHistorico: UpdateControlHistoricoDto & { id_estudiante: number };
-    },
-  ): Promise<AbonoDto> {
-    const { abono, controlHistorico } = body;
-    return this.abonosService.newAbono(abono, controlHistorico);
+  create(@Body() abono: CreateAbonoDto): Promise<AbonoDto> {
+    return this.abonosService.create(abono);
   }
 
   @Get(':idStudent')
