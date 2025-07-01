@@ -26,7 +26,6 @@ export class AbonosController {
       controlHistorico: UpdateControlHistoricoDto & { id_estudiante: number };
     },
   ): Promise<AbonoDto> {
-    console.log('Creating new abono with body:', body);
     const { abono, controlHistorico } = body;
     return this.abonosService.newAbono(abono, controlHistorico);
   }
