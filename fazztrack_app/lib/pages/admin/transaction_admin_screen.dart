@@ -101,21 +101,86 @@ class _TransactionAdminScreenState extends State<TransactionAdminScreen> {
         backgroundColor: AppColors.backgroundSecondary,
         iconTheme: const IconThemeData(color: AppColors.textPrimary),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildStudentSelector(),
-            const SizedBox(height: 20),
-            if (_selectedEstudiante != null) ...[
-              _buildTransactionTypeSelector(),
-              const SizedBox(height: 20),
-              _buildTransactionsList(),
-            ],
-          ],
-        ),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          // Responsive design for better window display
+          bool isDesktop = constraints.maxWidth > 800;
+          double maxWidth = isDesktop ? 1200 : double.infinity;
+
+          return Center(
+            child: Container(
+              constraints: BoxConstraints(maxWidth: maxWidth),
+              padding: const EdgeInsets.all(20),
+              child: isDesktop ? _buildDesktopLayout() : _buildMobileLayout(),
+            ),
+          );
+        },
       ),
+    );
+  }
+
+  Widget _buildDesktopLayout() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Left panel for controls
+        Container(
+          width: 350,
+          child: Column(
+            children: [
+              _buildStudentSelector(),
+              const SizedBox(height: 20),
+              if (_selectedEstudiante != null) _buildTransactionTypeSelector(),
+            ],
+          ),
+        ),
+        const SizedBox(width: 20),
+        // Right panel for transactions list
+        Expanded(
+          child:
+              _selectedEstudiante != null
+                  ? _buildTransactionsList()
+                  : Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppColors.card,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.shadow,
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: const Center(
+                      child: Text(
+                        'Seleccione un estudiante para ver las transacciones',
+                        style: TextStyle(
+                          color: AppColors.textPrimary,
+                          fontSize: 16,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMobileLayout() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildStudentSelector(),
+        const SizedBox(height: 20),
+        if (_selectedEstudiante != null) ...[
+          _buildTransactionTypeSelector(),
+          const SizedBox(height: 20),
+          _buildTransactionsList(),
+        ],
+      ],
     );
   }
 
@@ -145,46 +210,157 @@ class _TransactionAdminScreenState extends State<TransactionAdminScreen> {
             ),
           ),
           const SizedBox(height: 12),
-          _isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : DropdownButtonFormField<EstudianteModel>(
-                value: _selectedEstudiante,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  fillColor: AppColors.backgroundSecondary,
-                  filled: true,
-                ),
-                dropdownColor: AppColors.backgroundSecondary,
-                style: const TextStyle(color: AppColors.textPrimary),
-                hint: const Text(
-                  'Seleccione un estudiante',
-                  style: TextStyle(color: AppColors.textPrimary),
-                ),
-                items:
-                    _estudiantes.map((estudiante) {
-                      return DropdownMenuItem<EstudianteModel>(
-                        value: estudiante,
-                        child: Text(
-                          estudiante.nombre,
-                          style: const TextStyle(color: AppColors.textPrimary),
-                        ),
-                      );
-                    }).toList(),
-                onChanged: (EstudianteModel? newValue) {
-                  setState(() {
-                    _selectedEstudiante = newValue;
-                    _ventas = [];
-                    _abonos = [];
-                  });
-                  if (newValue != null) {
-                    _loadTransactions();
-                  }
-                },
-              ),
+          if (_isLoading)
+            const Center(child: CircularProgressIndicator())
+          else
+            _buildStudentAutocomplete(),
         ],
       ),
+    );
+  }
+
+  Widget _buildStudentAutocomplete() {
+    return Autocomplete<EstudianteModel>(
+      optionsBuilder: (TextEditingValue textEditingValue) {
+        if (textEditingValue.text.isEmpty) {
+          return _estudiantes;
+        }
+        return _estudiantes.where((EstudianteModel estudiante) {
+          return estudiante.nombre.toLowerCase().contains(
+            textEditingValue.text.toLowerCase(),
+          );
+        });
+      },
+      displayStringForOption: (EstudianteModel option) => option.nombre,
+      fieldViewBuilder: (
+        BuildContext context,
+        TextEditingController textEditingController,
+        FocusNode focusNode,
+        VoidCallback onFieldSubmitted,
+      ) {
+        return TextField(
+          controller: textEditingController,
+          focusNode: focusNode,
+          decoration: InputDecoration(
+            hintText: 'Buscar y seleccionar estudiante...',
+            hintStyle: TextStyle(color: AppColors.textPrimary.withOpacity(0.7)),
+            prefixIcon: Icon(Icons.search, color: AppColors.primaryTurquoise),
+            suffixIcon:
+                textEditingController.text.isNotEmpty
+                    ? IconButton(
+                      icon: Icon(
+                        Icons.clear,
+                        color: AppColors.textPrimary.withOpacity(0.7),
+                      ),
+                      onPressed: () {
+                        textEditingController.clear();
+                        setState(() {
+                          _selectedEstudiante = null;
+                          _ventas = [];
+                          _abonos = [];
+                        });
+                      },
+                    )
+                    : null,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+            fillColor: AppColors.backgroundSecondary,
+            filled: true,
+          ),
+          style: const TextStyle(color: AppColors.textPrimary),
+          onSubmitted: (String value) {
+            onFieldSubmitted();
+          },
+        );
+      },
+      optionsViewBuilder: (
+        BuildContext context,
+        AutocompleteOnSelected<EstudianteModel> onSelected,
+        Iterable<EstudianteModel> options,
+      ) {
+        return Align(
+          alignment: Alignment.topLeft,
+          child: Material(
+            color: AppColors.backgroundSecondary,
+            elevation: 8.0,
+            borderRadius: BorderRadius.circular(8),
+            child: Container(
+              constraints: const BoxConstraints(maxHeight: 200),
+              width:
+                  MediaQuery.of(context).size.width -
+                  72, // Adjust width as needed
+              child: ListView.builder(
+                padding: EdgeInsets.zero,
+                shrinkWrap: true,
+                itemCount: options.length,
+                itemBuilder: (BuildContext context, int index) {
+                  final EstudianteModel option = options.elementAt(index);
+                  return InkWell(
+                    onTap: () => onSelected(option),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      decoration: BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(
+                            color: AppColors.lightBlue.withOpacity(0.2),
+                            width: 0.5,
+                          ),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.person,
+                            color: AppColors.primaryTurquoise,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  option.nombre,
+                                  style: const TextStyle(
+                                    color: AppColors.textPrimary,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                if (option.curso != null) ...[
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    'Curso: ${option.curso}',
+                                    style: TextStyle(
+                                      color: AppColors.textPrimary.withOpacity(
+                                        0.7,
+                                      ),
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+      },
+      onSelected: (EstudianteModel selection) {
+        setState(() {
+          _selectedEstudiante = selection;
+          _ventas = [];
+          _abonos = [];
+        });
+        _loadTransactions();
+      },
     );
   }
 
@@ -213,46 +389,79 @@ class _TransactionAdminScreenState extends State<TransactionAdminScreen> {
               color: AppColors.textPrimary,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           Row(
             children: [
               Expanded(
-                child: RadioListTile<String>(
-                  title: const Text(
-                    'Ventas',
-                    style: TextStyle(color: AppColors.textPrimary),
-                  ),
-                  value: 'ventas',
-                  groupValue: _selectedTransactionType,
-                  activeColor: AppColors.primaryTurquoise,
-                  onChanged: (String? value) {
-                    if (value != null) {
-                      setState(() => _selectedTransactionType = value);
-                      _loadTransactions();
-                    }
+                child: _buildToggleButton(
+                  text: 'Ventas',
+                  icon: Icons.shopping_cart,
+                  isSelected: _selectedTransactionType == 'ventas',
+                  onPressed: () {
+                    setState(() => _selectedTransactionType = 'ventas');
+                    _loadTransactions();
                   },
                 ),
               ),
+              const SizedBox(width: 12),
               Expanded(
-                child: RadioListTile<String>(
-                  title: const Text(
-                    'Abonos',
-                    style: TextStyle(color: AppColors.textPrimary),
-                  ),
-                  value: 'abonos',
-                  groupValue: _selectedTransactionType,
-                  activeColor: AppColors.primaryTurquoise,
-                  onChanged: (String? value) {
-                    if (value != null) {
-                      setState(() => _selectedTransactionType = value);
-                      _loadTransactions();
-                    }
+                child: _buildToggleButton(
+                  text: 'Abonos',
+                  icon: Icons.payments,
+                  isSelected: _selectedTransactionType == 'abonos',
+                  onPressed: () {
+                    setState(() => _selectedTransactionType = 'abonos');
+                    _loadTransactions();
                   },
                 ),
               ),
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildToggleButton({
+    required String text,
+    required IconData icon,
+    required bool isSelected,
+    required VoidCallback onPressed,
+  }) {
+    return Container(
+      height: 50,
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor:
+              isSelected
+                  ? AppColors.primaryTurquoise
+                  : AppColors.backgroundSecondary,
+          foregroundColor:
+              isSelected ? AppColors.primaryDarkBlue : AppColors.textPrimary,
+          elevation: isSelected ? 4 : 1,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+            side: BorderSide(
+              color:
+                  isSelected ? AppColors.primaryTurquoise : AppColors.lightBlue,
+              width: isSelected ? 2 : 1,
+            ),
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 20),
+            const SizedBox(width: 8),
+            Text(
+              text,
+              style: TextStyle(
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -340,38 +549,81 @@ class _TransactionAdminScreenState extends State<TransactionAdminScreen> {
     return Card(
       color: AppColors.backgroundSecondary,
       margin: const EdgeInsets.only(bottom: 12),
-      child: ListTile(
-        title: Text(
-          'Producto: ${venta.producto?.nombre ?? 'N/A'}',
-          style: const TextStyle(color: AppColors.textPrimary),
-        ),
-        subtitle: Column(
+      elevation: 3,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Cantidad: ${venta.nProductos}',
-              style: const TextStyle(color: AppColors.textPrimary),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryTurquoise.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    Icons.shopping_cart,
+                    color: AppColors.primaryTurquoise,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Producto: ${venta.producto?.nombre ?? 'N/A'}',
+                    style: const TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(
+                        Icons.edit,
+                        color: AppColors.primaryTurquoise,
+                      ),
+                      onPressed: () => _editVenta(venta),
+                      tooltip: 'Editar venta',
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete, color: AppColors.error),
+                      onPressed: () => _deleteVenta(venta),
+                      tooltip: 'Eliminar venta',
+                    ),
+                  ],
+                ),
+              ],
             ),
-            Text(
-              'Fecha: ${venta.fechaTransaccion != null ? DateFormat('dd/MM/yyyy HH:mm').format(venta.fechaTransaccion!) : 'N/A'}',
-              style: const TextStyle(color: AppColors.textPrimary),
-            ),
-            Text(
-              'Bar: ${venta.idBar}',
-              style: const TextStyle(color: AppColors.textPrimary),
-            ),
-          ],
-        ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.edit, color: AppColors.primaryTurquoise),
-              onPressed: () => _editVenta(venta),
-            ),
-            IconButton(
-              icon: const Icon(Icons.delete, color: AppColors.error),
-              onPressed: () => _deleteVenta(venta),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildInfoChip(
+                    Icons.inventory_2,
+                    'Cantidad',
+                    '${venta.nProductos}',
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _buildInfoChip(
+                    Icons.access_time,
+                    'Fecha',
+                    venta.fechaTransaccion != null
+                        ? DateFormat(
+                          'dd/MM/yyyy HH:mm',
+                        ).format(venta.fechaTransaccion!)
+                        : 'N/A',
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -383,37 +635,128 @@ class _TransactionAdminScreenState extends State<TransactionAdminScreen> {
     return Card(
       color: AppColors.backgroundSecondary,
       margin: const EdgeInsets.only(bottom: 12),
-      child: ListTile(
-        title: Text(
-          'Total: \$${abono.total.toStringAsFixed(2)}',
-          style: const TextStyle(color: AppColors.textPrimary),
-        ),
-        subtitle: Column(
+      elevation: 3,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Tipo: ${abono.tipoAbono}',
-              style: const TextStyle(color: AppColors.textPrimary),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.success.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    Icons.payments,
+                    color: AppColors.success,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Total: \$${abono.total.toStringAsFixed(2)}',
+                    style: const TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(
+                        Icons.edit,
+                        color: AppColors.primaryTurquoise,
+                      ),
+                      onPressed: () => _editAbono(abono),
+                      tooltip: 'Editar abono',
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete, color: AppColors.error),
+                      onPressed: () => _deleteAbono(abono),
+                      tooltip: 'Eliminar abono',
+                    ),
+                  ],
+                ),
+              ],
             ),
-            Text(
-              'Fecha: ${abono.fechaAbono != null ? DateFormat('dd/MM/yyyy HH:mm').format(abono.fechaAbono!) : 'N/A'}',
-              style: const TextStyle(color: AppColors.textPrimary),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildInfoChip(
+                    Icons.category,
+                    'Tipo',
+                    abono.tipoAbono,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _buildInfoChip(
+                    Icons.access_time,
+                    'Fecha',
+                    abono.fechaAbono != null
+                        ? DateFormat(
+                          'dd/MM/yyyy HH:mm',
+                        ).format(abono.fechaAbono!)
+                        : 'N/A',
+                  ),
+                ),
+              ],
             ),
           ],
         ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.edit, color: AppColors.primaryTurquoise),
-              onPressed: () => _editAbono(abono),
-            ),
-            IconButton(
-              icon: const Icon(Icons.delete, color: AppColors.error),
-              onPressed: () => _deleteAbono(abono),
-            ),
-          ],
+      ),
+    );
+  }
+
+  Widget _buildInfoChip(IconData icon, String label, String value) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: AppColors.lightBlue.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: AppColors.lightBlue.withOpacity(0.3),
+          width: 1,
         ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: AppColors.primaryTurquoise),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: AppColors.textPrimary.withOpacity(0.7),
+                    fontSize: 12,
+                  ),
+                ),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -546,7 +889,6 @@ class _EditVentaDialog extends StatefulWidget {
 
 class _EditVentaDialogState extends State<_EditVentaDialog> {
   late TextEditingController _nProductosController;
-  late TextEditingController _idBarController;
 
   @override
   void initState() {
@@ -554,13 +896,11 @@ class _EditVentaDialogState extends State<_EditVentaDialog> {
     _nProductosController = TextEditingController(
       text: widget.venta.nProductos.toString(),
     );
-    _idBarController = TextEditingController(text: widget.venta.idBar);
   }
 
   @override
   void dispose() {
     _nProductosController.dispose();
-    _idBarController.dispose();
     super.dispose();
   }
 
@@ -575,23 +915,47 @@ class _EditVentaDialogState extends State<_EditVentaDialog> {
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          // Mostrar información del producto (solo lectura)
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.backgroundSecondary,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: AppColors.lightBlue.withOpacity(0.3),
+                width: 1,
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.shopping_cart,
+                  color: AppColors.primaryTurquoise,
+                  size: 20,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Producto: ${widget.venta.producto?.nombre ?? 'N/A'}',
+                    style: const TextStyle(
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
           TextField(
             controller: _nProductosController,
             decoration: const InputDecoration(
               labelText: 'Cantidad de productos',
               labelStyle: TextStyle(color: AppColors.textPrimary),
+              border: OutlineInputBorder(),
             ),
             style: const TextStyle(color: AppColors.textPrimary),
             keyboardType: TextInputType.number,
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: _idBarController,
-            decoration: const InputDecoration(
-              labelText: 'ID del Bar',
-              labelStyle: TextStyle(color: AppColors.textPrimary),
-            ),
-            style: const TextStyle(color: AppColors.textPrimary),
           ),
         ],
       ),
@@ -602,15 +966,24 @@ class _EditVentaDialogState extends State<_EditVentaDialog> {
         ),
         ElevatedButton(
           onPressed: () {
+            final cantidad = int.tryParse(_nProductosController.text);
+            if (cantidad == null || cantidad <= 0) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Por favor ingrese una cantidad válida'),
+                  backgroundColor: AppColors.error,
+                ),
+              );
+              return;
+            }
+
             final updatedVenta = VentaModel(
               id: widget.venta.id,
               idEstudiante: widget.venta.idEstudiante,
               idProducto: widget.venta.idProducto,
               fechaTransaccion: widget.venta.fechaTransaccion,
-              idBar: _idBarController.text,
-              nProductos:
-                  int.tryParse(_nProductosController.text) ??
-                  widget.venta.nProductos,
+              idBar: widget.venta.idBar, // Mantener el mismo bar
+              nProductos: cantidad,
               producto: widget.venta.producto,
             );
             Navigator.of(context).pop(updatedVenta);
@@ -633,7 +1006,9 @@ class _EditAbonoDialog extends StatefulWidget {
 
 class _EditAbonoDialogState extends State<_EditAbonoDialog> {
   late TextEditingController _totalController;
-  late TextEditingController _tipoAbonoController;
+  late String _selectedTipoAbono;
+
+  final List<String> _tiposAbono = ['Transferencia', 'Efectivo'];
 
   @override
   void initState() {
@@ -641,13 +1016,16 @@ class _EditAbonoDialogState extends State<_EditAbonoDialog> {
     _totalController = TextEditingController(
       text: widget.abono.total.toString(),
     );
-    _tipoAbonoController = TextEditingController(text: widget.abono.tipoAbono);
+    // Verificar si el tipo de abono actual está en la lista, si no, usar el primero
+    _selectedTipoAbono =
+        _tiposAbono.contains(widget.abono.tipoAbono)
+            ? widget.abono.tipoAbono
+            : _tiposAbono.first;
   }
 
   @override
   void dispose() {
     _totalController.dispose();
-    _tipoAbonoController.dispose();
     super.dispose();
   }
 
@@ -667,18 +1045,51 @@ class _EditAbonoDialogState extends State<_EditAbonoDialog> {
             decoration: const InputDecoration(
               labelText: 'Total',
               labelStyle: TextStyle(color: AppColors.textPrimary),
+              border: OutlineInputBorder(),
+              prefixText: '\$ ',
             ),
             style: const TextStyle(color: AppColors.textPrimary),
-            keyboardType: TextInputType.numberWithOptions(decimal: true),
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
           ),
           const SizedBox(height: 16),
-          TextField(
-            controller: _tipoAbonoController,
+          DropdownButtonFormField<String>(
+            value: _selectedTipoAbono,
             decoration: const InputDecoration(
               labelText: 'Tipo de Abono',
               labelStyle: TextStyle(color: AppColors.textPrimary),
+              border: OutlineInputBorder(),
             ),
+            dropdownColor: AppColors.backgroundSecondary,
             style: const TextStyle(color: AppColors.textPrimary),
+            items:
+                _tiposAbono.map((tipo) {
+                  return DropdownMenuItem<String>(
+                    value: tipo,
+                    child: Row(
+                      children: [
+                        Icon(
+                          tipo == 'Transferencia'
+                              ? Icons.account_balance
+                              : Icons.payments,
+                          color: AppColors.primaryTurquoise,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          tipo,
+                          style: const TextStyle(color: AppColors.textPrimary),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+            onChanged: (String? newValue) {
+              if (newValue != null) {
+                setState(() {
+                  _selectedTipoAbono = newValue;
+                });
+              }
+            },
           ),
         ],
       ),
@@ -689,12 +1100,22 @@ class _EditAbonoDialogState extends State<_EditAbonoDialog> {
         ),
         ElevatedButton(
           onPressed: () {
+            final total = double.tryParse(_totalController.text);
+            if (total == null || total <= 0) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Por favor ingrese un monto válido'),
+                  backgroundColor: AppColors.error,
+                ),
+              );
+              return;
+            }
+
             final updatedAbono = AbonoModel(
               id: widget.abono.id,
               idEstudiante: widget.abono.idEstudiante,
-              total:
-                  double.tryParse(_totalController.text) ?? widget.abono.total,
-              tipoAbono: _tipoAbonoController.text,
+              total: total,
+              tipoAbono: _selectedTipoAbono,
               fechaAbono: widget.abono.fechaAbono,
             );
             Navigator.of(context).pop(updatedAbono);

@@ -29,6 +29,9 @@ class _StudentSummaryWidgetState extends State<StudentSummaryWidget> {
   ControlHistoricoModel? controlHistorico;
   bool isLoading = true;
   String? error;
+  
+  // Variable para rastrear el estudiante actual y cancelar operaciones obsoletas
+  String? _currentStudentId;
 
   final List<Map<String, String>> months = [
     {'value': '1', 'name': 'Enero'},
@@ -50,7 +53,18 @@ class _StudentSummaryWidgetState extends State<StudentSummaryWidget> {
     super.initState();
     // Establecer el mes actual por defecto
     selectedMonth = DateTime.now().month.toString();
+    _currentStudentId = widget.estudiante.id;
     _loadData();
+  }
+
+  @override
+  void didUpdateWidget(StudentSummaryWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Si el estudiante cambió, actualizar el ID y recargar datos
+    if (widget.estudiante.id != oldWidget.estudiante.id) {
+      _currentStudentId = widget.estudiante.id;
+      _loadData();
+    }
   }
 
   Future<void> _loadData() async {
@@ -61,16 +75,35 @@ class _StudentSummaryWidgetState extends State<StudentSummaryWidget> {
 
     try {
       final month = int.parse(selectedMonth);
+      final currentStudentId = widget.estudiante.id;
+      
       final ventasData = await _ventasApiService.findAllByStudent(
         widget.estudiante.id,
         mes: month,
       );
+      
+      // Verificar si el widget sigue montado y si el estudiante no ha cambiado
+      if (!mounted || _currentStudentId != currentStudentId) {
+        return;
+      }
+      
       final abonosData = await _abonoApiService.findAllByStudent(
         widget.estudiante.id,
         mes: month,
       );
+      
+      // Verificar nuevamente
+      if (!mounted || _currentStudentId != currentStudentId) {
+        return;
+      }
+      
       final controlHistoricoData = await _controlHistoricoApiService
           .getControlHistoricoByEstudianteId(widget.estudiante.id);
+
+      // Verificación final antes de actualizar el estado
+      if (!mounted || _currentStudentId != currentStudentId) {
+        return;
+      }
 
       setState(() {
         ventas = ventasData;
@@ -79,6 +112,11 @@ class _StudentSummaryWidgetState extends State<StudentSummaryWidget> {
         isLoading = false;
       });
     } catch (e) {
+      // Verificar si el widget sigue montado antes de actualizar el estado del error
+      if (!mounted) {
+        return;
+      }
+      
       setState(() {
         error = e.toString();
         isLoading = false;
