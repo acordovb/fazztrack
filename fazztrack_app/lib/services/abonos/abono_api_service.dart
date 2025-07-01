@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:fazztrack_app/models/abono_model.dart';
-import 'package:fazztrack_app/models/control_historico_model.dart';
 import 'package:fazztrack_app/services/api/api_routes.dart';
 import 'package:fazztrack_app/services/api/api_service.dart';
 
@@ -9,21 +8,9 @@ class AbonoApiService {
 
   AbonoApiService() : _apiService = ApiService();
 
-  Future<AbonoModel> createAbono({
-    required AbonoModel abono,
-    required ControlHistoricoModel controlHistorico,
-    required int idEstudiante,
-  }) async {
+  Future<AbonoModel> createAbono(AbonoModel abono) async {
     try {
-      final body = {
-        'abono': abono.toJson(),
-        'controlHistorico': {
-          ...controlHistorico.toJson(),
-          'id_estudiante': idEstudiante,
-        },
-      };
-
-      final response = await _apiService.post(API.abonos, body);
+      final response = await _apiService.post(API.abonos, abono.toJson());
       final data = jsonDecode(response.body);
       return AbonoModel.fromJson(data);
     } catch (e) {

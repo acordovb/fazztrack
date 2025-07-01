@@ -210,8 +210,6 @@ class _ConsumoScreenState extends State<ConsumoScreen> {
                   final result = await ConsumoProvider().registrarConsumo(
                     _estudianteSeleccionado!,
                     _productosSeleccionados,
-                    _controlHistorico!,
-                    _total,
                   );
                   if (result == 'OK') {
                     await TransactionAlertWidget.show(

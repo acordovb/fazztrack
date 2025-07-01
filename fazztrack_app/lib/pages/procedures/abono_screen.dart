@@ -2,7 +2,7 @@ import 'package:fazztrack_app/constants/colors_constants.dart';
 import 'package:fazztrack_app/models/abono_model.dart';
 import 'package:fazztrack_app/models/control_historico_model.dart';
 import 'package:fazztrack_app/models/estudiante_model.dart';
-import 'package:fazztrack_app/providers/abono_provider.dart';
+import 'package:fazztrack_app/services/abonos/abono_api_service.dart';
 import 'package:fazztrack_app/widgets/saldo_cliente_widget.dart';
 import 'package:fazztrack_app/widgets/transaction_alert_widget.dart';
 import 'package:flutter/material.dart';
@@ -87,13 +87,8 @@ class _AbonoScreenState extends State<AbonoScreen> {
         fechaAbono: DateTime.now(),
       );
 
-      final resultado = await AbonoProvider().registrarAbono(
-        _estudianteSeleccionado!,
-        abono,
-        _controlHistorico!,
-      );
-
-      return resultado;
+      await AbonoApiService().createAbono(abono);
+      return 'OK';
     } catch (e) {
       return 'Error: ${e.toString()}';
     }

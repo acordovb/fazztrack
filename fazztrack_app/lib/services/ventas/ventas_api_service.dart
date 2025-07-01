@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:fazztrack_app/models/venta_model.dart';
-import 'package:fazztrack_app/models/control_historico_model.dart';
 import 'package:fazztrack_app/services/api/api_routes.dart';
 import 'package:fazztrack_app/services/api/api_service.dart';
 
@@ -9,21 +8,9 @@ class VentasApiService {
 
   VentasApiService() : _apiService = ApiService();
 
-  Future<void> createBulk({
-    required List<VentaModel> ventas,
-    required ControlHistoricoModel controlHistorico,
-    required int idEstudiante,
-  }) async {
+  Future<void> createBulk(List<Map<String, dynamic>> ventasJson) async {
     try {
-      final body = {
-        'ventas': ventas.map((venta) => venta.toJson()).toList(),
-        'controlHistorico': {
-          ...controlHistorico.toJson(),
-          'id_estudiante': idEstudiante,
-        },
-      };
-
-      await _apiService.post('${API.ventas}/bulk', body);
+      await _apiService.post('${API.ventas}/bulk', {'ventas': ventasJson});
     } catch (e) {
       throw Exception('Error creating ventas in bulk: $e');
     }

@@ -243,14 +243,14 @@ class _TransactionAdminScreenState extends State<TransactionAdminScreen> {
           focusNode: focusNode,
           decoration: InputDecoration(
             hintText: 'Buscar y seleccionar estudiante...',
-            hintStyle: TextStyle(color: AppColors.textPrimary.withOpacity(0.7)),
+            hintStyle: TextStyle(color: AppColors.textPrimary.withAlpha(70)),
             prefixIcon: Icon(Icons.search, color: AppColors.primaryTurquoise),
             suffixIcon:
                 textEditingController.text.isNotEmpty
                     ? IconButton(
                       icon: Icon(
                         Icons.clear,
-                        color: AppColors.textPrimary.withOpacity(0.7),
+                        color: AppColors.textPrimary.withAlpha(70),
                       ),
                       onPressed: () {
                         textEditingController.clear();
@@ -304,7 +304,7 @@ class _TransactionAdminScreenState extends State<TransactionAdminScreen> {
                       decoration: BoxDecoration(
                         border: Border(
                           bottom: BorderSide(
-                            color: AppColors.lightBlue.withOpacity(0.2),
+                            color: AppColors.lightBlue.withAlpha(20),
                             width: 0.5,
                           ),
                         ),
@@ -333,8 +333,8 @@ class _TransactionAdminScreenState extends State<TransactionAdminScreen> {
                                   Text(
                                     'Curso: ${option.curso}',
                                     style: TextStyle(
-                                      color: AppColors.textPrimary.withOpacity(
-                                        0.7,
+                                      color: AppColors.textPrimary.withAlpha(
+                                        70,
                                       ),
                                       fontSize: 12,
                                     ),
@@ -561,7 +561,7 @@ class _TransactionAdminScreenState extends State<TransactionAdminScreen> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: AppColors.primaryTurquoise.withOpacity(0.1),
+                    color: AppColors.primaryTurquoise.withAlpha(10),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
@@ -616,11 +616,9 @@ class _TransactionAdminScreenState extends State<TransactionAdminScreen> {
                   child: _buildInfoChip(
                     Icons.access_time,
                     'Fecha',
-                    venta.fechaTransaccion != null
-                        ? DateFormat(
-                          'dd/MM/yyyy HH:mm',
-                        ).format(venta.fechaTransaccion!)
-                        : 'N/A',
+                    DateFormat(
+                      'dd/MM/yyyy HH:mm',
+                    ).format(venta.fechaTransaccion),
                   ),
                 ),
               ],
@@ -647,7 +645,7 @@ class _TransactionAdminScreenState extends State<TransactionAdminScreen> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: AppColors.success.withOpacity(0.1),
+                    color: AppColors.success.withAlpha(10),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
@@ -702,11 +700,7 @@ class _TransactionAdminScreenState extends State<TransactionAdminScreen> {
                   child: _buildInfoChip(
                     Icons.access_time,
                     'Fecha',
-                    abono.fechaAbono != null
-                        ? DateFormat(
-                          'dd/MM/yyyy HH:mm',
-                        ).format(abono.fechaAbono!)
-                        : 'N/A',
+                    DateFormat('dd/MM/yyyy HH:mm').format(abono.fechaAbono),
                   ),
                 ),
               ],
@@ -721,12 +715,9 @@ class _TransactionAdminScreenState extends State<TransactionAdminScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: AppColors.lightBlue.withOpacity(0.1),
+        color: AppColors.lightBlue.withAlpha(10),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: AppColors.lightBlue.withOpacity(0.3),
-          width: 1,
-        ),
+        border: Border.all(color: AppColors.lightBlue.withAlpha(30), width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -741,7 +732,7 @@ class _TransactionAdminScreenState extends State<TransactionAdminScreen> {
                 Text(
                   label,
                   style: TextStyle(
-                    color: AppColors.textPrimary.withOpacity(0.7),
+                    color: AppColors.textPrimary.withAlpha(70),
                     fontSize: 12,
                   ),
                 ),
@@ -922,7 +913,7 @@ class _EditVentaDialogState extends State<_EditVentaDialog> {
               color: AppColors.backgroundSecondary,
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                color: AppColors.lightBlue.withOpacity(0.3),
+                color: AppColors.lightBlue.withAlpha(30),
                 width: 1,
               ),
             ),
@@ -982,9 +973,9 @@ class _EditVentaDialogState extends State<_EditVentaDialog> {
               idEstudiante: widget.venta.idEstudiante,
               idProducto: widget.venta.idProducto,
               fechaTransaccion: widget.venta.fechaTransaccion,
-              idBar: widget.venta.idBar, // Mantener el mismo bar
+              idBar: widget.venta.idBar,
               nProductos: cantidad,
-              producto: widget.venta.producto,
+              total: widget.venta.total,
             );
             Navigator.of(context).pop(updatedVenta);
           },
