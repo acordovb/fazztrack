@@ -39,19 +39,11 @@ export class ControlHistoricoController {
       await this.controlHistoricoService.findByEstudianteId(idEstudiante);
 
     if (!controlHistorico) {
-      const newControlHistoricoDto = new CreateControlHistoricoDto();
-      newControlHistoricoDto.id_estudiante = decodeId(idEstudiante);
-      newControlHistoricoDto.total_abono = 0;
-      newControlHistoricoDto.total_venta = 0;
-      newControlHistoricoDto.total_pendiente_ult_mes_abono = 0;
-      newControlHistoricoDto.total_pendiente_ult_mes_venta = 0;
-      controlHistorico = await this.controlHistoricoService.create(
-        newControlHistoricoDto,
-      );
-      if (!controlHistorico) {
-        throw new NotFoundException('Control historico not found');
-      }
+      controlHistorico = await this.controlHistoricoService.create({
+        id_estudiante: decodeId(idEstudiante),
+      });
     }
+
     return controlHistorico;
   }
 

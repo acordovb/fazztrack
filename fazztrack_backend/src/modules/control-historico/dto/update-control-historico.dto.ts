@@ -4,14 +4,6 @@ import { IsNumber, IsOptional } from 'class-validator';
 export class UpdateControlHistoricoDto implements UpdateDto {
   @IsNumber()
   @IsOptional()
-  total_abono?: number;
-
-  @IsNumber()
-  @IsOptional()
-  total_venta?: number;
-
-  @IsNumber()
-  @IsOptional()
   total_pendiente_ult_mes_abono?: number;
 
   @IsNumber()
