@@ -65,4 +65,28 @@ export class VentasService extends BaseCrudService<
     });
     return ventas.map((venta) => this.mapToDto(venta));
   }
+
+  async calculateTotalVentas(
+    idEstudiante: string,
+    month: number,
+  ): Promise<number> {
+    const currentYear = new Date().getFullYear();
+    const startDate = new Date(currentYear, month - 1, 1);
+    const endDate = new Date(currentYear, month, 0, 23, 59, 59, 999);
+
+    const result = await this.database.ventas.aggregate({
+      where: {
+        id_estudiante: decodeId(idEstudiante),
+        fecha_transaccion: {
+          gte: startDate,
+          lte: endDate,
+        },
+      },
+      _sum: {
+        total: true,
+      },
+    });
+
+    return result._sum.total?.toNumber() || 0;
+  }
 }
