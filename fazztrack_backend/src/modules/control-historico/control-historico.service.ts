@@ -23,8 +23,6 @@ export class ControlHistoricoService extends BaseCrudService<
     return {
       id: encodeId(model.id),
       id_estudiante: encodeId(model.id_estudiante),
-      total_abono: model.total_abono.toNumber(),
-      total_venta: model.total_venta.toNumber(),
       total_pendiente_ult_mes_abono:
         model.total_pendiente_ult_mes_abono.toNumber(),
       total_pendiente_ult_mes_venta:
