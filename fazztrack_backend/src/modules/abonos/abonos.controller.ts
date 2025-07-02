@@ -19,7 +19,6 @@ export class AbonosController {
 
   @Post()
   create(@Body() abono: CreateAbonoDto): Promise<AbonoDto> {
-    console.log('Creating abono:', abono);
     return this.abonosService.create(abono);
   }
 

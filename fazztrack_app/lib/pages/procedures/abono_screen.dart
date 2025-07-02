@@ -85,6 +85,10 @@ class _AbonoScreenState extends State<AbonoScreen> {
         total: monto,
         tipoAbono: _selectedPaymentMethod,
         fechaAbono: DateTime.now().toUtc().subtract(Duration(hours: 5)),
+        comentario:
+            _comentarioController.text.isEmpty
+                ? null
+                : _comentarioController.text,
       );
 
       await AbonoApiService().createAbono(abono);

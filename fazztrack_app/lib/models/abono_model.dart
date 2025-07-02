@@ -4,6 +4,7 @@ class AbonoModel {
   final double total;
   final String tipoAbono;
   final DateTime fechaAbono;
+  final String? comentario;
 
   AbonoModel({
     this.id,
@@ -11,6 +12,7 @@ class AbonoModel {
     required this.total,
     required this.tipoAbono,
     required this.fechaAbono,
+    this.comentario,
   });
 
   factory AbonoModel.fromJson(Map<String, dynamic> json) {
@@ -20,6 +22,7 @@ class AbonoModel {
       total: double.parse(json['total'].toString()),
       tipoAbono: json['tipo_abono'],
       fechaAbono: DateTime.parse(json['fecha_abono']),
+      comentario: json['comentario'],
     );
   }
 
@@ -29,6 +32,7 @@ class AbonoModel {
       'total': total,
       'tipo_abono': tipoAbono,
       'fecha_abono': fechaAbono.toIso8601String(),
+      'comentario': comentario,
     };
   }
 }
