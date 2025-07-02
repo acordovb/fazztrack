@@ -84,7 +84,7 @@ class _AbonoScreenState extends State<AbonoScreen> {
         idEstudiante: _estudianteSeleccionado!.id,
         total: monto,
         tipoAbono: _selectedPaymentMethod,
-        fechaAbono: DateTime.now(),
+        fechaAbono: DateTime.now().toUtc().subtract(Duration(hours: 5)),
       );
 
       await AbonoApiService().createAbono(abono);

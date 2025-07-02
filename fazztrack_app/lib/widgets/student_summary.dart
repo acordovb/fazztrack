@@ -29,7 +29,7 @@ class _StudentSummaryWidgetState extends State<StudentSummaryWidget> {
   ControlHistoricoModel? controlHistorico;
   bool isLoading = true;
   String? error;
-  
+
   // Variable para rastrear el estudiante actual y cancelar operaciones obsoletas
   String? _currentStudentId;
 
@@ -51,7 +51,6 @@ class _StudentSummaryWidgetState extends State<StudentSummaryWidget> {
   @override
   void initState() {
     super.initState();
-    // Establecer el mes actual por defecto
     selectedMonth = DateTime.now().month.toString();
     _currentStudentId = widget.estudiante.id;
     _loadData();
@@ -76,27 +75,27 @@ class _StudentSummaryWidgetState extends State<StudentSummaryWidget> {
     try {
       final month = int.parse(selectedMonth);
       final currentStudentId = widget.estudiante.id;
-      
+
       final ventasData = await _ventasApiService.findAllByStudent(
         widget.estudiante.id,
         mes: month,
       );
-      
+
       // Verificar si el widget sigue montado y si el estudiante no ha cambiado
       if (!mounted || _currentStudentId != currentStudentId) {
         return;
       }
-      
+
       final abonosData = await _abonoApiService.findAllByStudent(
         widget.estudiante.id,
         mes: month,
       );
-      
+
       // Verificar nuevamente
       if (!mounted || _currentStudentId != currentStudentId) {
         return;
       }
-      
+
       final controlHistoricoData = await _controlHistoricoApiService
           .getControlHistoricoByEstudianteId(widget.estudiante.id);
 
@@ -116,7 +115,7 @@ class _StudentSummaryWidgetState extends State<StudentSummaryWidget> {
       if (!mounted) {
         return;
       }
-      
+
       setState(() {
         error = e.toString();
         isLoading = false;

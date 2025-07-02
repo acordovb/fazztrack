@@ -12,7 +12,11 @@ class ConsumoProvider {
           return {
             'id_estudiante': estudiante.id,
             'id_producto': producto.producto!.id,
-            'fecha_transaccion': DateTime.now().toUtc().toIso8601String(),
+            'fecha_transaccion':
+                DateTime.now()
+                    .toUtc()
+                    .subtract(Duration(hours: 5))
+                    .toIso8601String(),
             'id_bar': producto.producto!.idBar,
             'n_productos': producto.cantidad,
             'total': producto.subtotal,
