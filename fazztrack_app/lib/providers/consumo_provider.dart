@@ -15,6 +15,7 @@ class ConsumoProvider {
             'fecha_transaccion': DateTime.now().toUtc().toIso8601String(),
             'id_bar': producto.producto!.idBar,
             'n_productos': producto.cantidad,
+            'total': producto.subtotal,
           };
         }).toList();
 

@@ -19,8 +19,8 @@ export class VentasController {
 
   @Post('bulk')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async createBulk(@Body() ventas: CreateVentaDto[]): Promise<void> {
-    return this.ventasService.createBulk(ventas);
+  async createBulk(@Body() body: { ventas: CreateVentaDto[] }): Promise<void> {
+    return this.ventasService.createBulk(body.ventas);
   }
 
   @Get(':idStudent')

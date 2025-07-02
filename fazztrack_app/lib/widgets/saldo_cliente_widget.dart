@@ -50,7 +50,6 @@ class _SaldoClienteWidgetState extends State<SaldoClienteWidget> {
     try {
       _controlHistorico = await _controlHistoricoService
           .getControlHistoricoByEstudianteId(estudianteId);
-
       if (_controlHistorico != null) {
         setState(() {
           balance =
@@ -64,7 +63,6 @@ class _SaldoClienteWidgetState extends State<SaldoClienteWidget> {
         });
       }
 
-      // Notify parent widget about the user change and balance
       if (widget.onUserChange != null) {
         widget.onUserChange!(selectedEstudiante, _controlHistorico!);
       }

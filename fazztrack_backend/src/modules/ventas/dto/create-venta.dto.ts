@@ -19,10 +19,10 @@ export class CreateVentaDto {
   @IsNumber({}, { message: 'El ID del producto debe ser un string (hasheado)' })
   id_producto: number;
 
-  @IsOptional()
+  @IsNotEmpty({ message: 'La fecha de transacción es requerida' })
   @IsDate({ message: 'La fecha de transacción debe ser una fecha válida' })
   @Transform(({ value }) => (value ? new Date(value) : new Date()))
-  fecha_transaccion?: Date;
+  fecha_transaccion: Date;
 
   @IsNotEmpty({ message: 'El ID del bar es requerido' })
   @IsNumber({}, { message: 'El ID del bar debe ser un string (hasheado)' })

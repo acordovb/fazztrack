@@ -36,8 +36,8 @@ export class ControlHistoricoController {
       ),
     ]);
 
-    controlHistorico.total_ventas = totalVentas;
-    controlHistorico.total_abonos = totalAbonos;
+    controlHistorico.total_venta = totalVentas;
+    controlHistorico.total_abono = totalAbonos;
 
     return controlHistorico;
   }

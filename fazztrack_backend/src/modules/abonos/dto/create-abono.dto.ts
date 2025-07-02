@@ -22,10 +22,10 @@ export class CreateAbonoDto {
   @IsString({ message: 'El tipo de abono debe ser una cadena de texto' })
   tipo_abono: string;
 
-  @IsOptional()
+  @IsNotEmpty({ message: 'La fecha de abono es requerida' })
   @IsDate({ message: 'La fecha de abono debe ser una fecha válida' })
   @Transform(({ value }) => (value ? new Date(value) : new Date()))
-  fecha_abono?: Date;
+  fecha_abono: Date;
 
   @IsOptional()
   @IsString({ message: 'El comentario debe ser una cadena de texto' })
