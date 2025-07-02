@@ -584,18 +584,38 @@ class _TransactionAdminScreenState extends State<TransactionAdminScreen> {
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    IconButton(
-                      icon: const Icon(
-                        Icons.edit,
-                        color: AppColors.primaryTurquoise,
-                      ),
+                    ElevatedButton.icon(
+                      icon: const Icon(Icons.edit, size: 16),
+                      label: const Text('Editar'),
                       onPressed: () => _editVenta(venta),
-                      tooltip: 'Editar venta',
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: AppColors.primaryTurquoise,
+                        backgroundColor: AppColors.card,
+                        side: const BorderSide(
+                          color: AppColors.primaryTurquoise,
+                        ),
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                      ),
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.delete, color: AppColors.error),
+                    const SizedBox(width: 8),
+                    ElevatedButton.icon(
+                      icon: const Icon(Icons.delete, size: 16),
+                      label: const Text('Eliminar'),
                       onPressed: () => _deleteVenta(venta),
-                      tooltip: 'Eliminar venta',
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: AppColors.error,
+                        backgroundColor: AppColors.card,
+                        side: const BorderSide(color: AppColors.error),
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -668,18 +688,38 @@ class _TransactionAdminScreenState extends State<TransactionAdminScreen> {
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    IconButton(
-                      icon: const Icon(
-                        Icons.edit,
-                        color: AppColors.primaryTurquoise,
-                      ),
+                    ElevatedButton.icon(
+                      icon: const Icon(Icons.edit, size: 16),
+                      label: const Text('Editar'),
                       onPressed: () => _editAbono(abono),
-                      tooltip: 'Editar abono',
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: AppColors.primaryTurquoise,
+                        backgroundColor: AppColors.card,
+                        side: const BorderSide(
+                          color: AppColors.primaryTurquoise,
+                        ),
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                      ),
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.delete, color: AppColors.error),
+                    const SizedBox(width: 8),
+                    ElevatedButton.icon(
+                      icon: const Icon(Icons.delete, size: 16),
+                      label: const Text('Eliminar'),
                       onPressed: () => _deleteAbono(abono),
-                      tooltip: 'Eliminar abono',
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: AppColors.error,
+                        backgroundColor: AppColors.card,
+                        side: const BorderSide(color: AppColors.error),
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -705,6 +745,55 @@ class _TransactionAdminScreenState extends State<TransactionAdminScreen> {
                 ),
               ],
             ),
+            if (abono.comentario != null && abono.comentario!.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.lightBlue.withAlpha(5),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: AppColors.lightBlue.withAlpha(20),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.comment,
+                      size: 16,
+                      color: AppColors.primaryTurquoise,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Comentario',
+                            style: TextStyle(
+                              color: AppColors.textPrimary.withAlpha(70),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            abono.comentario!,
+                            style: const TextStyle(
+                              color: AppColors.textPrimary,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ],
         ),
       ),
