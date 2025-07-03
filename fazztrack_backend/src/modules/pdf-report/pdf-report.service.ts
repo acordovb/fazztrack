@@ -30,10 +30,6 @@ export class PdfReportService {
   private async processReportsInBackground(
     studentIds: string[],
   ): Promise<void> {
-    console.log(
-      `Iniciando generación de ${studentIds.length} reportes en background...`,
-    );
-
     const filePaths: string[] = [];
     let processedCount = 0;
 
@@ -70,7 +66,6 @@ export class PdfReportService {
   }
 
   async generateAllReports(): Promise<ReportResponseDto> {
-    // Obtener datos de todos los estudiantes en background
     this.processAllReportsInBackground().catch((error) => {
       console.error(
         'Error procesando todos los reportes en background:',
@@ -89,13 +84,8 @@ export class PdfReportService {
   }
 
   private async processAllReportsInBackground(): Promise<void> {
-    console.log('Iniciando generación de TODOS los reportes en background...');
-
     const allReportsData =
       await this.reportDataService.getAllStudentsReportData();
-    console.log(
-      `Se encontraron ${allReportsData.length} estudiantes con datos para reportar`,
-    );
 
     const filePaths: string[] = [];
     let processedCount = 0;

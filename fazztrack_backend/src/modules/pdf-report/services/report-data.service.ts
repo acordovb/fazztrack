@@ -20,7 +20,6 @@ export class ReportDataService {
   async getReportData(studentId: string): Promise<ReportData | null> {
     const currentMonth = new Date().getMonth() + 1;
 
-    // Obtener datos del estudiante
     const student = await this.estudiantesService.findOne(studentId);
     if (!student) {
       return null;
@@ -75,7 +74,6 @@ export class ReportDataService {
 
     const reportDataResults = await Promise.all(reportDataPromises);
 
-    // Filtrar estudiantes sin datos para reportar
     return reportDataResults.filter(
       (data): data is ReportData => data !== null,
     );
