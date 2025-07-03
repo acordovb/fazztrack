@@ -63,31 +63,76 @@
       .info-value {
         color: #333;
       }
-      .summary {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: 15px;
+      .summary-table-section {
         margin-bottom: 30px;
       }
-      .summary-card {
-        background: #fff;
-        border: 1px solid #e0e0e0;
+      .breakdown-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
         border-radius: 8px;
-        padding: 20px;
-        text-align: center;
+        overflow: hidden;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        border: 1px solid #e0e0e0;
       }
-      .summary-card h3 {
-        margin: 0 0 10px 0;
-        font-size: 14px;
-        color: #666;
+      .breakdown-table td {
+        padding: 15px 20px;
+        border-bottom: 1px solid #f0f0f0;
+      }
+      .breakdown-table tr:last-child td {
+        border-bottom: none;
+      }
+      .breakdown-label {
+        font-weight: 500;
+        color: #333;
+        width: 70%;
+      }
+      .breakdown-amount {
+        text-align: right;
+        font-weight: bold;
+        font-size: 16px;
+        width: 30%;
+      }
+      .total-row {
+        background: #f8f9fa;
+        border-top: 2px solid #0a2647;
+      }
+      .total-label {
+        font-weight: bold;
+        color: #0a2647;
+        font-size: 16px;
+      }
+      .total-amount {
+        font-size: 18px;
+      }
+      .current-balance-card {
+        background: linear-gradient(135deg, #0a2647 0%, #144272 100%);
+        color: white;
+        border-radius: 12px;
+        padding: 25px;
+        text-align: center;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 12px rgba(10, 38, 71, 0.3);
+      }
+      .current-balance-card h3 {
+        margin: 0 0 15px 0;
+        font-size: 18px;
+        font-weight: 500;
+        opacity: 0.9;
         text-transform: uppercase;
         letter-spacing: 0.5px;
       }
-      .summary-card .amount {
-        font-size: 24px;
+      .balance-amount {
+        font-size: 32px;
         font-weight: bold;
         margin: 0;
+        color: white;
+      }
+      .balance-amount.negative {
+        color: #ffcccb;
+      }
+      .balance-amount.positive {
+        color: #90ee90;
       }
       .amount.positive {
         color: #2ecc71;
@@ -178,25 +223,37 @@
           {{studentCourse}} {{studentPhone}} {{studentRepresentative}}
         </div>
 
-        <div class="summary">
-          <div class="summary-card">
-            <h3>Total Abonos</h3>
-            <p class="amount positive">${{totalAbonos}}</p>
-          </div>
-          <div class="summary-card">
-            <h3>Total Ventas</h3>
-            <p class="amount negative">${{totalVentas}}</p>
-          </div>
-          <div class="summary-card">
-            <h3>Saldo Mes Anterior</h3>
-            <p class="amount {{saldoPendienteClass}}">
-              ${{saldoPendienteMesAnterior}}
-            </p>
-          </div>
-          <div class="summary-card">
-            <h3>Saldo Actual</h3>
-            <p class="amount {{saldoActualClass}}">${{saldoActual}}</p>
-          </div>
+        <div class="summary-table-section">
+          <h2 class="section-title">Desglose Financiero</h2>
+          <table class="breakdown-table">
+            <tbody>
+              <tr>
+                <td class="breakdown-label">Total Abonos del Mes</td>
+                <td class="breakdown-amount positive">+ ${{totalAbonos}}</td>
+              </tr>
+              <tr>
+                <td class="breakdown-label">Total Ventas del Mes</td>
+                <td class="breakdown-amount negative">- ${{totalVentas}}</td>
+              </tr>
+              <tr>
+                <td class="breakdown-label">Saldo del Mes Anterior</td>
+                <td class="breakdown-amount {{saldoPendienteClass}}">
+                  {{saldoPendienteSign}} ${{saldoPendienteMesAnteriorAbs}}
+                </td>
+              </tr>
+              <tr class="total-row">
+                <td class="breakdown-label total-label">Saldo Actual</td>
+                <td class="breakdown-amount {{saldoActualClass}} total-amount">
+                  ${{saldoActual}}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="current-balance-card">
+          <h3>Saldo Actual</h3>
+          <p class="balance-amount {{saldoActualClass}}">${{saldoActual}}</p>
         </div>
 
         <div class="transactions-section">

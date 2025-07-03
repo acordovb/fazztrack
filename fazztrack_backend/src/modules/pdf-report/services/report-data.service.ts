@@ -47,9 +47,9 @@ export class ReportDataService {
     // Calcular totales
     const totalAbonos = this.calculateTotal(abonos);
     const totalVentas = this.calculateTotal(ventas);
-    const saldoActual = totalAbonos - totalVentas;
     const saldoPendienteMesAnterior =
       this.calculatePreviousMonthBalance(controlHistorico);
+    const saldoActual = totalAbonos - totalVentas + saldoPendienteMesAnterior;
 
     return {
       student,

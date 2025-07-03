@@ -79,6 +79,14 @@ export class PdfGeneratorService {
       data.saldoPendienteMesAnterior.toFixed(2),
     );
     template = template.replace(
+      /{{saldoPendienteMesAnteriorAbs}}/g,
+      Math.abs(data.saldoPendienteMesAnterior).toFixed(2),
+    );
+    template = template.replace(
+      /{{saldoPendienteSign}}/g,
+      data.saldoPendienteMesAnterior >= 0 ? '+' : '-',
+    );
+    template = template.replace(
       /{{saldoActual}}/g,
       data.saldoActual.toFixed(2),
     );
