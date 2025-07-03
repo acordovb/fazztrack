@@ -30,16 +30,16 @@ export class ControlHistoricoService extends BaseCrudService<
     };
   }
 
-  async findByEstudianteId(
-    idEstudiante: string,
-  ): Promise<ControlHistoricoDto | null> {
+  async findByEstudianteId(idEstudiante: string): Promise<ControlHistoricoDto> {
     const idNumberEstudiante = decodeId(idEstudiante);
-    const controlHistorico = await this.database.control_historico.findFirst({
+    let controlHistorico = await this.database.control_historico.findFirst({
       where: { id_estudiante: idNumberEstudiante },
     });
 
     if (!controlHistorico) {
-      return null;
+      controlHistorico = await this.database.control_historico.create({
+        data: { id_estudiante: idNumberEstudiante },
+      });
     }
 
     return this.mapToDto(controlHistorico);

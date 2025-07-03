@@ -20,12 +20,6 @@ export class ControlHistoricoController {
     let controlHistorico =
       await this.controlHistoricoService.findByEstudianteId(idEstudiante);
 
-    if (!controlHistorico) {
-      controlHistorico = await this.controlHistoricoService.create({
-        id_estudiante: decodeId(idEstudiante),
-      });
-    }
-
     const currentMonth = new Date().getMonth() + 1;
 
     const [totalVentas, totalAbonos] = await Promise.all([
