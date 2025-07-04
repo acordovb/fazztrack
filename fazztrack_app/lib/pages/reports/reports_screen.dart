@@ -82,6 +82,10 @@ class _ReportsContentState extends State<ReportsContent> {
 
   void _filterEstudiantes(String query) {
     if (!mounted || _isDisposed) return;
+
+    // Save the current selections before filtering
+    final Set<String> previousSelections = Set.from(_selectedEstudiantes);
+
     setState(() {
       if (query.isEmpty) {
         _filteredEstudiantes = _allEstudiantes;
@@ -100,10 +104,23 @@ class _ReportsContentState extends State<ReportsContent> {
                       false);
             }).toList();
       }
-      _selectedEstudiantes.clear();
-      _selectAll = false;
+
+      // Only clear selections if not in multi-select mode
       if (!_isMultiSelectMode) {
+        _selectedEstudiantes.clear();
+        _selectAll = false;
         _selectedEstudiante = null;
+      } else {
+        // In multi-select mode, preserve previous selections
+        _selectedEstudiantes.clear();
+        _selectedEstudiantes.addAll(previousSelections);
+
+        // Update _selectAll based on whether all filtered items are selected
+        _selectAll =
+            _filteredEstudiantes.isNotEmpty &&
+            _filteredEstudiantes.every(
+              (e) => _selectedEstudiantes.contains(e.id),
+            );
       }
     });
   }
@@ -156,7 +173,10 @@ class _ReportsContentState extends State<ReportsContent> {
         _selectAll = false;
       } else {
         _selectedEstudiantes.add(id);
-        if (_selectedEstudiantes.length == _filteredEstudiantes.length) {
+        // Only set _selectAll to true if all currently filtered students are selected
+        if (_selectedEstudiantes.containsAll(
+          _filteredEstudiantes.map((e) => e.id),
+        )) {
           _selectAll = true;
         }
       }
