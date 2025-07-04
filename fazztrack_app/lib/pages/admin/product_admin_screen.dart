@@ -3,6 +3,7 @@ import 'package:fazztrack_app/models/bar_model.dart';
 import 'package:fazztrack_app/models/producto_model.dart';
 import 'package:fazztrack_app/services/bar/bar_api_service.dart';
 import 'package:fazztrack_app/services/productos/productos_api_service.dart';
+import 'package:fazztrack_app/widgets/bar_filter_widget.dart';
 import 'package:fazztrack_app/widgets/create_producto_dialog.dart';
 import 'package:fazztrack_app/widgets/edit_producto_dialog.dart';
 import 'package:fazztrack_app/widgets/producto_card.dart';
@@ -242,58 +243,11 @@ class _ProductAdminScreenState extends State<ProductAdminScreen> {
             ),
 
             // Filtro de bares
-            if (_allBars.isNotEmpty)
-              Container(
-                height: 50,
-                margin: const EdgeInsets.only(bottom: 16),
-                child: Center(
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    shrinkWrap: true,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: _allBars.length,
-                    itemBuilder: (context, index) {
-                      final bar = _allBars[index];
-                      final isSelected = _selectedBarId == bar.id;
-
-                      return Container(
-                        margin: const EdgeInsets.only(right: 8),
-                        child: FilterChip(
-                          label: Text(
-                            bar.nombre,
-                            style: TextStyle(
-                              color:
-                                  isSelected
-                                      ? AppColors.primaryDarkBlue
-                                      : AppColors.textPrimary,
-                              fontWeight:
-                                  isSelected
-                                      ? FontWeight.bold
-                                      : FontWeight.normal,
-                            ),
-                          ),
-                          selected: isSelected,
-                          onSelected: (selected) {
-                            if (selected) {
-                              _selectBar(bar.id);
-                            }
-                          },
-                          backgroundColor: AppColors.card,
-                          selectedColor: AppColors.primaryTurquoise,
-                          checkmarkColor: AppColors.primaryDarkBlue,
-                          side: BorderSide(
-                            color:
-                                isSelected
-                                    ? AppColors.primaryTurquoise
-                                    : AppColors.card,
-                            width: 1,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ),
+            BarFilterWidget(
+              bars: _allBars,
+              selectedBarId: _selectedBarId,
+              onBarSelected: _selectBar,
+            ),
 
             // Contenido principal
             Expanded(
