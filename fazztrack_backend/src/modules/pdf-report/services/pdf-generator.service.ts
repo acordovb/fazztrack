@@ -87,8 +87,18 @@ export class PdfGeneratorService {
       data.saldoPendienteMesAnterior >= 0 ? '+' : '-',
     );
     template = template.replace(
+      /{{saldoPendienteLabel}}/g,
+      data.saldoPendienteMesAnterior >= 0
+        ? 'Saldo a favor del mes anterior'
+        : 'Saldo pendiente del mes anterior',
+    );
+    template = template.replace(
       /{{saldoActual}}/g,
       data.saldoActual.toFixed(2),
+    );
+    template = template.replace(
+      /{{saldoActualLabel}}/g,
+      data.saldoActual >= 0 ? 'Saldo a favor' : 'Valor pendiente de pago',
     );
 
     // Reemplazar información condicional del estudiante
