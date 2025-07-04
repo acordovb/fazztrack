@@ -254,39 +254,42 @@ class _StoreAdminScreenState extends State<StoreAdminScreen> {
             // Barra de búsqueda
             Padding(
               padding: const EdgeInsets.all(16),
-              child: TextField(
-                controller: _searchController,
-                style: const TextStyle(color: AppColors.textPrimary),
-                decoration: InputDecoration(
-                  hintText: 'Buscar locales por nombre o ID...',
-                  hintStyle: const TextStyle(color: AppColors.textPrimary),
-                  prefixIcon: const Icon(
-                    Icons.search,
-                    color: AppColors.primaryTurquoise,
-                  ),
-                  suffixIcon:
-                      _searchController.text.isNotEmpty
-                          ? IconButton(
-                            onPressed: () {
-                              _searchController.clear();
-                            },
-                            icon: const Icon(
-                              Icons.clear,
-                              color: AppColors.textPrimary,
-                            ),
-                          )
-                          : null,
-                  filled: true,
-                  fillColor: AppColors.card,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(
+              child: SizedBox(
+                width: 600, // Ancho máximo para el buscador
+                child: TextField(
+                  controller: _searchController,
+                  style: const TextStyle(color: AppColors.textPrimary),
+                  decoration: InputDecoration(
+                    hintText: 'Buscar locales por nombre o ID...',
+                    hintStyle: const TextStyle(color: AppColors.textPrimary),
+                    prefixIcon: const Icon(
+                      Icons.search,
                       color: AppColors.primaryTurquoise,
-                      width: 2,
+                    ),
+                    suffixIcon:
+                        _searchController.text.isNotEmpty
+                            ? IconButton(
+                              onPressed: () {
+                                _searchController.clear();
+                              },
+                              icon: const Icon(
+                                Icons.clear,
+                                color: AppColors.textPrimary,
+                              ),
+                            )
+                            : null,
+                    filled: true,
+                    fillColor: AppColors.card,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(
+                        color: AppColors.primaryTurquoise,
+                        width: 2,
+                      ),
                     ),
                   ),
                 ),
