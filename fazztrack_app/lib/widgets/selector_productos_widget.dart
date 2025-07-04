@@ -10,8 +10,13 @@ import 'package:intl/intl.dart';
 class SelectorProductosWidget extends StatefulWidget {
   final void Function(List<ProductoSeleccionadoModel> productos)?
   onProductosChanged;
+  final String? barId;
 
-  const SelectorProductosWidget({super.key, this.onProductosChanged});
+  const SelectorProductosWidget({
+    super.key,
+    this.onProductosChanged,
+    this.barId,
+  });
 
   @override
   State<SelectorProductosWidget> createState() =>
@@ -66,20 +71,38 @@ class _SelectorProductosWidgetState extends State<SelectorProductosWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final isEnabled = widget.barId != null;
+
     return Container(
       constraints: const BoxConstraints(maxWidth: 500),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 10),
-            child: Text(
-              'Productos',
-              style: TextStyle(
-                color: AppColors.textPrimary,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: Row(
+              children: [
+                Text(
+                  'Productos',
+                  style: TextStyle(
+                    color:
+                        isEnabled ? AppColors.textPrimary : AppColors.lightGray,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                if (!isEnabled) ...[
+                  const SizedBox(width: 8),
+                  const Text(
+                    '(Seleccione un estudiante primero)',
+                    style: TextStyle(
+                      color: AppColors.lightGray,
+                      fontSize: 12,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ],
+              ],
             ),
           ),
           ListView.builder(
@@ -96,23 +119,31 @@ class _SelectorProductosWidgetState extends State<SelectorProductosWidget> {
                       child: _FilaProductoWidget(
                         productoSeleccionado: _productosSeleccionados[index],
                         onProductoActualizado:
-                            (producto) => _actualizarProducto(index, producto),
+                            isEnabled
+                                ? (producto) =>
+                                    _actualizarProducto(index, producto)
+                                : null,
+                        barId: widget.barId,
+                        isEnabled: isEnabled,
                       ),
                     ),
                     const SizedBox(width: 8),
                     InkWell(
-                      onTap: () => _eliminarFila(index),
+                      onTap: isEnabled ? () => _eliminarFila(index) : null,
                       borderRadius: BorderRadius.circular(20),
                       child: Container(
                         width: 36,
                         height: 36,
                         decoration: BoxDecoration(
-                          color: Colors.red.withAlpha(10),
+                          color:
+                              isEnabled
+                                  ? Colors.red.withAlpha(10)
+                                  : Colors.grey.withAlpha(10),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
                           Icons.delete_outline,
-                          color: Colors.red,
+                          color: isEnabled ? Colors.red : Colors.grey,
                           size: 20,
                         ),
                       ),
@@ -125,17 +156,23 @@ class _SelectorProductosWidgetState extends State<SelectorProductosWidget> {
           const SizedBox(height: 8),
           Center(
             child: InkWell(
-              onTap: _agregarNuevaFila,
+              onTap: isEnabled ? _agregarNuevaFila : null,
               child: Container(
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: AppColors.secondaryBlue,
+                  color:
+                      isEnabled
+                          ? AppColors.secondaryBlue
+                          : AppColors.secondaryBlue.withAlpha(100),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.add,
-                  color: AppColors.primaryTurquoise,
+                  color:
+                      isEnabled
+                          ? AppColors.primaryTurquoise
+                          : AppColors.lightGray,
                   size: 24,
                 ),
               ),
@@ -149,11 +186,15 @@ class _SelectorProductosWidgetState extends State<SelectorProductosWidget> {
 
 class _FilaProductoWidget extends StatelessWidget {
   final ProductoSeleccionadoModel productoSeleccionado;
-  final Function(ProductoSeleccionadoModel) onProductoActualizado;
+  final Function(ProductoSeleccionadoModel)? onProductoActualizado;
+  final String? barId;
+  final bool isEnabled;
 
   const _FilaProductoWidget({
     required this.productoSeleccionado,
     required this.onProductoActualizado,
+    this.barId,
+    this.isEnabled = true,
   });
 
   @override
@@ -161,11 +202,14 @@ class _FilaProductoWidget extends StatelessWidget {
     final formatCurrency = NumberFormat.currency(locale: 'en_US', symbol: '\$');
 
     return InkWell(
-      onTap: () => _mostrarDialogoSeleccion(context),
+      onTap: isEnabled ? () => _mostrarDialogoSeleccion(context) : null,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: AppColors.secondaryBlue,
+          color:
+              isEnabled
+                  ? AppColors.secondaryBlue
+                  : AppColors.secondaryBlue.withAlpha(100),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Row(
@@ -173,10 +217,15 @@ class _FilaProductoWidget extends StatelessWidget {
             Expanded(
               flex: 3,
               child: Text(
-                productoSeleccionado.producto?.nombre ?? 'Seleccionar producto',
+                productoSeleccionado.producto?.nombre ??
+                    (isEnabled
+                        ? 'Seleccionar producto'
+                        : 'Seleccione un estudiante primero'),
                 style: TextStyle(
                   color:
-                      productoSeleccionado.producto != null
+                      !isEnabled
+                          ? AppColors.lightGray
+                          : productoSeleccionado.producto != null
                           ? AppColors.textPrimary
                           : AppColors.lightGray,
                   fontSize: 16,
@@ -188,8 +237,11 @@ class _FilaProductoWidget extends StatelessWidget {
               const SizedBox(width: 10),
               Text(
                 formatCurrency.format(productoSeleccionado.producto!.precio),
-                style: const TextStyle(
-                  color: AppColors.primaryTurquoise,
+                style: TextStyle(
+                  color:
+                      isEnabled
+                          ? AppColors.primaryTurquoise
+                          : AppColors.lightGray,
                   fontSize: 14,
                 ),
               ),
@@ -198,10 +250,16 @@ class _FilaProductoWidget extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: AppColors.primaryDarkBlue,
+                color:
+                    isEnabled
+                        ? AppColors.primaryDarkBlue
+                        : AppColors.primaryDarkBlue.withAlpha(100),
                 borderRadius: BorderRadius.circular(4),
                 border: Border.all(
-                  color: AppColors.primaryTurquoise.withAlpha(30),
+                  color:
+                      isEnabled
+                          ? AppColors.primaryTurquoise.withAlpha(30)
+                          : AppColors.lightGray.withAlpha(30),
                   width: 1,
                 ),
               ),
@@ -209,8 +267,9 @@ class _FilaProductoWidget extends StatelessWidget {
                 productoSeleccionado.producto != null
                     ? '${productoSeleccionado.cantidad}'
                     : '0',
-                style: const TextStyle(
-                  color: AppColors.textPrimary,
+                style: TextStyle(
+                  color:
+                      isEnabled ? AppColors.textPrimary : AppColors.lightGray,
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
                 ),
@@ -223,6 +282,8 @@ class _FilaProductoWidget extends StatelessWidget {
   }
 
   Future<void> _mostrarDialogoSeleccion(BuildContext context) async {
+    if (!isEnabled || onProductoActualizado == null) return;
+
     final ProductosApiService productosService = ProductosApiService();
     await showDialog(
       context: context,
@@ -230,7 +291,8 @@ class _FilaProductoWidget extends StatelessWidget {
           (context) => _DialogoSeleccionProducto(
             productoSeleccionado: productoSeleccionado,
             productosService: productosService,
-            onProductoActualizado: onProductoActualizado,
+            onProductoActualizado: onProductoActualizado!,
+            barId: barId,
           ),
     );
   }
@@ -240,11 +302,13 @@ class _DialogoSeleccionProducto extends StatefulWidget {
   final ProductoSeleccionadoModel productoSeleccionado;
   final ProductosApiService productosService;
   final Function(ProductoSeleccionadoModel) onProductoActualizado;
+  final String? barId;
 
   const _DialogoSeleccionProducto({
     required this.productoSeleccionado,
     required this.productosService,
     required this.onProductoActualizado,
+    this.barId,
   });
 
   @override
@@ -296,13 +360,21 @@ class _DialogoSeleccionProductoState extends State<_DialogoSeleccionProducto> {
       }
 
       try {
-        final productos = await widget.productosService.searchProductosByName(
-          query,
-        );
-        setState(() {
-          _productosEncontrados = productos;
-          _isLoading = false;
-        });
+        if (widget.barId != null) {
+          final productos = await widget.productosService.searchProductosByName(
+            query,
+            widget.barId!,
+          );
+          setState(() {
+            _productosEncontrados = productos;
+            _isLoading = false;
+          });
+        } else {
+          setState(() {
+            _productosEncontrados = [];
+            _isLoading = false;
+          });
+        }
       } catch (e) {
         setState(() {
           _productosEncontrados = [];

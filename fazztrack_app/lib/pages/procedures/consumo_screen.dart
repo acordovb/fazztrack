@@ -53,6 +53,7 @@ class _ConsumoScreenState extends State<ConsumoScreen> {
         SelectorProductosWidget(
           key: _selectorProductosKey,
           onProductosChanged: _actualizarProductosSeleccionados,
+          barId: _estudianteSeleccionado?.idBar,
         ),
         if (_productosSeleccionados.isNotEmpty &&
             _controlHistorico != null) ...[

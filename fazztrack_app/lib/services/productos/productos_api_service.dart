@@ -2,20 +2,20 @@ import 'dart:convert';
 import 'package:fazztrack_app/models/producto_model.dart';
 import 'package:fazztrack_app/services/api/api_routes.dart';
 import 'package:fazztrack_app/services/api/api_service.dart';
-import 'package:fazztrack_app/services/bar/bar_storage_service.dart';
 
 class ProductosApiService {
   final ApiService _apiService;
 
   ProductosApiService() : _apiService = ApiService();
-  Future<List<ProductoModel>> searchProductosByName(String query) async {
+  Future<List<ProductoModel>> searchProductosByName(
+    String query,
+    String barId,
+  ) async {
     try {
       await Future.delayed(const Duration(microseconds: 400));
-      final barId = await BarStorageService.getSelectedBar();
-      String searchUrl = '${API.productos}/search?nombre=$query';
-      if (barId != null) {
-        searchUrl += '&idBar=$barId';
-      }
+      final selectedBarId = barId;
+      String searchUrl =
+          '${API.productos}/search?nombre=$query&idBar=$selectedBarId';
 
       final response = await _apiService.get(searchUrl);
       final data = jsonDecode(response.body) as List;
