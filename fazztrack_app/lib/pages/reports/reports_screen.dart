@@ -1,5 +1,7 @@
 import 'package:fazztrack_app/constants/colors_constants.dart';
+import 'package:fazztrack_app/models/bar_model.dart';
 import 'package:fazztrack_app/models/estudiante_model.dart';
+import 'package:fazztrack_app/services/bar/bar_api_service.dart';
 import 'package:fazztrack_app/services/estudiantes/estudiantes_api_service.dart';
 import 'package:fazztrack_app/widgets/buscador_reporte.dart';
 import 'package:fazztrack_app/widgets/student_summary.dart';
@@ -14,10 +16,12 @@ class ReportsContent extends StatefulWidget {
 
 class _ReportsContentState extends State<ReportsContent> {
   final EstudiantesApiService _estudiantesService = EstudiantesApiService();
+  final BarApiService _barService = BarApiService();
   final TextEditingController _searchController = TextEditingController();
 
   List<EstudianteModel> _allEstudiantes = [];
   List<EstudianteModel> _filteredEstudiantes = [];
+  List<BarModel> _bars = [];
   Set<String> _selectedEstudiantes = {};
   bool _isLoading = false;
   bool _selectAll = false;
@@ -29,6 +33,7 @@ class _ReportsContentState extends State<ReportsContent> {
   void initState() {
     super.initState();
     _loadEstudiantes();
+    _loadBars();
   }
 
   @override
@@ -60,6 +65,18 @@ class _ReportsContentState extends State<ReportsContent> {
           ),
         );
       }
+    }
+  }
+
+  Future<void> _loadBars() async {
+    try {
+      final bars = await _barService.getAllBars();
+      if (!mounted || _isDisposed) return;
+      setState(() {
+        _bars = bars;
+      });
+    } catch (e) {
+      // Handle error silently
     }
   }
 
@@ -144,6 +161,15 @@ class _ReportsContentState extends State<ReportsContent> {
         }
       }
     });
+  }
+
+  String _getBarName(String barId) {
+    try {
+      final bar = _bars.firstWhere((bar) => bar.id == barId);
+      return bar.nombre;
+    } catch (e) {
+      return 'Bar desconocido';
+    }
   }
 
   @override
@@ -395,19 +421,9 @@ class _ReportsContentState extends State<ReportsContent> {
                   ),
                 ),
                 const Expanded(
-                  flex: 2,
-                  child: Text(
-                    'Celular',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                ),
-                const Expanded(
                   flex: 3,
                   child: Text(
-                    'Representante',
+                    'Bar',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: AppColors.textPrimary,
@@ -502,18 +518,9 @@ class _ReportsContentState extends State<ReportsContent> {
                               ),
                             ),
                             Expanded(
-                              flex: 2,
-                              child: Text(
-                                estudiante.celular ?? '-',
-                                style: const TextStyle(
-                                  color: AppColors.textPrimary,
-                                ),
-                              ),
-                            ),
-                            Expanded(
                               flex: 3,
                               child: Text(
-                                estudiante.nombreRepresentante ?? '-',
+                                _getBarName(estudiante.idBar),
                                 style: const TextStyle(
                                   color: AppColors.textPrimary,
                                 ),
@@ -631,6 +638,10 @@ class _ReportsContentState extends State<ReportsContent> {
                       _buildInfoRow(
                         'Curso',
                         _selectedEstudiante!.curso ?? 'No especificado',
+                      ),
+                      _buildInfoRow(
+                        'Bar',
+                        _getBarName(_selectedEstudiante!.idBar),
                       ),
                       _buildInfoRow(
                         'Celular',
