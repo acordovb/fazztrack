@@ -40,9 +40,7 @@ class EstudiantesApiService {
 
   Future<EstudianteModel> createEstudiante(EstudianteModel estudiante) async {
     final estudianteData = estudiante.toJson();
-    estudianteData.remove(
-      'id',
-    ); // Eliminar el ID para que sea generado por el backend
+    estudianteData.remove('id');
 
     final response = await _apiService.post(API.estudiantes, estudianteData);
     final data = jsonDecode(response.body);
