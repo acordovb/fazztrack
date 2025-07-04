@@ -1,5 +1,7 @@
 import 'package:fazztrack_app/constants/colors_constants.dart';
+import 'package:fazztrack_app/models/bar_model.dart';
 import 'package:fazztrack_app/models/estudiante_model.dart';
+import 'package:fazztrack_app/services/bar/bar_api_service.dart';
 import 'package:fazztrack_app/services/estudiantes/estudiantes_api_service.dart';
 import 'package:fazztrack_app/widgets/create_estudiante_dialog.dart';
 import 'package:fazztrack_app/widgets/edit_estudiante_dialog.dart';
@@ -15,17 +17,20 @@ class StudentAdminScreen extends StatefulWidget {
 
 class _StudentAdminScreenState extends State<StudentAdminScreen> {
   final EstudiantesApiService _estudiantesService = EstudiantesApiService();
+  final BarApiService _barApiService = BarApiService();
   final TextEditingController _searchController = TextEditingController();
 
   List<EstudianteModel> _allEstudiantes = [];
   List<EstudianteModel> _filteredEstudiantes = [];
+  List<BarModel> _allBars = [];
+  String? _selectedBarId;
   bool _isLoading = false;
   String _errorMessage = '';
 
   @override
   void initState() {
     super.initState();
-    _loadEstudiantes();
+    _loadData();
     _searchController.addListener(_filterEstudiantes);
   }
 
@@ -35,22 +40,36 @@ class _StudentAdminScreenState extends State<StudentAdminScreen> {
     super.dispose();
   }
 
-  Future<void> _loadEstudiantes() async {
+  Future<void> _loadData() async {
     setState(() {
       _isLoading = true;
       _errorMessage = '';
     });
 
     try {
-      final estudiantes = await _estudiantesService.getAllEstudiantes();
+      // Cargar bares y estudiantes en paralelo
+      final results = await Future.wait([
+        _barApiService.getAllBars(),
+        _estudiantesService.getAllEstudiantes(),
+      ]);
+
+      final bars = results[0] as List<BarModel>;
+      final estudiantes = results[1] as List<EstudianteModel>;
+
       setState(() {
+        _allBars = bars;
         _allEstudiantes = estudiantes;
-        _filteredEstudiantes = estudiantes;
+
+        if (_selectedBarId == null && bars.isNotEmpty) {
+          _selectedBarId = bars.first.id;
+        }
+
+        _filterEstudiantes();
         _isLoading = false;
       });
     } catch (e) {
       setState(() {
-        _errorMessage = 'Error al cargar estudiantes: ${e.toString()}';
+        _errorMessage = 'Error al cargar datos: ${e.toString()}';
         _isLoading = false;
       });
     }
@@ -59,11 +78,22 @@ class _StudentAdminScreenState extends State<StudentAdminScreen> {
   void _filterEstudiantes() {
     final query = _searchController.text.toLowerCase();
     setState(() {
+      List<EstudianteModel> estudiantesFiltradosPorBar = _allEstudiantes;
+
+      // Filtrar por bar seleccionado
+      if (_selectedBarId != null) {
+        estudiantesFiltradosPorBar =
+            _allEstudiantes
+                .where((estudiante) => estudiante.idBar == _selectedBarId)
+                .toList();
+      }
+
+      // Filtrar por búsqueda de texto
       if (query.isEmpty) {
-        _filteredEstudiantes = _allEstudiantes;
+        _filteredEstudiantes = estudiantesFiltradosPorBar;
       } else {
         _filteredEstudiantes =
-            _allEstudiantes
+            estudiantesFiltradosPorBar
                 .where(
                   (estudiante) =>
                       estudiante.nombre.toLowerCase().contains(query) ||
@@ -79,12 +109,35 @@ class _StudentAdminScreenState extends State<StudentAdminScreen> {
     });
   }
 
+  void _selectBar(String barId) {
+    setState(() {
+      _selectedBarId = barId;
+    });
+    _filterEstudiantes();
+  }
+
   void _showCreateEstudianteDialog() {
+    if (_allBars.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No hay bares disponibles para crear un estudiante'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+
+    // Si hay un bar seleccionado, lo usamos; de lo contrario, usamos el primero
+    final preselectedBarId = _selectedBarId ?? _allBars.first.id;
+
     showDialog(
       context: context,
       builder:
-          (context) =>
-              CreateEstudianteDialog(onEstudianteCreated: _loadEstudiantes),
+          (context) => CreateEstudianteDialog(
+            onEstudianteCreated: _loadData,
+            bars: _allBars,
+            preselectedBarId: preselectedBarId,
+          ),
     );
   }
 
@@ -94,7 +147,8 @@ class _StudentAdminScreenState extends State<StudentAdminScreen> {
       builder:
           (context) => EditEstudianteDialog(
             estudiante: estudiante,
-            onEstudianteUpdated: _loadEstudiantes,
+            onEstudianteUpdated: _loadData,
+            bars: _allBars,
           ),
     );
   }
@@ -145,7 +199,7 @@ class _StudentAdminScreenState extends State<StudentAdminScreen> {
           backgroundColor: AppColors.success,
         ),
       );
-      _loadEstudiantes(); // Recargar la lista
+      _loadData(); // Recargar la lista
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -173,7 +227,7 @@ class _StudentAdminScreenState extends State<StudentAdminScreen> {
         elevation: 0,
         actions: [
           IconButton(
-            onPressed: _loadEstudiantes,
+            onPressed: _loadData,
             icon: const Icon(Icons.refresh),
             tooltip: 'Actualizar',
           ),
@@ -227,6 +281,60 @@ class _StudentAdminScreenState extends State<StudentAdminScreen> {
               ),
             ),
 
+            // Filtro de bares
+            if (_allBars.isNotEmpty)
+              Container(
+                height: 50,
+                margin: const EdgeInsets.only(bottom: 16),
+                child: Center(
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    shrinkWrap: true,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: _allBars.length,
+                    itemBuilder: (context, index) {
+                      final bar = _allBars[index];
+                      final isSelected = _selectedBarId == bar.id;
+
+                      return Container(
+                        margin: const EdgeInsets.only(right: 8),
+                        child: FilterChip(
+                          label: Text(
+                            bar.nombre,
+                            style: TextStyle(
+                              color:
+                                  isSelected
+                                      ? AppColors.primaryDarkBlue
+                                      : AppColors.textPrimary,
+                              fontWeight:
+                                  isSelected
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                            ),
+                          ),
+                          selected: isSelected,
+                          onSelected: (selected) {
+                            if (selected) {
+                              _selectBar(bar.id);
+                            }
+                          },
+                          backgroundColor: AppColors.card,
+                          selectedColor: AppColors.primaryTurquoise,
+                          checkmarkColor: AppColors.primaryDarkBlue,
+                          side: BorderSide(
+                            color:
+                                isSelected
+                                    ? AppColors.primaryTurquoise
+                                    : AppColors.card,
+                            width: 1,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+
             // Contenido principal
             Expanded(
               child:
@@ -257,7 +365,7 @@ class _StudentAdminScreenState extends State<StudentAdminScreen> {
                             ),
                             const SizedBox(height: 16),
                             ElevatedButton(
-                              onPressed: _loadEstudiantes,
+                              onPressed: _loadData,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppColors.primaryTurquoise,
                                 foregroundColor: AppColors.primaryDarkBlue,

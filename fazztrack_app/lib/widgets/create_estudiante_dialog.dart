@@ -1,12 +1,20 @@
 import 'package:fazztrack_app/constants/colors_constants.dart';
+import 'package:fazztrack_app/models/bar_model.dart';
 import 'package:fazztrack_app/models/estudiante_model.dart';
 import 'package:fazztrack_app/services/estudiantes/estudiantes_api_service.dart';
 import 'package:flutter/material.dart';
 
 class CreateEstudianteDialog extends StatefulWidget {
   final VoidCallback? onEstudianteCreated;
+  final List<BarModel> bars;
+  final String preselectedBarId;
 
-  const CreateEstudianteDialog({super.key, this.onEstudianteCreated});
+  const CreateEstudianteDialog({
+    super.key,
+    this.onEstudianteCreated,
+    required this.bars,
+    required this.preselectedBarId,
+  });
 
   @override
   State<CreateEstudianteDialog> createState() => _CreateEstudianteDialogState();
@@ -21,6 +29,15 @@ class _CreateEstudianteDialogState extends State<CreateEstudianteDialog> {
       TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _isCreating = false;
+  String? _selectedBarId;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedBarId = widget.preselectedBarId;
+  }
+
+  // No longer needed as bars are passed directly to the widget
 
   @override
   void dispose() {
@@ -40,14 +57,25 @@ class _CreateEstudianteDialogState extends State<CreateEstudianteDialog> {
       return; // Prevenir múltiples envíos
     }
 
+    if (_selectedBarId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Por favor selecciona un bar'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+
     setState(() {
       _isCreating = true;
     });
 
     try {
       final nuevoEstudiante = EstudianteModel(
-        id: '', // El ID será generado por el backend
+        id: '',
         nombre: _nombreController.text.trim(),
+        idBar: _selectedBarId!, // Agregamos el bar seleccionado
         celular:
             _celularController.text.trim().isEmpty
                 ? null
@@ -151,6 +179,44 @@ class _CreateEstudianteDialogState extends State<CreateEstudianteDialog> {
                   }
                   return null;
                 },
+              ),
+              const SizedBox(height: 16),
+              // Dropdown para seleccionar el bar
+              Container(
+                decoration: BoxDecoration(
+                  color: AppColors.backgroundSecondary,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: AppColors.textPrimary, width: 1),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: DropdownButtonFormField<String>(
+                  dropdownColor: AppColors.backgroundSecondary,
+                  value: _selectedBarId,
+                  decoration: const InputDecoration(
+                    labelText: 'Bar *',
+                    labelStyle: TextStyle(color: AppColors.textPrimary),
+                    border: InputBorder.none,
+                  ),
+                  style: const TextStyle(color: AppColors.textPrimary),
+                  items:
+                      widget.bars.map((bar) {
+                        return DropdownMenuItem<String>(
+                          value: bar.id,
+                          child: Text(bar.nombre),
+                        );
+                      }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedBarId = value;
+                    });
+                  },
+                  validator: (value) {
+                    if (value == null) {
+                      return 'Por favor selecciona un bar';
+                    }
+                    return null;
+                  },
+                ),
               ),
               const SizedBox(height: 16),
               TextFormField(
