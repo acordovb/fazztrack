@@ -30,8 +30,11 @@ export class EstudiantesController {
   }
 
   @Get('search')
-  search(@Query('nombre') nombre: string): Promise<EstudianteDto[]> {
-    return this.estudiantesService.searchByName(nombre);
+  search(
+    @Query('nombre') nombre: string,
+    @Query('idbar') idbar?: string,
+  ): Promise<EstudianteDto[]> {
+    return this.estudiantesService.search(nombre, idbar);
   }
 
   @Get(':id')
