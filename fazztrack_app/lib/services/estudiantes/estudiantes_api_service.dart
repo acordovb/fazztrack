@@ -2,6 +2,9 @@ import 'dart:convert';
 import 'package:fazztrack_app/models/estudiante_model.dart';
 import 'package:fazztrack_app/services/api/api_routes.dart';
 import 'package:fazztrack_app/services/api/api_service.dart';
+import 'package:fazztrack_app/config/build.config.dart';
+import 'package:fazztrack_app/config/general.config.dart';
+import 'package:fazztrack_app/services/bar/bar_storage_service.dart';
 
 class EstudiantesApiService {
   final ApiService _apiService;
@@ -15,9 +18,16 @@ class EstudiantesApiService {
   }
 
   Future<List<EstudianteModel>> searchEstudiantesByName(String nombre) async {
-    final response = await _apiService.get(
-      '${API.estudiantes}/search?nombre=$nombre',
-    );
+    String endpoint = '${API.estudiantes}/search?nombre=$nombre';
+
+    if (BuildConfig.appLevel == AppConfig.appLevel.user) {
+      final selectedBar = await BarStorageService.getSelectedBar();
+      if (selectedBar != null) {
+        endpoint += '&idbar=$selectedBar';
+      }
+    }
+
+    final response = await _apiService.get(endpoint);
     final data = jsonDecode(response.body) as List;
     return EstudianteModel.fromJsonList(data);
   }
