@@ -101,6 +101,15 @@ export class PdfGeneratorService {
       data.saldoActual >= 0 ? 'Saldo a favor' : 'Valor pendiente de pago',
     );
 
+    // Reemplazar información del rango de fechas
+    template = template.replace(/{{reportDateRange}}/g, data.reportDateRange);
+
+    // Reemplazar información del bar si está disponible
+    const barInfo = data.barName
+      ? `<div class="info-row"><span class="info-label">Bar:</span><span class="info-value">${data.barName}</span></div>`
+      : '';
+    template = template.replace(/{{barInfo}}/g, barInfo);
+
     // Reemplazar información condicional del estudiante
     template = this.replaceStudentInfo(template, data);
 

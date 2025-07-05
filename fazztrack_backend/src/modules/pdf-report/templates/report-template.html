@@ -214,6 +214,7 @@
       <div class="header">
         <h1>Estado de Cuenta</h1>
         <p>Reporte del mes de {{currentMonthName}} {{currentYear}}</p>
+        <p>{{reportDateRange}}</p>
       </div>
 
       <div class="content">
@@ -223,7 +224,8 @@
             <span class="info-label">Nombre:</span>
             <span class="info-value">{{studentName}}</span>
           </div>
-          {{studentCourse}} {{studentPhone}} {{studentRepresentative}}
+          {{barInfo}} {{studentCourse}} {{studentPhone}}
+          {{studentRepresentative}}
         </div>
 
         <div class="summary-table-section">

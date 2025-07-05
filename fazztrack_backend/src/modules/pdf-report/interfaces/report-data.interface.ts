@@ -5,6 +5,7 @@ export interface ReportData {
     curso?: string | null;
     celular?: string | null;
     nombre_representante?: string | null;
+    id_bar: string; // Añadimos el ID del bar
   };
   abonos: Array<{
     fecha_abono: Date;
@@ -30,4 +31,6 @@ export interface ProcessedReportData extends ReportData {
   currentYear: number;
   currentDate: string;
   currentTime: string;
+  reportDateRange: string; // Añadimos el rango de fechas
+  barName?: string; // Añadimos el nombre del bar
 }

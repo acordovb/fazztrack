@@ -39,7 +39,7 @@ export class PdfReportService {
           await this.reportDataService.getReportData(studentId);
         if (reportData) {
           const processedData =
-            this.reportDataProcessorService.processReportData(reportData);
+            await this.reportDataProcessorService.processReportData(reportData);
           const filePath =
             await this.pdfGeneratorService.generatePdf(processedData);
 
@@ -93,7 +93,7 @@ export class PdfReportService {
     for (const reportData of allReportsData) {
       try {
         const processedData =
-          this.reportDataProcessorService.processReportData(reportData);
+          await this.reportDataProcessorService.processReportData(reportData);
         const filePath =
           await this.pdfGeneratorService.generatePdf(processedData);
 

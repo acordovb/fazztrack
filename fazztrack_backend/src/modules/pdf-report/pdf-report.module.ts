@@ -8,6 +8,7 @@ import { EstudiantesModule } from '../estudiantes/estudiantes.module';
 import { AbonosModule } from '../abonos/abonos.module';
 import { VentasModule } from '../ventas/ventas.module';
 import { ControlHistoricoModule } from '../control-historico/control-historico.module';
+import { BarsModule } from '../bars/bars.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { ControlHistoricoModule } from '../control-historico/control-historico.m
     AbonosModule,
     VentasModule,
     ControlHistoricoModule,
+    BarsModule,
   ],
   controllers: [PdfReportController],
   providers: [
