@@ -206,6 +206,14 @@
         text-align: right;
         font-weight: bold;
       }
+      .page-break {
+        page-break-before: always;
+      }
+      @media print {
+        .page-break {
+          page-break-before: always;
+        }
+      }
     </style>
   </head>
   <body>
@@ -232,18 +240,18 @@
           <table class="breakdown-table">
             <tbody>
               <tr>
+                <td class="breakdown-label">{{saldoPendienteLabel}}</td>
+                <td class="breakdown-amount {{saldoPendienteClass}}">
+                  {{saldoPendienteSign}} ${{saldoPendienteMesAnteriorAbs}}
+                </td>
+              </tr>
+              <tr>
                 <td class="breakdown-label">Total Abonos del Mes</td>
                 <td class="breakdown-amount positive">+ ${{totalAbonos}}</td>
               </tr>
               <tr>
                 <td class="breakdown-label">Total Ventas del Mes</td>
                 <td class="breakdown-amount negative">- ${{totalVentas}}</td>
-              </tr>
-              <tr>
-                <td class="breakdown-label">{{saldoPendienteLabel}}</td>
-                <td class="breakdown-amount {{saldoPendienteClass}}">
-                  {{saldoPendienteSign}} ${{saldoPendienteMesAnteriorAbs}}
-                </td>
               </tr>
               <tr class="total-row">
                 <td class="breakdown-label total-label">Saldo Actual</td>
@@ -259,7 +267,25 @@
           <h3>{{saldoActualLabel}}</h3>
           <p class="balance-amount {{saldoActualClass}}">${{saldoActual}}</p>
         </div>
+      </div>
 
+      <div class="footer">
+        <p>Reporte generado el {{currentDate}} a las {{currentTime}}</p>
+        <p>FazzTrack - Sistema de Gestión de Pagos y Cuotas</p>
+      </div>
+    </div>
+
+    <div class="page-break"></div>
+
+    <div class="container">
+      <div class="header">
+        <h1>Detalle de Transacciones</h1>
+        <p>
+          Estudiante: {{studentName}} - {{currentMonthName}} {{currentYear}}
+        </p>
+      </div>
+
+      <div class="content">
         <div class="transactions-section">
           <h2 class="section-title">Abonos del Mes</h2>
           {{abonosSection}}
