@@ -187,7 +187,7 @@ export class PdfGeneratorService {
       .join('');
 
     return `
-      <table class="table">
+      <table class="table-content">
         <thead>
           <tr>
             <th>Fecha</th>
@@ -225,7 +225,7 @@ export class PdfGeneratorService {
       .join('');
 
     return `
-      <table class="table">
+      <table class="table-content">
         <thead>
           <tr>
             <th>Fecha</th>
