@@ -10,8 +10,13 @@ import 'package:flutter/material.dart';
 
 class StudentSummaryWidget extends StatefulWidget {
   final EstudianteModel estudiante;
+  final void Function(int selectedMonth)? onMonthChanged;
 
-  const StudentSummaryWidget({super.key, required this.estudiante});
+  const StudentSummaryWidget({
+    super.key,
+    required this.estudiante,
+    this.onMonthChanged,
+  });
 
   @override
   State<StudentSummaryWidget> createState() => _StudentSummaryWidgetState();
@@ -488,6 +493,11 @@ class _StudentSummaryWidgetState extends State<StudentSummaryWidget> {
                             selectedMonth = newValue;
                           });
                           _loadData();
+
+                          // Notificar al widget padre sobre el cambio de mes
+                          if (widget.onMonthChanged != null) {
+                            widget.onMonthChanged!(int.parse(newValue));
+                          }
                         }
                       },
                     ),

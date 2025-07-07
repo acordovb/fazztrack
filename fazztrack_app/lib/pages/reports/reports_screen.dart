@@ -28,6 +28,7 @@ class _ReportsContentState extends State<ReportsContent> {
   bool _isMultiSelectMode = false;
   EstudianteModel? _selectedEstudiante;
   bool _isDisposed = false;
+  int _selectedMonth = DateTime.now().month; // Mes actual por defecto
 
   @override
   void initState() {
@@ -190,6 +191,13 @@ class _ReportsContentState extends State<ReportsContent> {
     } catch (e) {
       return 'Bar desconocido';
     }
+  }
+
+  // Método para actualizar el mes seleccionado desde StudentSummaryWidget
+  void _updateSelectedMonth(int month) {
+    setState(() {
+      _selectedMonth = month;
+    });
   }
 
   @override
@@ -681,6 +689,7 @@ class _ReportsContentState extends State<ReportsContent> {
                   StudentSummaryWidget(
                     key: ValueKey(_selectedEstudiante!.id),
                     estudiante: _selectedEstudiante!,
+                    onMonthChanged: _updateSelectedMonth,
                   ),
 
                   const SizedBox(height: 20),
@@ -689,14 +698,29 @@ class _ReportsContentState extends State<ReportsContent> {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
-                      onPressed: () {
-                        // TODO: Implement individual PDF download
-                      },
+                      // Solo habilitado si el mes seleccionado es el actual
+                      onPressed:
+                          _selectedMonth == DateTime.now().month
+                              ? () {
+                                // TODO: Implement individual PDF download
+                              }
+                              : null,
                       icon: const Icon(Icons.download),
-                      label: const Text('Descargar Reporte'),
+                      label:
+                          _selectedMonth == DateTime.now().month
+                              ? const Text('Descargar Reporte')
+                              : const Text(
+                                'Descarga no disponible para meses anteriores',
+                              ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryTurquoise,
-                        foregroundColor: AppColors.primaryDarkBlue,
+                        backgroundColor:
+                            _selectedMonth == DateTime.now().month
+                                ? AppColors.primaryTurquoise
+                                : AppColors.darkGray,
+                        foregroundColor:
+                            _selectedMonth == DateTime.now().month
+                                ? AppColors.primaryDarkBlue
+                                : AppColors.textPrimary.withAlpha(50),
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
