@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ControlHistoricoService } from './control-historico.service';
 import { ControlHistoricoDto } from './dto';
 import { decodeId } from 'src/shared/hashid/hashid.utils';
@@ -16,11 +16,16 @@ export class ControlHistoricoController {
   @Get('estudiante/:idEstudiante')
   async findByEstudianteId(
     @Param('idEstudiante') idEstudiante: string,
+    @Query('month') month?: number,
   ): Promise<ControlHistoricoDto> {
-    let controlHistorico =
-      await this.controlHistoricoService.findByEstudianteId(idEstudiante);
+    const currentMonth =
+      month !== undefined ? month : new Date().getMonth() + 1;
 
-    const currentMonth = new Date().getMonth() + 1;
+    let controlHistorico =
+      await this.controlHistoricoService.findByEstudianteId(
+        idEstudiante,
+        currentMonth,
+      );
 
     const [totalVentas, totalAbonos] = await Promise.all([
       this.ventasService.calculateTotalVentas(idEstudiante, currentMonth),

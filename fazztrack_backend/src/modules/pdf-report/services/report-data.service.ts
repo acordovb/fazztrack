@@ -37,7 +37,10 @@ export class ReportDataService {
 
     // Obtener control histórico
     const controlHistorico =
-      await this.controlHistoricoService.findByEstudianteId(studentId);
+      await this.controlHistoricoService.findByEstudianteId(
+        studentId,
+        currentMonth,
+      );
 
     // Verificar si hay datos para generar el reporte
     if (!this.hasReportableData(abonos, ventas, controlHistorico)) {

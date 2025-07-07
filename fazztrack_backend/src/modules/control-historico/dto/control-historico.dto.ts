@@ -5,6 +5,7 @@ export class ControlHistoricoDto implements BaseDto {
   id_estudiante: string;
   total_pendiente_ult_mes_abono: number;
   total_pendiente_ult_mes_venta: number;
+  n_mes: number;
   total_venta?: number;
   total_abono?: number;
 }

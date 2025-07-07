@@ -27,19 +27,25 @@ export class ControlHistoricoService extends BaseCrudService<
         model.total_pendiente_ult_mes_abono.toNumber(),
       total_pendiente_ult_mes_venta:
         model.total_pendiente_ult_mes_venta.toNumber(),
+      n_mes: model.n_mes,
     };
   }
 
-  async findByEstudianteId(idEstudiante: string): Promise<ControlHistoricoDto> {
+  async findByEstudianteId(
+    idEstudiante: string,
+    month: number,
+  ): Promise<ControlHistoricoDto> {
     const idNumberEstudiante = decodeId(idEstudiante);
     let controlHistorico = await this.database.control_historico.findFirst({
-      where: { id_estudiante: idNumberEstudiante },
+      where: { id_estudiante: idNumberEstudiante, n_mes: month },
     });
 
     if (!controlHistorico) {
-      controlHistorico = await this.database.control_historico.create({
-        data: { id_estudiante: idNumberEstudiante },
-      });
+      const controlHistoricoNew = new ControlHistoricoDto();
+      controlHistoricoNew.id_estudiante = idEstudiante;
+      controlHistoricoNew.total_pendiente_ult_mes_abono = 0;
+      controlHistoricoNew.total_pendiente_ult_mes_venta = 0;
+      controlHistoricoNew.n_mes = month;
     }
 
     return this.mapToDto(controlHistorico);
