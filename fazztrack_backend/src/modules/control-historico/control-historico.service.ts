@@ -53,4 +53,13 @@ export class ControlHistoricoService extends BaseCrudService<
 
     return this.mapToDto(controlHistorico);
   }
+
+  async findByEstudianteIdAndMonth(
+    idEstudiante: number,
+    month: number,
+  ): Promise<any> {
+    return await this.database.control_historico.findFirst({
+      where: { id_estudiante: idEstudiante, n_mes: month },
+    });
+  }
 }
