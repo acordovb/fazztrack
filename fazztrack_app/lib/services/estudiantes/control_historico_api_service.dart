@@ -15,12 +15,17 @@ class ControlHistoricoApiService {
   }
 
   Future<ControlHistoricoModel?> getControlHistoricoByEstudianteId(
-    String estudianteId,
-  ) async {
+    String estudianteId, {
+    int? month,
+  }) async {
     try {
-      final response = await _apiService.get(
-        '${API.controlHistorico}/estudiante/$estudianteId',
-      );
+      String url = '${API.controlHistorico}/estudiante/$estudianteId';
+
+      if (month != null) {
+        url += '?month=$month';
+      }
+
+      final response = await _apiService.get(url);
       return ControlHistoricoModel.fromJson(jsonDecode(response.body));
     } catch (e) {
       if (e.toString().contains('HTTP error: 404')) {

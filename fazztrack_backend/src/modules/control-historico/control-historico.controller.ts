@@ -19,7 +19,7 @@ export class ControlHistoricoController {
     @Query('month') month?: number,
   ): Promise<ControlHistoricoDto> {
     const currentMonth =
-      month !== undefined ? month : new Date().getMonth() + 1;
+      month !== undefined ? Number(month) : new Date().getMonth() + 1;
 
     let controlHistorico =
       await this.controlHistoricoService.findByEstudianteId(

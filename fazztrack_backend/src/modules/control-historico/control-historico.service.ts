@@ -42,10 +42,13 @@ export class ControlHistoricoService extends BaseCrudService<
 
     if (!controlHistorico) {
       const controlHistoricoNew = new ControlHistoricoDto();
+      controlHistoricoNew.id = encodeId(1);
       controlHistoricoNew.id_estudiante = idEstudiante;
       controlHistoricoNew.total_pendiente_ult_mes_abono = 0;
       controlHistoricoNew.total_pendiente_ult_mes_venta = 0;
       controlHistoricoNew.n_mes = month;
+
+      return controlHistoricoNew;
     }
 
     return this.mapToDto(controlHistorico);

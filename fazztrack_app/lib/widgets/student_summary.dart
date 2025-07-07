@@ -97,7 +97,10 @@ class _StudentSummaryWidgetState extends State<StudentSummaryWidget> {
       }
 
       final controlHistoricoData = await _controlHistoricoApiService
-          .getControlHistoricoByEstudianteId(widget.estudiante.id);
+          .getControlHistoricoByEstudianteId(
+            widget.estudiante.id,
+            month: month,
+          );
 
       // Verificación final antes de actualizar el estado
       if (!mounted || _currentStudentId != currentStudentId) {
