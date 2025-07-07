@@ -15,13 +15,17 @@ export class PdfReportService {
   async generateReportsForStudents(
     reportRequest: ReportRequestDto,
   ): Promise<ReportResponseDto> {
-    this.processReportsInBackground(reportRequest.studentIds).catch((error) => {
-      console.error('Error procesando reportes en background:', error);
+    setImmediate(() => {
+      this.processReportsInBackground(reportRequest.studentIds).catch(
+        (error) => {
+          console.error('Error procesando reportes en background:', error);
+        },
+      );
     });
 
     return {
       message:
-        'Procesando reportes en background. Se enviarán por correo cuando estén listos.',
+        'Su solicitud ha sido recibida exitosamente. Los reportes serán generados y enviados a su correo electrónico en los próximos minutos.',
       filePaths: [],
       studentsProcessed: reportRequest.studentIds.length,
     };
@@ -45,8 +49,9 @@ export class PdfReportService {
 
           filePaths.push(filePath);
           processedCount++;
+        } else {
           console.log(
-            `Reporte ${processedCount}/${studentIds.length} generado: ${filePath}`,
+            `Sin datos para generar reporte del estudiante ${studentId}`,
           );
         }
       } catch (error) {
@@ -57,29 +62,25 @@ export class PdfReportService {
       }
     }
 
-    console.log(
-      `Generación completada. ${processedCount} reportes generados exitosamente.`,
-    );
-
     // Aquí podrías llamar al servicio de correo para enviar los PDFs
     // await this.emailService.sendReports(filePaths);
   }
 
   async generateAllReports(): Promise<ReportResponseDto> {
-    this.processAllReportsInBackground().catch((error) => {
-      console.error(
-        'Error procesando todos los reportes en background:',
-        error,
-      );
+    setImmediate(() => {
+      this.processAllReportsInBackground().catch((error) => {
+        console.error(
+          'Error procesando todos los reportes en background:',
+          error,
+        );
+      });
     });
 
-    const allStudentsData =
-      await this.reportDataService.getAllStudentsReportData();
-
     return {
-      message: `Procesando ${allStudentsData.length} reportes en background. Se enviarán por correo cuando estén listos.`,
+      message:
+        'Su solicitud ha sido recibida exitosamente. Los reportes serán generados y enviados a su correo electrónico en los próximos minutos.',
       filePaths: [],
-      studentsProcessed: allStudentsData.length,
+      studentsProcessed: 0,
     };
   }
 
@@ -99,9 +100,6 @@ export class PdfReportService {
 
         filePaths.push(filePath);
         processedCount++;
-        console.log(
-          `Reporte ${processedCount}/${allReportsData.length} generado: ${filePath}`,
-        );
       } catch (error) {
         console.error(
           `Error generando reporte para estudiante ${reportData.student.nombre}:`,
@@ -109,10 +107,6 @@ export class PdfReportService {
         );
       }
     }
-
-    console.log(
-      `Generación de TODOS los reportes completada. ${processedCount} reportes generados exitosamente.`,
-    );
 
     // Aquí podrías llamar al servicio de correo para enviar los PDFs
     // await this.emailService.sendAllReports(filePaths);
