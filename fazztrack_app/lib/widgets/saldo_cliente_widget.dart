@@ -83,7 +83,10 @@ class _SaldoClienteWidgetState extends State<SaldoClienteWidget> {
       if (_controlHistorico != null) {
         setState(() {
           balance =
-              _controlHistorico!.totalAbono - _controlHistorico!.totalVenta;
+              _controlHistorico!.totalAbono -
+              _controlHistorico!.totalVenta +
+              _controlHistorico!.totalPendienteUltMesAbono -
+              _controlHistorico!.totalPendienteUltMesVenta;
           _isLoadingBalance = false;
         });
       } else {
