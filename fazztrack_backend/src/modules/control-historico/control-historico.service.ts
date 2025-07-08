@@ -36,8 +36,12 @@ export class ControlHistoricoService extends BaseCrudService<
     month: number,
   ): Promise<ControlHistoricoDto> {
     const idNumberEstudiante = decodeId(idEstudiante);
+    let monthNumber = month - 1;
+    if (monthNumber < 0) {
+      monthNumber = 12;
+    }
     let controlHistorico = await this.database.control_historico.findFirst({
-      where: { id_estudiante: idNumberEstudiante, n_mes: month },
+      where: { id_estudiante: idNumberEstudiante, n_mes: monthNumber },
     });
 
     if (!controlHistorico) {
