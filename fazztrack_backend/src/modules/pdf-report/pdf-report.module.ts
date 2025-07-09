@@ -9,6 +9,7 @@ import { AbonosModule } from '../abonos/abonos.module';
 import { VentasModule } from '../ventas/ventas.module';
 import { ControlHistoricoModule } from '../control-historico/control-historico.module';
 import { BarsModule } from '../bars/bars.module';
+import { MailModule } from '../../shared/mail/mail.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { BarsModule } from '../bars/bars.module';
     VentasModule,
     ControlHistoricoModule,
     BarsModule,
+    MailModule,
   ],
   controllers: [PdfReportController],
   providers: [

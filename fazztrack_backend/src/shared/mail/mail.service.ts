@@ -8,13 +8,6 @@ export interface EmailAttachment {
   contentType?: string;
 }
 
-export interface SendEmailOptions {
-  subject: string;
-  html?: string;
-  text?: string;
-  attachments?: EmailAttachment[];
-}
-
 @Injectable()
 export class MailService {
   private readonly logger = new Logger(MailService.name);
@@ -32,10 +25,78 @@ export class MailService {
   }
 
   /**
-   * Send email with PDF attachments
-   * If more than 25 PDFs are provided, it will split them into multiple emails
+   * Send email with PDF files from disk
+   * Optimized specifically for PDF report service
    */
-  async sendEmailWithPDFs(
+  async sendEmailWithPDFFiles(
+    subject: string,
+    filePaths: string[],
+    htmlContent?: string,
+    textContent?: string,
+  ): Promise<void> {
+    if (filePaths.length === 0) {
+      this.logger.warn('No PDF files to send');
+      return;
+    }
+
+    try {
+      // Read all PDF files into memory with proper error handling
+      const attachments: EmailAttachment[] = [];
+
+      for (const filePath of filePaths) {
+        try {
+          const fs = await import('fs/promises');
+          const path = await import('path');
+
+          const content = await fs.readFile(filePath);
+          const filename = path.basename(filePath);
+
+          // Validate file size (most email providers have limits)
+          const maxSize = 25 * 1024 * 1024; // 25MB limit
+          if (content.length > maxSize) {
+            this.logger.warn(
+              `PDF file ${filename} is too large (${Math.round(content.length / 1024 / 1024)}MB), skipping`,
+            );
+            continue;
+          }
+
+          attachments.push({
+            filename,
+            content,
+            contentType: 'application/pdf',
+          });
+        } catch (error) {
+          this.logger.error(`Failed to read PDF file ${filePath}:`, error);
+          // Continue with other files instead of failing completely
+        }
+      }
+
+      if (attachments.length === 0) {
+        this.logger.warn('No valid PDF files could be processed');
+        return;
+      }
+
+      // Send emails with PDFs, splitting if necessary
+      await this.sendPDFEmailsInBatches(
+        subject,
+        attachments,
+        htmlContent,
+        textContent,
+      );
+
+      this.logger.log(
+        `Successfully sent email with ${attachments.length} PDF attachments (${filePaths.length} files processed)`,
+      );
+    } catch (error) {
+      this.logger.error('Failed to send email with PDF files:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Send PDFs in batches to handle email provider limits
+   */
+  private async sendPDFEmailsInBatches(
     subject: string,
     pdfs: EmailAttachment[],
     htmlContent?: string,
@@ -43,22 +104,8 @@ export class MailService {
   ): Promise<void> {
     const MAX_ATTACHMENTS_PER_EMAIL = 25;
 
-    // Validate PDFs
-    const validPdfs = pdfs.filter((pdf) => {
-      if (!pdf.filename.toLowerCase().endsWith('.pdf')) {
-        this.logger.warn(`Skipping non-PDF file: ${pdf.filename}`);
-        return false;
-      }
-      return true;
-    });
-
-    if (validPdfs.length === 0) {
-      this.logger.warn('No valid PDF files to send');
-      return;
-    }
-
     // Split PDFs into chunks if necessary
-    const pdfChunks = this.chunkArray(validPdfs, MAX_ATTACHMENTS_PER_EMAIL);
+    const pdfChunks = this.chunkArray(pdfs, MAX_ATTACHMENTS_PER_EMAIL);
 
     for (let i = 0; i < pdfChunks.length; i++) {
       const chunk = pdfChunks[i];
@@ -87,12 +134,12 @@ export class MailService {
       );
 
       try {
-        await this.sendEmail({
-          subject: emailSubject,
-          html: htmlContent || defaultHtml,
-          text: textContent || defaultText,
-          attachments: chunk,
-        });
+        await this.sendSingleEmail(
+          emailSubject,
+          htmlContent || defaultHtml,
+          textContent || defaultText,
+          chunk,
+        );
 
         this.logger.log(
           `Successfully sent email ${i + 1}/${pdfChunks.length} with ${chunk.length} PDF(s)`,
@@ -108,12 +155,15 @@ export class MailService {
   }
 
   /**
-   * Send a single email
+   * Send a single email with attachments
    */
-  async sendEmail(options: SendEmailOptions): Promise<void> {
-    const { subject, html, text, attachments = [] } = options;
-
-    const to = ['alexcordova111@gmail.com'];
+  private async sendSingleEmail(
+    subject: string,
+    html?: string,
+    text?: string,
+    attachments: EmailAttachment[] = [],
+  ): Promise<void> {
+    const to = ['fazztrack1963@gmail.com'];
     const from = this.defaultFromEmail;
 
     try {
@@ -142,6 +192,7 @@ export class MailService {
       }
 
       const result = await this.resend.emails.send(emailData);
+      console.log('Email sent:', result);
       this.logger.log(`Email sent successfully with ID: ${result.data?.id}`);
     } catch (error) {
       this.logger.error('Failed to send email:', error);
