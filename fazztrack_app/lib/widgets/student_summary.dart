@@ -10,12 +10,16 @@ import 'package:flutter/material.dart';
 
 class StudentSummaryWidget extends StatefulWidget {
   final EstudianteModel estudiante;
-  final void Function(int selectedMonth)? onMonthChanged;
+  final Future<void> Function()? onDownloadReport;
+  final String Function(String barId)? getBarName;
+  final bool? isDownloadLoading;
 
   const StudentSummaryWidget({
     super.key,
     required this.estudiante,
-    this.onMonthChanged,
+    this.onDownloadReport,
+    this.getBarName,
+    this.isDownloadLoading,
   });
 
   @override
@@ -153,114 +157,205 @@ class _StudentSummaryWidgetState extends State<StudentSummaryWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return _buildInfoCard(
-      title: 'Resumen',
-      icon: Icons.summarize,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (isLoading)
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppColors.background.withAlpha(30),
-              borderRadius: BorderRadius.circular(8),
+        // Información general
+        _buildInfoCard(
+          title: 'Datos Generales',
+          icon: Icons.info_outline,
+          children: [
+            _buildInfoRow('Nombre', widget.estudiante.nombre),
+            _buildInfoRow(
+              'Curso',
+              widget.estudiante.curso ?? 'No especificado',
             ),
-            child: const Center(child: CircularProgressIndicator()),
-          )
-        else if (error != null)
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.red.withAlpha(30),
-              borderRadius: BorderRadius.circular(8),
+            _buildInfoRow(
+              'Bar',
+              widget.getBarName?.call(widget.estudiante.idBar) ??
+                  'Bar desconocido',
             ),
-            child: Column(
-              children: [
-                const Icon(Icons.error_outline, size: 40, color: Colors.red),
-                const SizedBox(height: 8),
-                Text(
-                  'Error al cargar datos',
-                  style: TextStyle(
-                    color: Colors.red,
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                  ),
+            _buildInfoRow(
+              'Celular',
+              widget.estudiante.celular ?? 'No especificado',
+            ),
+            _buildInfoRow(
+              'Representante',
+              widget.estudiante.nombreRepresentante ?? 'No especificado',
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 20),
+
+        // Resumen financiero
+        _buildInfoCard(
+          title: 'Resumen',
+          icon: Icons.summarize,
+          children: [
+            if (isLoading)
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppColors.background.withAlpha(30),
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  error!,
-                  style: const TextStyle(color: Colors.red, fontSize: 12),
-                  textAlign: TextAlign.center,
+                child: const Center(child: CircularProgressIndicator()),
+              )
+            else if (error != null)
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.red.withAlpha(30),
+                  borderRadius: BorderRadius.circular(8),
                 ),
-              ],
-            ),
-          )
-        else
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppColors.background.withAlpha(30),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Column(
-              children: [
-                Text(
-                  'Resumen de ${months.firstWhere((month) => month['value'] == selectedMonth)['name']}',
-                  style: TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                if (controlHistorico != null) ...[
-                  if (controlHistorico!.totalPendienteUltMesAbono > 0) ...[
-                    _buildSummaryRow(
-                      'Saldo a favor del mes anterior',
-                      '\$${controlHistorico!.totalPendienteUltMesAbono.toStringAsFixed(2)}',
-                      Icons.schedule,
-                      Colors.blue,
+                child: Column(
+                  children: [
+                    const Icon(
+                      Icons.error_outline,
+                      size: 40,
+                      color: Colors.red,
                     ),
                     const SizedBox(height: 8),
+                    Text(
+                      'Error al cargar datos',
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      error!,
+                      style: const TextStyle(color: Colors.red, fontSize: 12),
+                      textAlign: TextAlign.center,
+                    ),
                   ],
-                  if (controlHistorico!.totalPendienteUltMesVenta > 0) ...[
+                ),
+              )
+            else
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppColors.background.withAlpha(30),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      'Resumen de ${months.firstWhere((month) => month['value'] == selectedMonth)['name']}',
+                      style: TextStyle(
+                        color: AppColors.textPrimary,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    if (controlHistorico != null) ...[
+                      if (controlHistorico!.totalPendienteUltMesAbono > 0) ...[
+                        _buildSummaryRow(
+                          'Saldo a favor del mes anterior',
+                          '\$${controlHistorico!.totalPendienteUltMesAbono.toStringAsFixed(2)}',
+                          Icons.schedule,
+                          Colors.blue,
+                        ),
+                        const SizedBox(height: 8),
+                      ],
+                      if (controlHistorico!.totalPendienteUltMesVenta > 0) ...[
+                        _buildSummaryRow(
+                          'Saldo pendiente del mes anterior',
+                          '\$${controlHistorico!.totalPendienteUltMesVenta.toStringAsFixed(2)}',
+                          Icons.schedule,
+                          Colors.red,
+                        ),
+                        const SizedBox(height: 8),
+                      ],
+                    ],
                     _buildSummaryRow(
-                      'Saldo pendiente del mes anterior',
-                      '\$${controlHistorico!.totalPendienteUltMesVenta.toStringAsFixed(2)}',
-                      Icons.schedule,
-                      Colors.red,
+                      'Ventas',
+                      '\$${totalVentas.toStringAsFixed(2)}',
+                      Icons.shopping_cart,
+                      Colors.orange,
                     ),
                     const SizedBox(height: 8),
+                    _buildSummaryRow(
+                      'Abonos',
+                      '\$${totalAbonos.toStringAsFixed(2)}',
+                      Icons.payment,
+                      Colors.green,
+                    ),
+                    const SizedBox(height: 8),
+                    _buildSummaryRow(
+                      'Saldo Actual',
+                      '\$${balance.toStringAsFixed(2)}',
+                      Icons.account_balance_wallet,
+                      balance >= 0 ? Colors.green : Colors.red,
+                    ),
+                    const SizedBox(height: 16),
+                    if (ventas.isNotEmpty || abonos.isNotEmpty) ...[
+                      const Divider(),
+                      const SizedBox(height: 8),
+                      _buildTransactionsList(),
+                    ],
                   ],
-                ],
-                _buildSummaryRow(
-                  'Ventas',
-                  '\$${totalVentas.toStringAsFixed(2)}',
-                  Icons.shopping_cart,
-                  Colors.orange,
                 ),
-                const SizedBox(height: 8),
-                _buildSummaryRow(
-                  'Abonos',
-                  '\$${totalAbonos.toStringAsFixed(2)}',
-                  Icons.payment,
-                  Colors.green,
-                ),
-                const SizedBox(height: 8),
-                _buildSummaryRow(
-                  'Saldo Actual',
-                  '\$${balance.toStringAsFixed(2)}',
-                  Icons.account_balance_wallet,
-                  balance >= 0 ? Colors.green : Colors.red,
-                ),
-                const SizedBox(height: 16),
-                if (ventas.isNotEmpty || abonos.isNotEmpty) ...[
-                  const Divider(),
-                  const SizedBox(height: 8),
-                  _buildTransactionsList(),
-                ],
-              ],
+              ),
+          ],
+        ),
+
+        const SizedBox(height: 20),
+
+        // Botón de descarga
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            // Solo habilitado si el mes seleccionado es el actual
+            onPressed:
+                int.parse(selectedMonth) == DateTime.now().month &&
+                        !(widget.isDownloadLoading ?? false) &&
+                        widget.onDownloadReport != null
+                    ? widget.onDownloadReport
+                    : null,
+            icon:
+                (widget.isDownloadLoading ?? false)
+                    ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          AppColors.primaryDarkBlue,
+                        ),
+                      ),
+                    )
+                    : const Icon(Icons.download),
+            label:
+                (widget.isDownloadLoading ?? false)
+                    ? const Text('Procesando...')
+                    : int.parse(selectedMonth) == DateTime.now().month
+                    ? const Text('Descargar Reporte')
+                    : const Text(
+                      'Descarga no disponible para meses anteriores',
+                    ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor:
+                  int.parse(selectedMonth) == DateTime.now().month &&
+                          !(widget.isDownloadLoading ?? false)
+                      ? AppColors.primaryTurquoise
+                      : AppColors.darkGray,
+              foregroundColor:
+                  int.parse(selectedMonth) == DateTime.now().month &&
+                          !(widget.isDownloadLoading ?? false)
+                      ? AppColors.primaryDarkBlue
+                      : AppColors.textPrimary.withAlpha(50),
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
           ),
+        ),
       ],
     );
   }
@@ -493,11 +588,6 @@ class _StudentSummaryWidgetState extends State<StudentSummaryWidget> {
                             selectedMonth = newValue;
                           });
                           _loadData();
-
-                          // Notificar al widget padre sobre el cambio de mes
-                          if (widget.onMonthChanged != null) {
-                            widget.onMonthChanged!(int.parse(newValue));
-                          }
                         }
                       },
                     ),
@@ -511,6 +601,34 @@ class _StudentSummaryWidgetState extends State<StudentSummaryWidget> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: children,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 120,
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textPrimary.withAlpha(150),
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: TextStyle(fontSize: 14, color: AppColors.textPrimary),
             ),
           ),
         ],

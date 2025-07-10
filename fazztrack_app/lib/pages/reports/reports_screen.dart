@@ -30,7 +30,6 @@ class _ReportsContentState extends State<ReportsContent> {
   bool _isMultiSelectMode = false;
   EstudianteModel? _selectedEstudiante;
   bool _isDisposed = false;
-  int _selectedMonth = DateTime.now().month; // Mes actual por defecto
 
   @override
   void initState() {
@@ -193,13 +192,6 @@ class _ReportsContentState extends State<ReportsContent> {
     } catch (e) {
       return 'Bar desconocido';
     }
-  }
-
-  // Método para actualizar el mes seleccionado desde StudentSummaryWidget
-  void _updateSelectedMonth(int month) {
-    setState(() {
-      _selectedMonth = month;
-    });
   }
 
   // Download Methods
@@ -767,164 +759,16 @@ class _ReportsContentState extends State<ReportsContent> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Información general
-                  _buildInfoCard(
-                    title: 'Datos Generales',
-                    icon: Icons.info_outline,
-                    children: [
-                      _buildInfoRow('Nombre', _selectedEstudiante!.nombre),
-                      _buildInfoRow(
-                        'Curso',
-                        _selectedEstudiante!.curso ?? 'No especificado',
-                      ),
-                      _buildInfoRow(
-                        'Bar',
-                        _getBarName(_selectedEstudiante!.idBar),
-                      ),
-                      _buildInfoRow(
-                        'Celular',
-                        _selectedEstudiante!.celular ?? 'No especificado',
-                      ),
-                      _buildInfoRow(
-                        'Representante',
-                        _selectedEstudiante!.nombreRepresentante ??
-                            'No especificado',
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  // Sección de resumen
+                  // Sección de resumen con información general integrada
                   StudentSummaryWidget(
                     key: ValueKey(_selectedEstudiante!.id),
                     estudiante: _selectedEstudiante!,
-                    onMonthChanged: _updateSelectedMonth,
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  // Botón de descarga
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      // Solo habilitado si el mes seleccionado es el actual
-                      onPressed:
-                          _selectedMonth == DateTime.now().month && !_isLoading
-                              ? _downloadIndividualReport
-                              : null,
-                      icon:
-                          _isLoading
-                              ? const SizedBox(
-                                width: 18,
-                                height: 18,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                    AppColors.primaryDarkBlue,
-                                  ),
-                                ),
-                              )
-                              : const Icon(Icons.download),
-                      label:
-                          _isLoading
-                              ? const Text('Procesando...')
-                              : _selectedMonth == DateTime.now().month
-                              ? const Text('Descargar Reporte')
-                              : const Text(
-                                'Descarga no disponible para meses anteriores',
-                              ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            _selectedMonth == DateTime.now().month &&
-                                    !_isLoading
-                                ? AppColors.primaryTurquoise
-                                : AppColors.darkGray,
-                        foregroundColor:
-                            _selectedMonth == DateTime.now().month &&
-                                    !_isLoading
-                                ? AppColors.primaryDarkBlue
-                                : AppColors.textPrimary.withAlpha(50),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                    ),
+                    onDownloadReport: _downloadIndividualReport,
+                    getBarName: _getBarName,
+                    isDownloadLoading: _isLoading,
                   ),
                 ],
               ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInfoCard({
-    required String title,
-    required IconData icon,
-    required List<Widget> children,
-  }) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: AppColors.background.withAlpha(20),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Row(
-              children: [
-                Icon(icon, size: 20, color: AppColors.primaryTurquoise),
-                const SizedBox(width: 8),
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: children,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInfoRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 120,
-            child: Text(
-              '$label:',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: AppColors.textPrimary.withAlpha(80),
-              ),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: TextStyle(fontSize: 14, color: AppColors.textPrimary),
             ),
           ),
         ],
@@ -972,10 +816,7 @@ class _ReportsContentState extends State<ReportsContent> {
             constraints: const BoxConstraints(maxWidth: 400),
             child: Text(
               message,
-              style: TextStyle(
-                color: AppColors.textPrimary,
-                fontSize: 16,
-              ),
+              style: TextStyle(color: AppColors.textPrimary, fontSize: 16),
             ),
           ),
           actions: [
