@@ -198,34 +198,9 @@ class _ReportsContentState extends State<ReportsContent> {
   Future<void> _downloadIndividualReport() async {
     if (_selectedEstudiante == null) return;
 
-    try {
-      setState(() => _isLoading = true);
+    await _reportsService.generateReportForStudent(_selectedEstudiante!.id);
 
-      final response = await _reportsService.generateReportForStudent(
-        _selectedEstudiante!.id,
-      );
-
-      if (!mounted || _isDisposed) return;
-
-      setState(() => _isLoading = false);
-
-      // Mostrar mensaje de éxito en popup
-      _showResponseDialog(
-        title: 'Reporte Solicitado',
-        message: response.message,
-        isSuccess: true,
-      );
-    } catch (e) {
-      if (!mounted || _isDisposed) return;
-
-      setState(() => _isLoading = false);
-
-      _showResponseDialog(
-        title: 'Error',
-        message: 'Error al solicitar reporte: $e',
-        isSuccess: false,
-      );
-    }
+    // La función retorna, el StudentSummaryWidget maneja el éxito/error
   }
 
   Future<void> _downloadSelectedReports() async {
@@ -765,7 +740,7 @@ class _ReportsContentState extends State<ReportsContent> {
                     estudiante: _selectedEstudiante!,
                     onDownloadReport: _downloadIndividualReport,
                     getBarName: _getBarName,
-                    isDownloadLoading: _isLoading,
+                    onShowDialog: _showResponseDialog,
                   ),
                 ],
               ),

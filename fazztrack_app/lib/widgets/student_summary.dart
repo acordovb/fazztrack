@@ -12,14 +12,19 @@ class StudentSummaryWidget extends StatefulWidget {
   final EstudianteModel estudiante;
   final Future<void> Function()? onDownloadReport;
   final String Function(String barId)? getBarName;
-  final bool? isDownloadLoading;
+  final void Function({
+    required String title,
+    required String message,
+    required bool isSuccess,
+  })?
+  onShowDialog;
 
   const StudentSummaryWidget({
     super.key,
     required this.estudiante,
     this.onDownloadReport,
     this.getBarName,
-    this.isDownloadLoading,
+    this.onShowDialog,
   });
 
   @override
@@ -37,6 +42,7 @@ class _StudentSummaryWidgetState extends State<StudentSummaryWidget> {
   List<AbonoModel> abonos = [];
   ControlHistoricoModel? controlHistorico;
   bool isLoading = true;
+  bool isDownloadLoading = false;
   String? error;
 
   // Variable para rastrear el estudiante actual y cancelar operaciones obsoletas
@@ -153,6 +159,43 @@ class _StudentSummaryWidgetState extends State<StudentSummaryWidget> {
         totalVentas +
         (controlHistorico?.totalPendienteUltMesAbono ?? 0) -
         (controlHistorico?.totalPendienteUltMesVenta ?? 0);
+  }
+
+  // Download Methods
+  Future<void> _downloadIndividualReport() async {
+    if (widget.onDownloadReport == null) return;
+
+    try {
+      setState(() => isDownloadLoading = true);
+
+      await widget.onDownloadReport!();
+
+      if (!mounted) return;
+
+      setState(() => isDownloadLoading = false);
+
+      // Mostrar mensaje de éxito
+      if (widget.onShowDialog != null) {
+        widget.onShowDialog!(
+          title: 'Reporte Solicitado',
+          message: 'El reporte ha sido solicitado exitosamente',
+          isSuccess: true,
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() => isDownloadLoading = false);
+
+      // Mostrar mensaje de error
+      if (widget.onShowDialog != null) {
+        widget.onShowDialog!(
+          title: 'Error',
+          message: 'Error al solicitar reporte: $e',
+          isSuccess: false,
+        );
+      }
+    }
   }
 
   @override
@@ -313,12 +356,12 @@ class _StudentSummaryWidgetState extends State<StudentSummaryWidget> {
             // Solo habilitado si el mes seleccionado es el actual
             onPressed:
                 int.parse(selectedMonth) == DateTime.now().month &&
-                        !(widget.isDownloadLoading ?? false) &&
+                        !isDownloadLoading &&
                         widget.onDownloadReport != null
-                    ? widget.onDownloadReport
+                    ? _downloadIndividualReport
                     : null,
             icon:
-                (widget.isDownloadLoading ?? false)
+                isDownloadLoading
                     ? const SizedBox(
                       width: 18,
                       height: 18,
@@ -331,7 +374,7 @@ class _StudentSummaryWidgetState extends State<StudentSummaryWidget> {
                     )
                     : const Icon(Icons.download),
             label:
-                (widget.isDownloadLoading ?? false)
+                isDownloadLoading
                     ? const Text('Procesando...')
                     : int.parse(selectedMonth) == DateTime.now().month
                     ? const Text('Descargar Reporte')
@@ -341,12 +384,12 @@ class _StudentSummaryWidgetState extends State<StudentSummaryWidget> {
             style: ElevatedButton.styleFrom(
               backgroundColor:
                   int.parse(selectedMonth) == DateTime.now().month &&
-                          !(widget.isDownloadLoading ?? false)
+                          !isDownloadLoading
                       ? AppColors.primaryTurquoise
                       : AppColors.darkGray,
               foregroundColor:
                   int.parse(selectedMonth) == DateTime.now().month &&
-                          !(widget.isDownloadLoading ?? false)
+                          !isDownloadLoading
                       ? AppColors.primaryDarkBlue
                       : AppColors.textPrimary.withAlpha(50),
               padding: const EdgeInsets.symmetric(vertical: 16),
