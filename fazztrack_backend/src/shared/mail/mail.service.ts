@@ -83,10 +83,6 @@ export class MailService {
         textContent,
         studentNames,
       );
-
-      this.logger.log(
-        `Successfully sent email with ${attachments.length} PDF attachments (${filePaths.length} files processed)`,
-      );
     } catch (error) {
       this.logger.error('Failed to send email with PDF files:', error);
       throw error;
@@ -143,10 +139,6 @@ export class MailService {
           textContent || defaultText,
           chunk,
         );
-
-        this.logger.log(
-          `Successfully sent email ${i + 1}/${pdfChunks.length} with ${chunk.length} PDF(s)`,
-        );
       } catch (error) {
         this.logger.error(
           `Failed to send email ${i + 1}/${pdfChunks.length}:`,
@@ -195,8 +187,6 @@ export class MailService {
       }
 
       const result = await this.resend.emails.send(emailData);
-      console.log('Email sent:', result);
-      this.logger.log(`Email sent successfully with ID: ${result.data?.id}`);
     } catch (error) {
       this.logger.error('Failed to send email:', error);
       throw error;
