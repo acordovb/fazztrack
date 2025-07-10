@@ -21,7 +21,7 @@ export class MailService {
     }
 
     this.resend = new Resend(resendApiKey);
-    this.defaultFromEmail = 'Acme <onboarding@resend.dev>';
+    this.defaultFromEmail = 'Fazztrack System <fazztrack@resend.dev>';
   }
 
   /**
@@ -67,7 +67,6 @@ export class MailService {
           });
         } catch (error) {
           this.logger.error(`Failed to read PDF file ${filePath}:`, error);
-          // Continue with other files instead of failing completely
         }
       }
 
@@ -76,7 +75,6 @@ export class MailService {
         return;
       }
 
-      // Send emails with PDFs, splitting if necessary
       await this.sendPDFEmailsInBatches(
         subject,
         attachments,
