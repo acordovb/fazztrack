@@ -1,0 +1,11 @@
+services:
+  fazztrack_backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: fazztrack_backend:latest
+    container_name: fazztrack_backend
+    env_file:
+      - .env
+    ports:
+      - "3000:3000"

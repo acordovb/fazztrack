@@ -2,6 +2,7 @@ node_modules
 dist
 npm-debug.log
 Dockerfile
+Dockerfile.optimized
 .dockerignore
 .env
 .env.*
@@ -12,3 +13,17 @@ test
 *.ts
 !.dockerignore
 !.env.example
+# Archivos adicionales para optimizar
+.DS_Store
+*.log
+*.swp
+*.swo
+.vscode/
+.idea/
+README.md
+docker-compose.yml
+eslint.config.mjs
+.prettierrc
+tsconfig.build.json
+nest-cli.json
+yarn-error.log

@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Resend } from 'resend';
+import { PdfResult } from '../../modules/pdf-report/interfaces/pdf-result.interface';
 
 export interface EmailAttachment {
   filename: string;
@@ -85,6 +86,75 @@ export class MailService {
       );
     } catch (error) {
       this.logger.error('Failed to send email with PDF files:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Send email with PDF results in base64 (OPTIMIZED METHOD)
+   * This method is more efficient as it doesn't require file I/O
+   */
+  async sendEmailWithPdfResults(
+    subject: string,
+    pdfResults: PdfResult[],
+    htmlContent?: string,
+    textContent?: string,
+    studentNames?: string[],
+  ): Promise<void> {
+    if (pdfResults.length === 0) {
+      this.logger.warn('No PDF results to send');
+      return;
+    }
+
+    try {
+      // Convert PdfResult objects to EmailAttachment format
+      const attachments: EmailAttachment[] = [];
+
+      for (const pdfResult of pdfResults) {
+        try {
+          // Convert base64 to Buffer for email attachment
+          const content = Buffer.from(pdfResult.base64, 'base64');
+
+          // Validate file size (most email providers have limits)
+          const maxSize = 25 * 1024 * 1024; // 25MB limit
+          if (content.length > maxSize) {
+            this.logger.warn(
+              `PDF file ${pdfResult.filename} is too large (${Math.round(content.length / 1024 / 1024)}MB), skipping`,
+            );
+            continue;
+          }
+
+          attachments.push({
+            filename: pdfResult.filename,
+            content,
+            contentType: pdfResult.mimeType,
+          });
+        } catch (error) {
+          this.logger.error(
+            `Failed to process PDF result ${pdfResult.filename}:`,
+            error,
+          );
+        }
+      }
+
+      if (attachments.length === 0) {
+        this.logger.warn('No valid PDF results could be processed');
+        return;
+      }
+
+      await this.sendPDFEmailsInBatches(
+        subject,
+        attachments,
+        htmlContent,
+        textContent,
+        studentNames,
+      );
+
+      this.logger.log(
+        `Successfully sent email with ${attachments.length} PDF attachments using base64 method`,
+      );
+    } catch (error) {
+      this.logger.error('Failed to send email with PDF results:', error);
       throw error;
     }
   }

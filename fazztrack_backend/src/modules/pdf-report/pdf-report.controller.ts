@@ -13,7 +13,6 @@ export class PdfReportController {
   ): Promise<ReportResponseDto> {
     return this.pdfReportService.generateReportsForStudents(reportRequest);
   }
-
   @Post('generate-all')
   @HttpCode(HttpStatus.OK)
   async generateAllReports(): Promise<ReportResponseDto> {

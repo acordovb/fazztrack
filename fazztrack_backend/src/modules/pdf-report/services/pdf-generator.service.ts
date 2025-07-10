@@ -3,6 +3,7 @@ import * as puppeteer from 'puppeteer';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { ProcessedReportData } from '../interfaces/report-data.interface';
+import { PdfResult } from '../interfaces/pdf-result.interface';
 
 @Injectable()
 export class PdfGeneratorService {
@@ -14,14 +15,11 @@ export class PdfGeneratorService {
   );
 
   /**
-   * Genera un PDF a partir de los datos del reporte
+   * Genera un PDF en base64 a partir de los datos del reporte (método optimizado)
    */
-  async generatePdf(reportData: ProcessedReportData): Promise<string> {
+  async generatePdfBase64(reportData: ProcessedReportData): Promise<PdfResult> {
     const htmlContent = await this.generateHtmlContent(reportData);
-    const fileName = this.generateFileName(reportData.student.nombre);
-    const filePath = path.join(process.cwd(), 'temp', fileName);
-
-    await this.ensureTempDirectoryExists();
+    const filename = this.generateFileName(reportData.student.nombre);
 
     const browser = await puppeteer.launch({
       headless: true,
@@ -31,8 +29,8 @@ export class PdfGeneratorService {
     try {
       const page = await browser.newPage();
       await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
-      await page.pdf({
-        path: filePath,
+
+      const pdfBuffer = await page.pdf({
         format: 'A4',
         printBackground: true,
         margin: {
@@ -42,11 +40,15 @@ export class PdfGeneratorService {
           left: '20px',
         },
       });
+
+      return {
+        base64: Buffer.from(pdfBuffer).toString('base64'),
+        filename,
+        mimeType: 'application/pdf',
+      };
     } finally {
       await browser.close();
     }
-
-    return filePath;
   }
 
   /**
@@ -259,5 +261,27 @@ export class PdfGeneratorService {
     } catch {
       await fs.mkdir(tempDir, { recursive: true });
     }
+  }
+
+  /**
+   * Genera un PDF como archivo (para casos específicos donde se necesite el archivo)
+   * @deprecated Usar generatePdfBase64 para mejor rendimiento
+   */
+  async generatePdfFile(reportData: ProcessedReportData): Promise<string> {
+    const pdfResult = await this.generatePdfBase64(reportData);
+    const filePath = path.join(process.cwd(), 'temp', pdfResult.filename);
+
+    await this.ensureTempDirectoryExists();
+    await fs.writeFile(filePath, Buffer.from(pdfResult.base64, 'base64'));
+
+    return filePath;
+  }
+
+  /**
+   * Genera un PDF a partir de los datos del reporte
+   * @deprecated Usar generatePdfBase64 para mejor rendimiento
+   */
+  async generatePdf(reportData: ProcessedReportData): Promise<string> {
+    return this.generatePdfFile(reportData);
   }
 }

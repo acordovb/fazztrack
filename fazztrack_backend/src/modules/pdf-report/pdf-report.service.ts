@@ -1,11 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { unlink } from 'fs/promises';
-import { basename } from 'path';
 import { ReportRequestDto, ReportResponseDto } from './dto';
 import { ReportDataService } from './services/report-data.service';
 import { PdfGeneratorService } from './services/pdf-generator.service';
 import { ReportDataProcessorService } from './services/report-data-processor.service';
 import { MailService } from '../../shared/mail/mail.service';
+import { PdfResult } from './interfaces/pdf-result.interface';
 
 @Injectable()
 export class PdfReportService {
@@ -49,7 +48,7 @@ export class PdfReportService {
       `Starting background processing for ${studentIds.length} student reports`,
     );
 
-    const filePaths: string[] = [];
+    const pdfResults: PdfResult[] = [];
     const studentNames: string[] = [];
     let processedCount = 0;
     let skippedCount = 0;
@@ -70,9 +69,10 @@ export class PdfReportService {
                 await this.reportDataProcessorService.processReportData(
                   reportData,
                 );
-              const filePath =
-                await this.pdfGeneratorService.generatePdf(processedData);
-              return { filePath, studentName: reportData.student.nombre };
+              // Use optimized base64 method
+              const pdfResult =
+                await this.pdfGeneratorService.generatePdfBase64(processedData);
+              return { pdfResult, studentName: reportData.student.nombre };
             } else {
               this.logger.warn(
                 `Sin datos para generar reporte del estudiante ${studentId}`,
@@ -92,7 +92,7 @@ export class PdfReportService {
 
         batchResults.forEach((result) => {
           if (result.status === 'fulfilled' && result.value) {
-            filePaths.push(result.value.filePath);
+            pdfResults.push(result.value.pdfResult);
             studentNames.push(result.value.studentName);
             processedCount++;
           } else {
@@ -106,9 +106,9 @@ export class PdfReportService {
       }
 
       // Send emails with PDFs if any were generated
-      if (filePaths.length > 0) {
-        await this.sendReportsViaEmail(
-          filePaths,
+      if (pdfResults.length > 0) {
+        await this.sendReportsViaEmailOptimized(
+          pdfResults,
           `Reportes de Estudiantes - ${processedCount} reportes generados`,
           studentNames,
         );
@@ -122,8 +122,6 @@ export class PdfReportService {
       }
     } catch (error) {
       this.logger.error('Error in background report processing:', error);
-      // Clean up any generated files even if email sending failed
-      await this.cleanupPdfFiles(filePaths);
     }
   }
 
@@ -151,7 +149,7 @@ export class PdfReportService {
     const startTime = Date.now();
     this.logger.log('Starting background processing for all student reports');
 
-    const filePaths: string[] = [];
+    const pdfResults: PdfResult[] = [];
     const studentNames: string[] = [];
     let processedCount = 0;
     let skippedCount = 0;
@@ -173,9 +171,10 @@ export class PdfReportService {
               await this.reportDataProcessorService.processReportData(
                 reportData,
               );
-            const filePath =
-              await this.pdfGeneratorService.generatePdf(processedData);
-            return { filePath, studentName: reportData.student.nombre };
+            // Use optimized base64 method
+            const pdfResult =
+              await this.pdfGeneratorService.generatePdfBase64(processedData);
+            return { pdfResult, studentName: reportData.student.nombre };
           } catch (error) {
             this.logger.error(
               `Error generando reporte para estudiante ${reportData.student.nombre}:`,
@@ -189,7 +188,7 @@ export class PdfReportService {
 
         batchResults.forEach((result) => {
           if (result.status === 'fulfilled' && result.value) {
-            filePaths.push(result.value.filePath);
+            pdfResults.push(result.value.pdfResult);
             studentNames.push(result.value.studentName);
             processedCount++;
           } else {
@@ -203,9 +202,9 @@ export class PdfReportService {
       }
 
       // Send emails with PDFs if any were generated
-      if (filePaths.length > 0) {
-        await this.sendReportsViaEmail(
-          filePaths,
+      if (pdfResults.length > 0) {
+        await this.sendReportsViaEmailOptimized(
+          pdfResults,
           `Reportes de Todos los Estudiantes - ${processedCount} reportes generados`,
           studentNames,
         );
@@ -219,64 +218,33 @@ export class PdfReportService {
       }
     } catch (error) {
       this.logger.error('Error in background all reports processing:', error);
-      // Clean up any generated files even if email sending failed
-      await this.cleanupPdfFiles(filePaths);
     }
   }
 
   /**
-   * Send reports via email with PDF attachments
+   * Send reports via email with PDF attachments using base64 (OPTIMIZED)
    */
-  private async sendReportsViaEmail(
-    filePaths: string[],
+  private async sendReportsViaEmailOptimized(
+    pdfResults: PdfResult[],
     subject: string,
     studentNames?: string[],
   ): Promise<void> {
     try {
-      // Use the optimized mail service method
-      await this.mailService.sendEmailWithPDFFiles(
+      // Use the optimized mail service method with base64
+      await this.mailService.sendEmailWithPdfResults(
         subject,
-        filePaths,
+        pdfResults,
         undefined,
         undefined,
         studentNames,
       );
 
       this.logger.log(
-        `Email sent successfully with ${filePaths.length} PDF attachments`,
+        `Email sent successfully with ${pdfResults.length} PDF attachments using optimized base64 method`,
       );
-
-      // Clean up PDF files after successful email sending
-      await this.cleanupPdfFiles(filePaths);
     } catch (error) {
       this.logger.error('Failed to send reports via email:', error);
-      // Still try to clean up files even if email failed
-      await this.cleanupPdfFiles(filePaths);
       throw error;
     }
-  }
-
-  /**
-   * Clean up generated PDF files
-   */
-  private async cleanupPdfFiles(filePaths: string[]): Promise<void> {
-    if (filePaths.length === 0) {
-      return;
-    }
-
-    const cleanupPromises = filePaths.map(async (filePath) => {
-      try {
-        await unlink(filePath);
-        this.logger.log(`Successfully deleted PDF file: ${basename(filePath)}`);
-      } catch (error) {
-        this.logger.warn(
-          `Failed to delete PDF file ${basename(filePath)}:`,
-          error,
-        );
-      }
-    });
-
-    await Promise.allSettled(cleanupPromises);
-    this.logger.log(`Cleanup completed for ${filePaths.length} PDF files`);
   }
 }
