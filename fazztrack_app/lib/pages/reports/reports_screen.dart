@@ -3,6 +3,7 @@ import 'package:fazztrack_app/models/bar_model.dart';
 import 'package:fazztrack_app/models/estudiante_model.dart';
 import 'package:fazztrack_app/services/bar/bar_api_service.dart';
 import 'package:fazztrack_app/services/estudiantes/estudiantes_api_service.dart';
+import 'package:fazztrack_app/services/reports/reports_api_service.dart';
 import 'package:fazztrack_app/widgets/buscador_reporte.dart';
 import 'package:fazztrack_app/widgets/student_summary.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +18,7 @@ class ReportsContent extends StatefulWidget {
 class _ReportsContentState extends State<ReportsContent> {
   final EstudiantesApiService _estudiantesService = EstudiantesApiService();
   final BarApiService _barService = BarApiService();
+  final ReportsApiService _reportsService = ReportsApiService();
   final TextEditingController _searchController = TextEditingController();
 
   List<EstudianteModel> _allEstudiantes = [];
@@ -200,6 +202,108 @@ class _ReportsContentState extends State<ReportsContent> {
     });
   }
 
+  // Download Methods
+  Future<void> _downloadIndividualReport() async {
+    if (_selectedEstudiante == null) return;
+
+    try {
+      setState(() => _isLoading = true);
+
+      final response = await _reportsService.generateReportForStudent(
+        _selectedEstudiante!.id,
+      );
+
+      if (!mounted || _isDisposed) return;
+
+      setState(() => _isLoading = false);
+
+      // Mostrar mensaje de éxito en popup
+      _showResponseDialog(
+        title: 'Reporte Solicitado',
+        message: response.message,
+        isSuccess: true,
+      );
+    } catch (e) {
+      if (!mounted || _isDisposed) return;
+
+      setState(() => _isLoading = false);
+
+      _showResponseDialog(
+        title: 'Error',
+        message: 'Error al solicitar reporte: $e',
+        isSuccess: false,
+      );
+    }
+  }
+
+  Future<void> _downloadSelectedReports() async {
+    if (_selectedEstudiantes.isEmpty) return;
+
+    try {
+      setState(() => _isLoading = true);
+
+      final response = await _reportsService.generateReportsForStudents(
+        _selectedEstudiantes.toList(),
+      );
+
+      if (!mounted || _isDisposed) return;
+
+      setState(() => _isLoading = false);
+
+      // Mostrar mensaje de éxito en popup
+      _showResponseDialog(
+        title: 'Reportes Solicitados',
+        message: response.message,
+        isSuccess: true,
+      );
+
+      // Opcional: Limpiar selección después de solicitar reportes
+      setState(() {
+        _selectedEstudiantes.clear();
+        _selectAll = false;
+      });
+    } catch (e) {
+      if (!mounted || _isDisposed) return;
+
+      setState(() => _isLoading = false);
+
+      _showResponseDialog(
+        title: 'Error',
+        message: 'Error al solicitar reportes: $e',
+        isSuccess: false,
+      );
+    }
+  }
+
+  Future<void> _downloadAllReports() async {
+    try {
+      setState(() => _isLoading = true);
+
+      final response = await _reportsService.generateAllReports();
+
+      if (!mounted || _isDisposed) return;
+
+      setState(() => _isLoading = false);
+
+      // Mostrar mensaje de éxito en popup
+      _showResponseDialog(
+        title: 'Reportes Solicitados',
+        message: response.message,
+        isSuccess: true,
+      );
+    } catch (e) {
+      if (!mounted || _isDisposed) return;
+
+      setState(() => _isLoading = false);
+
+      _showResponseDialog(
+        title: 'Error',
+        message: 'Error al solicitar reportes: $e',
+        isSuccess: false,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -319,9 +423,7 @@ class _ReportsContentState extends State<ReportsContent> {
             label: 'Descargar Seleccionados',
             onPressed:
                 _selectedEstudiantes.isNotEmpty
-                    ? () {
-                      // TODO: Implement download selected
-                    }
+                    ? _downloadSelectedReports
                     : null,
           ),
           const SizedBox(width: 12),
@@ -331,11 +433,7 @@ class _ReportsContentState extends State<ReportsContent> {
           icon: Icons.download_for_offline,
           label: 'Descargar Todos',
           onPressed:
-              _filteredEstudiantes.isNotEmpty
-                  ? () {
-                    // TODO: Implement download all
-                  }
-                  : null,
+              _filteredEstudiantes.isNotEmpty ? _downloadAllReports : null,
         ),
       ],
     );
@@ -346,10 +444,22 @@ class _ReportsContentState extends State<ReportsContent> {
     required String label,
     required VoidCallback? onPressed,
   }) {
-    final isEnabled = onPressed != null;
+    final isEnabled = onPressed != null && !_isLoading;
     return ElevatedButton.icon(
-      onPressed: onPressed,
-      icon: Icon(icon, size: 18),
+      onPressed: isEnabled ? onPressed : null,
+      icon:
+          _isLoading && onPressed != null
+              ? const SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    AppColors.primaryDarkBlue,
+                  ),
+                ),
+              )
+              : Icon(icon, size: 18),
       label: Text(label),
       style: ElevatedButton.styleFrom(
         backgroundColor:
@@ -700,25 +810,39 @@ class _ReportsContentState extends State<ReportsContent> {
                     child: ElevatedButton.icon(
                       // Solo habilitado si el mes seleccionado es el actual
                       onPressed:
-                          _selectedMonth == DateTime.now().month
-                              ? () {
-                                // TODO: Implement individual PDF download
-                              }
+                          _selectedMonth == DateTime.now().month && !_isLoading
+                              ? _downloadIndividualReport
                               : null,
-                      icon: const Icon(Icons.download),
+                      icon:
+                          _isLoading
+                              ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    AppColors.primaryDarkBlue,
+                                  ),
+                                ),
+                              )
+                              : const Icon(Icons.download),
                       label:
-                          _selectedMonth == DateTime.now().month
+                          _isLoading
+                              ? const Text('Procesando...')
+                              : _selectedMonth == DateTime.now().month
                               ? const Text('Descargar Reporte')
                               : const Text(
                                 'Descarga no disponible para meses anteriores',
                               ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor:
-                            _selectedMonth == DateTime.now().month
+                            _selectedMonth == DateTime.now().month &&
+                                    !_isLoading
                                 ? AppColors.primaryTurquoise
                                 : AppColors.darkGray,
                         foregroundColor:
-                            _selectedMonth == DateTime.now().month
+                            _selectedMonth == DateTime.now().month &&
+                                    !_isLoading
                                 ? AppColors.primaryDarkBlue
                                 : AppColors.textPrimary.withAlpha(50),
                         padding: const EdgeInsets.symmetric(vertical: 16),
@@ -805,6 +929,66 @@ class _ReportsContentState extends State<ReportsContent> {
           ),
         ],
       ),
+    );
+  }
+
+  // Dialog method to show responses
+  void _showResponseDialog({
+    required String title,
+    required String message,
+    required bool isSuccess,
+  }) {
+    if (!mounted || _isDisposed) return;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: AppColors.card,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          title: Row(
+            children: [
+              Icon(
+                isSuccess ? Icons.check_circle : Icons.error,
+                color: isSuccess ? AppColors.primaryTurquoise : AppColors.error,
+                size: 24,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          content: Container(
+            constraints: const BoxConstraints(maxWidth: 400),
+            child: Text(
+              message,
+              style: TextStyle(
+                color: AppColors.textPrimary,
+                fontSize: 16,
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.primaryTurquoise,
+              ),
+              child: const Text('Entendido'),
+            ),
+          ],
+        );
+      },
     );
   }
 }
