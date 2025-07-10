@@ -25,5 +25,4 @@ docker-compose.yml
 eslint.config.mjs
 .prettierrc
 tsconfig.build.json
-nest-cli.json
 yarn-error.log
