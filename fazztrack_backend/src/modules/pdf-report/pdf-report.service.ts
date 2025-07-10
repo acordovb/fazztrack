@@ -50,6 +50,7 @@ export class PdfReportService {
     );
 
     const filePaths: string[] = [];
+    const studentNames: string[] = [];
     let processedCount = 0;
     let skippedCount = 0;
 
@@ -71,7 +72,7 @@ export class PdfReportService {
                 );
               const filePath =
                 await this.pdfGeneratorService.generatePdf(processedData);
-              return filePath;
+              return { filePath, studentName: reportData.student.nombre };
             } else {
               this.logger.warn(
                 `Sin datos para generar reporte del estudiante ${studentId}`,
@@ -91,7 +92,8 @@ export class PdfReportService {
 
         batchResults.forEach((result) => {
           if (result.status === 'fulfilled' && result.value) {
-            filePaths.push(result.value);
+            filePaths.push(result.value.filePath);
+            studentNames.push(result.value.studentName);
             processedCount++;
           } else {
             skippedCount++;
@@ -108,6 +110,7 @@ export class PdfReportService {
         await this.sendReportsViaEmail(
           filePaths,
           `Reportes de Estudiantes - ${processedCount} reportes generados`,
+          studentNames,
         );
 
         const duration = Date.now() - startTime;
@@ -149,6 +152,7 @@ export class PdfReportService {
     this.logger.log('Starting background processing for all student reports');
 
     const filePaths: string[] = [];
+    const studentNames: string[] = [];
     let processedCount = 0;
     let skippedCount = 0;
 
@@ -171,7 +175,7 @@ export class PdfReportService {
               );
             const filePath =
               await this.pdfGeneratorService.generatePdf(processedData);
-            return filePath;
+            return { filePath, studentName: reportData.student.nombre };
           } catch (error) {
             this.logger.error(
               `Error generando reporte para estudiante ${reportData.student.nombre}:`,
@@ -185,7 +189,8 @@ export class PdfReportService {
 
         batchResults.forEach((result) => {
           if (result.status === 'fulfilled' && result.value) {
-            filePaths.push(result.value);
+            filePaths.push(result.value.filePath);
+            studentNames.push(result.value.studentName);
             processedCount++;
           } else {
             skippedCount++;
@@ -202,6 +207,7 @@ export class PdfReportService {
         await this.sendReportsViaEmail(
           filePaths,
           `Reportes de Todos los Estudiantes - ${processedCount} reportes generados`,
+          studentNames,
         );
 
         const duration = Date.now() - startTime;
@@ -224,10 +230,17 @@ export class PdfReportService {
   private async sendReportsViaEmail(
     filePaths: string[],
     subject: string,
+    studentNames?: string[],
   ): Promise<void> {
     try {
       // Use the optimized mail service method
-      await this.mailService.sendEmailWithPDFFiles(subject, filePaths);
+      await this.mailService.sendEmailWithPDFFiles(
+        subject,
+        filePaths,
+        undefined,
+        undefined,
+        studentNames,
+      );
 
       this.logger.log(
         `Email sent successfully with ${filePaths.length} PDF attachments`,

@@ -33,6 +33,7 @@ export class MailService {
     filePaths: string[],
     htmlContent?: string,
     textContent?: string,
+    studentNames?: string[],
   ): Promise<void> {
     if (filePaths.length === 0) {
       this.logger.warn('No PDF files to send');
@@ -80,6 +81,7 @@ export class MailService {
         attachments,
         htmlContent,
         textContent,
+        studentNames,
       );
 
       this.logger.log(
@@ -99,6 +101,7 @@ export class MailService {
     pdfs: EmailAttachment[],
     htmlContent?: string,
     textContent?: string,
+    studentNames?: string[],
   ): Promise<void> {
     const MAX_ATTACHMENTS_PER_EMAIL = 25;
 
@@ -121,6 +124,7 @@ export class MailService {
         isMultipart,
         i + 1,
         pdfChunks.length,
+        studentNames,
       );
 
       const defaultText = this.generateDefaultTextContent(
@@ -129,6 +133,7 @@ export class MailService {
         isMultipart,
         i + 1,
         pdfChunks.length,
+        studentNames,
       );
 
       try {
@@ -207,6 +212,7 @@ export class MailService {
     isMultipart: boolean,
     currentPart?: number,
     totalParts?: number,
+    studentNames?: string[],
   ): string {
     const partInfo = isMultipart
       ? `<p style="color: #666; font-size: 14px; margin-bottom: 15px;">
@@ -214,10 +220,24 @@ export class MailService {
          </p>`
       : '';
 
+    // Generate student names section
+    const studentNamesSection =
+      studentNames && studentNames.length > 0
+        ? `
+        <div style="background-color: #f0f8ff; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #2196F3;">
+          <h3 style="color: #1976D2; margin: 0 0 15px 0; font-size: 16px;">Estudiantes incluidos en este reporte:</h3>
+          <ul style="margin: 0; padding-left: 20px; color: #666;">
+            ${studentNames.map((name) => `<li style="margin-bottom: 5px;">${name}</li>`).join('')}
+          </ul>
+        </div>
+      `
+        : '';
+
     return `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #333; margin-bottom: 20px;">${subject}</h2>
         ${partInfo}
+        ${studentNamesSection}
         <div style="background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
           <p style="color: #666; line-height: 1.6; margin: 0;">
             Se adjuntan <strong>${pdfCount} archivo(s) PDF</strong> en este correo.
@@ -249,6 +269,7 @@ export class MailService {
     isMultipart: boolean,
     currentPart?: number,
     totalParts?: number,
+    studentNames?: string[],
   ): string {
     const partInfo = isMultipart
       ? `Parte ${currentPart} de ${totalParts}\n\n`
@@ -257,7 +278,13 @@ export class MailService {
       ? `\n\nNota: Debido a la cantidad de archivos, los PDFs se han dividido en ${totalParts} correos separados.`
       : '';
 
-    return `${subject}\n\n${partInfo}Se adjuntan ${pdfCount} archivo(s) PDF en este correo.${multipartNote}\n\n---\nEste es un mensaje automático de FazzTrack. Por favor no responda a este correo.`;
+    // Generate student names section for text
+    const studentNamesSection =
+      studentNames && studentNames.length > 0
+        ? `\n\nESTUDIANTES INCLUIDOS:\n${studentNames.map((name, index) => `${index + 1}. ${name}`).join('\n')}\n`
+        : '';
+
+    return `${subject}\n\n${partInfo}Se adjuntan ${pdfCount} archivo(s) PDF en este correo.${multipartNote}${studentNamesSection}\n\n---\nEste es un mensaje automático de FazzTrack. Por favor no responda a este correo.`;
   }
 
   /**
