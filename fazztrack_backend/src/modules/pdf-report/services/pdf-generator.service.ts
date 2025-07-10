@@ -250,38 +250,4 @@ export class PdfGeneratorService {
     const cleanName = studentName.replace(/\s+/g, '_');
     return `reporte_${cleanName}_${Date.now()}.pdf`;
   }
-
-  /**
-   * Asegura que el directorio temporal existe
-   */
-  private async ensureTempDirectoryExists(): Promise<void> {
-    const tempDir = path.join(process.cwd(), 'temp');
-    try {
-      await fs.access(tempDir);
-    } catch {
-      await fs.mkdir(tempDir, { recursive: true });
-    }
-  }
-
-  /**
-   * Genera un PDF como archivo (para casos específicos donde se necesite el archivo)
-   * @deprecated Usar generatePdfBase64 para mejor rendimiento
-   */
-  async generatePdfFile(reportData: ProcessedReportData): Promise<string> {
-    const pdfResult = await this.generatePdfBase64(reportData);
-    const filePath = path.join(process.cwd(), 'temp', pdfResult.filename);
-
-    await this.ensureTempDirectoryExists();
-    await fs.writeFile(filePath, Buffer.from(pdfResult.base64, 'base64'));
-
-    return filePath;
-  }
-
-  /**
-   * Genera un PDF a partir de los datos del reporte
-   * @deprecated Usar generatePdfBase64 para mejor rendimiento
-   */
-  async generatePdf(reportData: ProcessedReportData): Promise<string> {
-    return this.generatePdfFile(reportData);
-  }
 }

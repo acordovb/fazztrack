@@ -35,8 +35,6 @@ export class PdfReportService {
     return {
       message:
         'Su solicitud ha sido recibida exitosamente. Los reportes serán generados y enviados a su correo electrónico en los próximos minutos.',
-      filePaths: [],
-      studentsProcessed: reportRequest.studentIds.length,
     };
   }
 
@@ -140,8 +138,6 @@ export class PdfReportService {
     return {
       message:
         'Su solicitud ha sido recibida exitosamente. Los reportes serán generados y enviados a su correo electrónico en los próximos minutos.',
-      filePaths: [],
-      studentsProcessed: 0,
     };
   }
 
