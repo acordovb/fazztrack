@@ -23,6 +23,12 @@ export class EstudiantesService extends BaseCrudService<
       celular: model.celular,
       curso: model.curso,
       nombre_representante: model.nombre_representante,
+      bar: model.bar
+        ? {
+            id: encodeId(model.bar.id),
+            nombre: model.bar.nombre,
+          }
+        : undefined,
     };
   }
 

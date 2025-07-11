@@ -12,7 +12,6 @@ import 'package:flutter/material.dart';
 class StudentSummaryWidget extends StatefulWidget {
   final EstudianteModel estudiante;
   final Future<void> Function()? onDownloadReport;
-  final String Function(String barId)? getBarName;
   final void Function({
     required String title,
     required String message,
@@ -24,7 +23,6 @@ class StudentSummaryWidget extends StatefulWidget {
     super.key,
     required this.estudiante,
     this.onDownloadReport,
-    this.getBarName,
     this.onShowDialog,
   });
 
@@ -167,15 +165,15 @@ class _StudentSummaryWidgetState extends State<StudentSummaryWidget> {
   Future<void> _generateLocalReport() async {
     try {
       setState(() => isDownloadLoading = true);
-
-      final barName =
-          widget.getBarName?.call(widget.estudiante.idBar) ?? 'Bar desconocido';
       final month = int.parse(selectedMonth);
       final year = DateTime.now().year;
 
-      final filePath = await _localReportsService.generateLocalStudentReport(
+      await _localReportsService.generateReportWithData(
+        context: context,
         estudiante: widget.estudiante,
-        barName: barName,
+        ventas: ventas,
+        abonos: abonos,
+        controlHistorico: controlHistorico,
         month: month,
         year: year,
       );
@@ -184,8 +182,8 @@ class _StudentSummaryWidgetState extends State<StudentSummaryWidget> {
 
       setState(() => isDownloadLoading = false);
 
-      // Mostrar mensaje de éxito con opciones
-      _showReportGeneratedDialog(filePath);
+      // El método generateReportWithData ya muestra el diálogo de éxito
+      // por lo que no necesitamos llamar _showReportGeneratedDialog aquí
     } catch (e) {
       if (!mounted) return;
 
@@ -200,39 +198,6 @@ class _StudentSummaryWidgetState extends State<StudentSummaryWidget> {
         );
       }
     }
-  }
-
-  void _showReportGeneratedDialog(String filePath) {
-    if (!mounted) return;
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: AppColors.background,
-          title: Text(
-            'Reporte Generado',
-            style: TextStyle(
-              color: AppColors.textPrimary,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          content: Text(
-            'El reporte PDF ha sido generado y guardado exitosamente. Verifique en la carpeta de documentos de su dispositivo.',
-            style: TextStyle(color: AppColors.textPrimary),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(
-                'Entendido',
-                style: TextStyle(color: AppColors.primaryTurquoise),
-              ),
-            ),
-          ],
-        );
-      },
-    );
   }
 
   @override
@@ -250,11 +215,7 @@ class _StudentSummaryWidgetState extends State<StudentSummaryWidget> {
               'Curso',
               widget.estudiante.curso ?? 'No especificado',
             ),
-            _buildInfoRow(
-              'Bar',
-              widget.getBarName?.call(widget.estudiante.idBar) ??
-                  'Bar desconocido',
-            ),
+            _buildInfoRow('Bar', widget.estudiante.bar?.nombre ?? ''),
             _buildInfoRow(
               'Celular',
               widget.estudiante.celular ?? 'No especificado',

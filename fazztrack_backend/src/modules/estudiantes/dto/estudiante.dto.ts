@@ -1,3 +1,5 @@
+import { BarDto } from 'src/modules/bars/dto';
+
 export class EstudianteDto {
   id: string;
   nombre: string;
@@ -5,4 +7,5 @@ export class EstudianteDto {
   celular: string | null;
   curso: string | null;
   nombre_representante: string | null;
+  bar?: BarDto;
 }

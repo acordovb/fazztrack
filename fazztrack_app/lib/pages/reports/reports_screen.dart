@@ -1,9 +1,7 @@
 import 'package:fazztrack_app/constants/colors_constants.dart';
-import 'package:fazztrack_app/models/bar_model.dart';
 import 'package:fazztrack_app/models/estudiante_model.dart';
-import 'package:fazztrack_app/services/bar/bar_api_service.dart';
 import 'package:fazztrack_app/services/estudiantes/estudiantes_api_service.dart';
-import 'package:fazztrack_app/services/reports/reports_api_service.dart';
+import 'package:fazztrack_app/services/reports/local_reports_service.dart';
 import 'package:fazztrack_app/widgets/buscador_reporte.dart';
 import 'package:fazztrack_app/widgets/student_summary.dart';
 import 'package:flutter/material.dart';
@@ -17,13 +15,11 @@ class ReportsContent extends StatefulWidget {
 
 class _ReportsContentState extends State<ReportsContent> {
   final EstudiantesApiService _estudiantesService = EstudiantesApiService();
-  final BarApiService _barService = BarApiService();
-  final ReportsApiService _reportsService = ReportsApiService();
+  final LocalReportsService _localReportsService = LocalReportsService();
   final TextEditingController _searchController = TextEditingController();
 
   List<EstudianteModel> _allEstudiantes = [];
   List<EstudianteModel> _filteredEstudiantes = [];
-  List<BarModel> _bars = [];
   Set<String> _selectedEstudiantes = {};
   bool _isLoading = false;
   bool _selectAll = false;
@@ -35,7 +31,6 @@ class _ReportsContentState extends State<ReportsContent> {
   void initState() {
     super.initState();
     _loadEstudiantes();
-    _loadBars();
   }
 
   @override
@@ -67,18 +62,6 @@ class _ReportsContentState extends State<ReportsContent> {
           ),
         );
       }
-    }
-  }
-
-  Future<void> _loadBars() async {
-    try {
-      final bars = await _barService.getAllBars();
-      if (!mounted || _isDisposed) return;
-      setState(() {
-        _bars = bars;
-      });
-    } catch (e) {
-      // Handle error silently
     }
   }
 
@@ -185,22 +168,25 @@ class _ReportsContentState extends State<ReportsContent> {
     });
   }
 
-  String _getBarName(String barId) {
-    try {
-      final bar = _bars.firstWhere((bar) => bar.id == barId);
-      return bar.nombre;
-    } catch (e) {
-      return 'Bar desconocido';
-    }
-  }
-
   // Download Methods
   Future<void> _downloadIndividualReport() async {
     if (_selectedEstudiante == null) return;
 
-    await _reportsService.generateReportForStudent(_selectedEstudiante!.id);
+    try {
+      setState(() => _isLoading = true);
 
-    // La función retorna, el StudentSummaryWidget maneja el éxito/error
+      // Use the single student in a list for the bulk method
+      await _localReportsService.generateBulkStudentReportsWithProgress(
+        context: context,
+        estudiantes: [_selectedEstudiante!],
+      );
+
+      if (!mounted || _isDisposed) return;
+      setState(() => _isLoading = false);
+    } catch (e) {
+      if (!mounted || _isDisposed) return;
+      setState(() => _isLoading = false);
+    }
   }
 
   Future<void> _downloadSelectedReports() async {
@@ -209,36 +195,31 @@ class _ReportsContentState extends State<ReportsContent> {
     try {
       setState(() => _isLoading = true);
 
-      final response = await _reportsService.generateReportsForStudents(
-        _selectedEstudiantes.toList(),
+      // Get selected students objects
+      final selectedStudentObjects =
+          _filteredEstudiantes
+              .where(
+                (estudiante) => _selectedEstudiantes.contains(estudiante.id),
+              )
+              .toList();
+
+      await _localReportsService.generateBulkStudentReportsWithProgress(
+        context: context,
+        estudiantes: selectedStudentObjects,
       );
 
       if (!mounted || _isDisposed) return;
 
       setState(() => _isLoading = false);
 
-      // Mostrar mensaje de éxito en popup
-      _showResponseDialog(
-        title: 'Reportes Solicitados',
-        message: response.message,
-        isSuccess: true,
-      );
-
-      // Opcional: Limpiar selección después de solicitar reportes
+      // Limpiar selección después de solicitar reportes
       setState(() {
         _selectedEstudiantes.clear();
         _selectAll = false;
       });
     } catch (e) {
       if (!mounted || _isDisposed) return;
-
       setState(() => _isLoading = false);
-
-      _showResponseDialog(
-        title: 'Error',
-        message: 'Error al solicitar reportes: $e',
-        isSuccess: false,
-      );
     }
   }
 
@@ -246,28 +227,16 @@ class _ReportsContentState extends State<ReportsContent> {
     try {
       setState(() => _isLoading = true);
 
-      final response = await _reportsService.generateAllReports();
+      await _localReportsService.generateBulkStudentReportsWithProgress(
+        context: context,
+        estudiantes: _filteredEstudiantes,
+      );
 
       if (!mounted || _isDisposed) return;
-
       setState(() => _isLoading = false);
-
-      // Mostrar mensaje de éxito en popup
-      _showResponseDialog(
-        title: 'Reportes Solicitados',
-        message: response.message,
-        isSuccess: true,
-      );
     } catch (e) {
       if (!mounted || _isDisposed) return;
-
       setState(() => _isLoading = false);
-
-      _showResponseDialog(
-        title: 'Error',
-        message: 'Error al solicitar reportes: $e',
-        isSuccess: false,
-      );
     }
   }
 
@@ -625,7 +594,7 @@ class _ReportsContentState extends State<ReportsContent> {
                             Expanded(
                               flex: 3,
                               child: Text(
-                                _getBarName(estudiante.idBar),
+                                estudiante.bar?.nombre ?? 'Bar desconocido',
                                 style: const TextStyle(
                                   color: AppColors.textPrimary,
                                 ),
@@ -739,8 +708,6 @@ class _ReportsContentState extends State<ReportsContent> {
                     key: ValueKey(_selectedEstudiante!.id),
                     estudiante: _selectedEstudiante!,
                     onDownloadReport: _downloadIndividualReport,
-                    getBarName: _getBarName,
-                    onShowDialog: _showResponseDialog,
                   ),
                 ],
               ),
@@ -748,63 +715,6 @@ class _ReportsContentState extends State<ReportsContent> {
           ),
         ],
       ),
-    );
-  }
-
-  // Dialog method to show responses
-  void _showResponseDialog({
-    required String title,
-    required String message,
-    required bool isSuccess,
-  }) {
-    if (!mounted || _isDisposed) return;
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: AppColors.card,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          title: Row(
-            children: [
-              Icon(
-                isSuccess ? Icons.check_circle : Icons.error,
-                color: isSuccess ? AppColors.primaryTurquoise : AppColors.error,
-                size: 24,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  title,
-                  style: TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          content: Container(
-            constraints: const BoxConstraints(maxWidth: 400),
-            child: Text(
-              message,
-              style: TextStyle(color: AppColors.textPrimary, fontSize: 16),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              style: TextButton.styleFrom(
-                foregroundColor: AppColors.primaryTurquoise,
-              ),
-              child: const Text('Entendido'),
-            ),
-          ],
-        );
-      },
     );
   }
 }

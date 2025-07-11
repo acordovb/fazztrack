@@ -8,5 +8,4 @@ class API {
   static final String productos = '/productos';
   static final String ventas = '/ventas';
   static final String abonos = '/abonos';
-  static final String pdfReports = '/pdf-reports';
 }
