@@ -597,15 +597,6 @@ class PdfGeneratorService {
     );
   }
 
-  /// Helper method to build table cells (legacy compatibility)
-  pw.Widget _buildTableCell(String text, {bool isHeader = false}) {
-    if (isHeader) {
-      return _buildTableHeaderCell(text);
-    } else {
-      return _buildTableDataCell(text);
-    }
-  }
-
   /// Saves the PDF to device storage
   Future<String> _savePdfToDevice(
     pw.Document pdf,
@@ -696,7 +687,7 @@ class PdfGeneratorService {
       // Verify file was created
       if (await file.exists()) {
         final fileSize = await file.length();
-        print('PDF saved successfully. Size: ${fileSize} bytes');
+        print('PDF saved successfully. Size: $fileSize bytes');
       } else {
         throw Exception('File was not created successfully');
       }
