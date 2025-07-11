@@ -9,14 +9,22 @@ import 'package:fazztrack_app/models/abono_model.dart';
 import 'package:fazztrack_app/models/control_historico_model.dart';
 
 class PdfGeneratorService {
-  // Nombres de meses en español
   static const List<String> _monthNames = [
-    '', // Índice 0 no se usa
-    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
+    '',
+    'Enero',
+    'Febrero',
+    'Marzo',
+    'Abril',
+    'Mayo',
+    'Junio',
+    'Julio',
+    'Agosto',
+    'Septiembre',
+    'Octubre',
+    'Noviembre',
+    'Diciembre',
   ];
 
-  /// Generates a PDF report for a student and saves it to device storage
   Future<String> generateStudentReport({
     required EstudianteModel estudiante,
     required List<VentaModel> ventas,
@@ -29,7 +37,6 @@ class PdfGeneratorService {
     try {
       final pdf = pw.Document();
 
-      // Calculate totals
       final totalVentas = ventas.fold<double>(
         0.0,
         (sum, venta) =>
@@ -52,42 +59,60 @@ class PdfGeneratorService {
           pendienteAnteriorAbono -
           pendienteAnteriorVenta;
 
-      // Get month name
       final monthName = _monthNames[month];
 
+      // Primera página - Solo resumen
       pdf.addPage(
-        pw.MultiPage(
+        pw.Page(
           pageFormat: PdfPageFormat.a4,
           margin: const pw.EdgeInsets.all(40),
           build: (pw.Context context) {
-            return [
-              _buildHeader(estudiante, barName, monthName, year, month),
-              pw.SizedBox(height: 30),
-              _buildStudentInfo(estudiante, barName),
-              pw.SizedBox(height: 30),
-              _buildFinancialSummary(
-                totalVentas,
-                totalAbonos,
-                balance,
-                pendienteAnteriorAbono,
-                pendienteAnteriorVenta,
-              ),
-              pw.SizedBox(height: 30),
-              if (ventas.isNotEmpty) ...[
-                _buildVentasSection(ventas, estudiante, monthName, year),
-                pw.SizedBox(height: 20),
+            return pw.Column(
+              children: [
+                _buildHeader(estudiante, barName, monthName, year, month),
+                pw.SizedBox(height: 30),
+                _buildStudentInfo(estudiante, barName),
+                pw.SizedBox(height: 30),
+                _buildFinancialSummary(
+                  totalVentas,
+                  totalAbonos,
+                  balance,
+                  pendienteAnteriorAbono,
+                  pendienteAnteriorVenta,
+                ),
+                pw.Spacer(), // Empuja el footer hacia abajo
+                _buildFooter(),
               ],
-              if (abonos.isNotEmpty) ...[
-                _buildAbonosSection(abonos),
-                pw.SizedBox(height: 20),
-              ],
-              _buildFooter(),
-            ];
+            );
           },
         ),
       );
 
-      // Save PDF to device
+      // Segunda página - Detalle de transacciones
+      if (ventas.isNotEmpty || abonos.isNotEmpty) {
+        pdf.addPage(
+          pw.MultiPage(
+            pageFormat: PdfPageFormat.a4,
+            margin: const pw.EdgeInsets.all(40),
+            build: (pw.Context context) {
+              return [
+                _buildTransactionHeader(estudiante, monthName, year),
+                pw.SizedBox(height: 30),
+                if (ventas.isNotEmpty) ...[
+                  _buildVentasSection(ventas),
+                  pw.SizedBox(height: 20),
+                ],
+                if (abonos.isNotEmpty) ...[
+                  _buildAbonosSection(abonos),
+                  pw.SizedBox(height: 20),
+                ],
+                _buildFooter(),
+              ];
+            },
+          ),
+        );
+      }
+
       final filePath = await _savePdfToDevice(
         pdf,
         estudiante.nombre,
@@ -100,7 +125,6 @@ class PdfGeneratorService {
     }
   }
 
-  /// Builds the PDF header
   pw.Widget _buildHeader(
     EstudianteModel estudiante,
     String barName,
@@ -117,7 +141,7 @@ class PdfGeneratorService {
             width: double.infinity,
             padding: const pw.EdgeInsets.all(20),
             decoration: pw.BoxDecoration(
-              color: const PdfColor.fromInt(0xFF1E3A8A), // Azul oscuro
+              color: const PdfColor.fromInt(0xFF0a2647), // Azul oscuro
               borderRadius: pw.BorderRadius.circular(8),
             ),
             child: pw.Column(
@@ -158,7 +182,7 @@ class PdfGeneratorService {
           pw.Container(
             width: 4,
             height: 120,
-            color: const PdfColor.fromInt(0xFF1E3A8A),
+            color: const PdfColor.fromInt(0xFF0a2647),
           ),
           pw.SizedBox(width: 15),
           // Contenido de la información
@@ -171,7 +195,7 @@ class PdfGeneratorService {
                   style: pw.TextStyle(
                     fontSize: 16,
                     fontWeight: pw.FontWeight.bold,
-                    color: const PdfColor.fromInt(0xFF1E3A8A),
+                    color: const PdfColor.fromInt(0xFF0a2647),
                   ),
                 ),
                 pw.SizedBox(height: 15),
@@ -266,7 +290,7 @@ class PdfGeneratorService {
           width: double.infinity,
           padding: const pw.EdgeInsets.all(20),
           decoration: pw.BoxDecoration(
-            color: const PdfColor.fromInt(0xFF1E3A8A), // Azul oscuro
+            color: const PdfColor.fromInt(0xFF0a2647), // Azul oscuro
             borderRadius: pw.BorderRadius.circular(8),
           ),
           child: pw.Column(
@@ -298,48 +322,44 @@ class PdfGeneratorService {
     );
   }
 
-  /// Builds sales section
-  pw.Widget _buildVentasSection(
-    List<VentaModel> ventas,
+  /// Builds transaction page header
+  pw.Widget _buildTransactionHeader(
     EstudianteModel estudiante,
     String monthName,
     int year,
   ) {
+    return pw.Container(
+      width: double.infinity,
+      padding: const pw.EdgeInsets.all(20),
+      decoration: pw.BoxDecoration(
+        color: const PdfColor.fromInt(0xFF0a2647), // Azul oscuro
+        borderRadius: pw.BorderRadius.circular(8),
+      ),
+      child: pw.Column(
+        children: [
+          pw.Text(
+            'Detalle de Transacciones',
+            style: pw.TextStyle(
+              fontSize: 20,
+              fontWeight: pw.FontWeight.bold,
+              color: PdfColors.white,
+            ),
+          ),
+          pw.SizedBox(height: 4),
+          pw.Text(
+            'Estudiante: ${estudiante.nombre} - $monthName $year',
+            style: pw.TextStyle(fontSize: 12, color: PdfColors.white),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Builds sales section
+  pw.Widget _buildVentasSection(List<VentaModel> ventas) {
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
-        // Nueva página para las transacciones
-        pw.NewPage(),
-
-        // Header de la segunda página
-        pw.Container(
-          width: double.infinity,
-          padding: const pw.EdgeInsets.all(20),
-          decoration: pw.BoxDecoration(
-            color: const PdfColor.fromInt(0xFF1E3A8A), // Azul oscuro
-            borderRadius: pw.BorderRadius.circular(8),
-          ),
-          child: pw.Column(
-            children: [
-              pw.Text(
-                'Detalle de Transacciones',
-                style: pw.TextStyle(
-                  fontSize: 20,
-                  fontWeight: pw.FontWeight.bold,
-                  color: PdfColors.white,
-                ),
-              ),
-              pw.SizedBox(height: 4),
-              pw.Text(
-                'Estudiante: ${estudiante.nombre} - $monthName $year',
-                style: pw.TextStyle(fontSize: 12, color: PdfColors.white),
-              ),
-            ],
-          ),
-        ),
-
-        pw.SizedBox(height: 30),
-
         pw.Text(
           'Ventas del Mes',
           style: pw.TextStyle(
@@ -361,7 +381,7 @@ class PdfGeneratorService {
             // Header con fondo azul oscuro
             pw.TableRow(
               decoration: const pw.BoxDecoration(
-                color: PdfColor.fromInt(0xFF1E3A8A), // Azul oscuro
+                color: PdfColor.fromInt(0xFF0a2647), // Azul oscuro
               ),
               children: [
                 _buildTableHeaderCell('Fecha'),
@@ -400,7 +420,6 @@ class PdfGeneratorService {
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
-        pw.SizedBox(height: 30),
         pw.Text(
           'Abonos del Mes',
           style: pw.TextStyle(
@@ -422,7 +441,7 @@ class PdfGeneratorService {
             // Header con fondo azul oscuro
             pw.TableRow(
               decoration: const pw.BoxDecoration(
-                color: PdfColor.fromInt(0xFF1E3A8A), // Azul oscuro
+                color: PdfColor.fromInt(0xFF0a2647), // Azul oscuro
               ),
               children: [
                 _buildTableHeaderCell('Fecha'),
@@ -513,7 +532,7 @@ class PdfGeneratorService {
   /// Helper method to build table header cells
   pw.Widget _buildTableHeaderCell(String text) {
     return pw.Container(
-      color: PdfColor.fromInt(0xFF1E3A8A),
+      color: PdfColor.fromInt(0xFF0a2647),
       padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 10),
       child: pw.Text(
         text,
@@ -558,7 +577,7 @@ class PdfGeneratorService {
       decoration:
           shouldHighlight
               ? pw.BoxDecoration(
-                color: PdfColor.fromInt(0xFF1E3A8A),
+                color: PdfColor.fromInt(0xFF0a2647),
                 borderRadius: pw.BorderRadius.circular(8),
               )
               : null,
