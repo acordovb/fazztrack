@@ -267,15 +267,17 @@ class _BulkReportProgressDialogState extends State<_BulkReportProgressDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final total = widget.estudiantes.length;
     final progress = total > 0 ? _currentProgress / total : 0.0;
 
     return AlertDialog(
+      backgroundColor: AppColors.background,
       title: Text(
         _isCompleted ? 'Generación Completada' : 'Generando Reportes',
-        style: theme.textTheme.titleLarge?.copyWith(
+        style: TextStyle(
+          color: AppColors.textPrimary,
           fontWeight: FontWeight.bold,
+          fontSize: 20,
         ),
       ),
       content: SizedBox(
@@ -287,34 +289,36 @@ class _BulkReportProgressDialogState extends State<_BulkReportProgressDialog> {
             if (!_isCompleted) ...[
               Text(
                 'Generando reporte $_currentProgress de $total',
-                style: theme.textTheme.bodyMedium,
+                style: TextStyle(color: AppColors.textPrimary, fontSize: 16),
               ),
               const SizedBox(height: 8),
               Text(
                 'Estudiante: $_currentStudentName',
-                style: theme.textTheme.bodySmall?.copyWith(
+                style: TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 14,
                   fontStyle: FontStyle.italic,
                 ),
               ),
               const SizedBox(height: 16),
               LinearProgressIndicator(
                 value: progress,
-                backgroundColor: theme.colorScheme.surfaceVariant,
+                backgroundColor: AppColors.darkGray,
                 valueColor: AlwaysStoppedAnimation<Color>(
-                  theme.colorScheme.primary,
+                  AppColors.primaryTurquoise,
                 ),
               ),
               const SizedBox(height: 8),
               Text(
                 '${(progress * 100).toStringAsFixed(1)}%',
-                style: theme.textTheme.bodySmall,
+                style: TextStyle(color: AppColors.textPrimary, fontSize: 14),
                 textAlign: TextAlign.center,
               ),
             ] else if (_result != null) ...[
-              _buildResultSummary(theme),
+              _buildResultSummary(),
               if (_result!.errors.isNotEmpty) ...[
                 const SizedBox(height: 16),
-                _buildErrorList(theme),
+                _buildErrorList(),
               ],
             ],
           ],
@@ -324,71 +328,69 @@ class _BulkReportProgressDialogState extends State<_BulkReportProgressDialog> {
         if (_isCompleted)
           TextButton(
             onPressed: () => Navigator.of(context).pop(_result),
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.primaryTurquoise,
+            ),
             child: const Text('Cerrar'),
           ),
       ],
     );
   }
 
-  Widget _buildResultSummary(ThemeData theme) {
+  Widget _buildResultSummary() {
     final result = _result!;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
+        color: AppColors.secondaryBlue,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: theme.colorScheme.outline.withOpacity(0.5)),
+        border: Border.all(color: AppColors.primaryTurquoise.withOpacity(0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'Resumen de Generación',
-            style: theme.textTheme.titleMedium?.copyWith(
+            style: TextStyle(
+              color: AppColors.textPrimary,
               fontWeight: FontWeight.bold,
+              fontSize: 16,
             ),
           ),
           const SizedBox(height: 12),
-          _buildSummaryRow(
-            'Total de reportes:',
-            '${result.totalReports}',
-            theme,
-          ),
+          _buildSummaryRow('Total de reportes:', '${result.totalReports}'),
           _buildSummaryRow(
             'Exitosos:',
             '${result.successfulReports}',
-            theme,
-            color: Colors.green,
+            color: AppColors.success,
           ),
           if (result.failedReports > 0)
             _buildSummaryRow(
               'Fallidos:',
               '${result.failedReports}',
-              theme,
-              color: Colors.red,
+              color: AppColors.error,
             ),
         ],
       ),
     );
   }
 
-  Widget _buildSummaryRow(
-    String label,
-    String value,
-    ThemeData theme, {
-    Color? color,
-  }) {
+  Widget _buildSummaryRow(String label, String value, {Color? color}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: theme.textTheme.bodyMedium),
+          Text(
+            label,
+            style: TextStyle(color: AppColors.textPrimary, fontSize: 14),
+          ),
           Text(
             value,
-            style: theme.textTheme.bodyMedium?.copyWith(
+            style: TextStyle(
+              color: color ?? AppColors.textPrimary,
               fontWeight: FontWeight.bold,
-              color: color,
+              fontSize: 14,
             ),
           ),
         ],
@@ -396,20 +398,27 @@ class _BulkReportProgressDialogState extends State<_BulkReportProgressDialog> {
     );
   }
 
-  Widget _buildErrorList(ThemeData theme) {
+  Widget _buildErrorList() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'Errores:',
-          style: theme.textTheme.titleSmall?.copyWith(
-            color: Colors.red,
+          style: TextStyle(
+            color: AppColors.error,
             fontWeight: FontWeight.bold,
+            fontSize: 14,
           ),
         ),
         const SizedBox(height: 8),
         Container(
           constraints: const BoxConstraints(maxHeight: 150),
+          decoration: BoxDecoration(
+            color: AppColors.secondaryBlue,
+            borderRadius: BorderRadius.circular(4),
+            border: Border.all(color: AppColors.error.withOpacity(0.3)),
+          ),
+          padding: const EdgeInsets.all(8),
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -419,9 +428,7 @@ class _BulkReportProgressDialogState extends State<_BulkReportProgressDialog> {
                       padding: const EdgeInsets.symmetric(vertical: 2),
                       child: Text(
                         '• $error',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: Colors.red.shade700,
-                        ),
+                        style: TextStyle(color: AppColors.error, fontSize: 12),
                       ),
                     );
                   }).toList(),
