@@ -6,6 +6,7 @@ import 'package:fazztrack_app/models/control_historico_model.dart';
 import 'package:fazztrack_app/services/ventas/ventas_api_service.dart';
 import 'package:fazztrack_app/services/abonos/abono_api_service.dart';
 import 'package:fazztrack_app/services/estudiantes/control_historico_api_service.dart';
+import 'package:fazztrack_app/services/reports/local_reports_service.dart';
 import 'package:flutter/material.dart';
 
 class StudentSummaryWidget extends StatefulWidget {
@@ -37,6 +38,7 @@ class _StudentSummaryWidgetState extends State<StudentSummaryWidget> {
   final AbonoApiService _abonoApiService = AbonoApiService();
   final ControlHistoricoApiService _controlHistoricoApiService =
       ControlHistoricoApiService();
+  final LocalReportsService _localReportsService = LocalReportsService();
 
   List<VentaModel> ventas = [];
   List<AbonoModel> abonos = [];
@@ -161,27 +163,29 @@ class _StudentSummaryWidgetState extends State<StudentSummaryWidget> {
         (controlHistorico?.totalPendienteUltMesVenta ?? 0);
   }
 
-  // Download Methods
-  Future<void> _downloadIndividualReport() async {
-    if (widget.onDownloadReport == null) return;
-
+  // Local PDF generation method
+  Future<void> _generateLocalReport() async {
     try {
       setState(() => isDownloadLoading = true);
 
-      await widget.onDownloadReport!();
+      final barName =
+          widget.getBarName?.call(widget.estudiante.idBar) ?? 'Bar desconocido';
+      final month = int.parse(selectedMonth);
+      final year = DateTime.now().year;
+
+      final filePath = await _localReportsService.generateLocalStudentReport(
+        estudiante: widget.estudiante,
+        barName: barName,
+        month: month,
+        year: year,
+      );
 
       if (!mounted) return;
 
       setState(() => isDownloadLoading = false);
 
-      // Mostrar mensaje de éxito
-      if (widget.onShowDialog != null) {
-        widget.onShowDialog!(
-          title: 'Reporte Solicitado',
-          message: 'El reporte ha sido solicitado exitosamente',
-          isSuccess: true,
-        );
-      }
+      // Mostrar mensaje de éxito con opciones
+      _showReportGeneratedDialog(filePath);
     } catch (e) {
       if (!mounted) return;
 
@@ -191,11 +195,44 @@ class _StudentSummaryWidgetState extends State<StudentSummaryWidget> {
       if (widget.onShowDialog != null) {
         widget.onShowDialog!(
           title: 'Error',
-          message: 'Error al solicitar reporte: $e',
+          message: 'Error al generar reporte local: $e',
           isSuccess: false,
         );
       }
     }
+  }
+
+  void _showReportGeneratedDialog(String filePath) {
+    if (!mounted) return;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: AppColors.background,
+          title: Text(
+            'Reporte Generado',
+            style: TextStyle(
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: Text(
+            'El reporte PDF ha sido generado y guardado exitosamente. Verifique en la carpeta de documentos de su dispositivo.',
+            style: TextStyle(color: AppColors.textPrimary),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                'Entendido',
+                style: TextStyle(color: AppColors.primaryTurquoise),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -353,12 +390,9 @@ class _StudentSummaryWidgetState extends State<StudentSummaryWidget> {
         SizedBox(
           width: double.infinity,
           child: ElevatedButton.icon(
-            // Solo habilitado si el mes seleccionado es el actual
             onPressed:
-                int.parse(selectedMonth) == DateTime.now().month &&
-                        !isDownloadLoading &&
-                        widget.onDownloadReport != null
-                    ? _downloadIndividualReport
+                !isDownloadLoading && !isLoading && error == null
+                    ? _generateLocalReport
                     : null,
             icon:
                 isDownloadLoading
@@ -375,21 +409,15 @@ class _StudentSummaryWidgetState extends State<StudentSummaryWidget> {
                     : const Icon(Icons.download),
             label:
                 isDownloadLoading
-                    ? const Text('Procesando...')
-                    : int.parse(selectedMonth) == DateTime.now().month
-                    ? const Text('Descargar Reporte')
-                    : const Text(
-                      'Descarga no disponible para meses anteriores',
-                    ),
+                    ? const Text('Generando PDF...')
+                    : const Text('Descargar Reporte'),
             style: ElevatedButton.styleFrom(
               backgroundColor:
-                  int.parse(selectedMonth) == DateTime.now().month &&
-                          !isDownloadLoading
+                  !isDownloadLoading && !isLoading && error == null
                       ? AppColors.primaryTurquoise
                       : AppColors.darkGray,
               foregroundColor:
-                  int.parse(selectedMonth) == DateTime.now().month &&
-                          !isDownloadLoading
+                  !isDownloadLoading && !isLoading && error == null
                       ? AppColors.primaryDarkBlue
                       : AppColors.textPrimary.withAlpha(50),
               padding: const EdgeInsets.symmetric(vertical: 16),
