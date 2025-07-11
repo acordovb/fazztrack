@@ -8,7 +8,6 @@ import { EstudiantesModule } from './modules/estudiantes/estudiantes.module';
 import { AbonosModule } from './modules/abonos/abonos.module';
 import { VentasModule } from './modules/ventas/ventas.module';
 import { ControlHistoricoModule } from './modules/control-historico/control-historico.module';
-import { PdfReportModule } from './modules/pdf-report/pdf-report.module';
 import { LoggerModule, LoggerMiddleware } from './common/logger';
 import { MailModule } from './shared/mail/mail.module';
 import configuration from './config/configuration';
@@ -27,7 +26,6 @@ import configuration from './config/configuration';
     AbonosModule,
     VentasModule,
     ControlHistoricoModule,
-    PdfReportModule,
     LoggerModule,
     MailModule,
   ],
