@@ -176,15 +176,27 @@ class PdfGeneratorService {
   pw.Widget _buildStudentInfo(EstudianteModel estudiante, String barName) {
     return pw.Container(
       width: double.infinity,
+      padding: const pw.EdgeInsets.all(20),
+      decoration: pw.BoxDecoration(
+        color: const PdfColor.fromInt(0xFFF8FAFC), // Fondo gris claro
+        borderRadius: pw.BorderRadius.circular(12),
+        border: pw.Border.all(
+          color: const PdfColor.fromInt(0xFFE2E8F0),
+          width: 1,
+        ),
+      ),
       child: pw.Row(
         children: [
           // Borde azul a la izquierda
           pw.Container(
             width: 4,
             height: 120,
-            color: const PdfColor.fromInt(0xFF0a2647),
+            decoration: pw.BoxDecoration(
+              color: const PdfColor.fromInt(0xFF0a2647),
+              borderRadius: pw.BorderRadius.circular(2),
+            ),
           ),
-          pw.SizedBox(width: 15),
+          pw.SizedBox(width: 20),
           // Contenido de la información
           pw.Expanded(
             child: pw.Column(
@@ -256,6 +268,12 @@ class PdfGeneratorService {
                   '+\$${pendienteAnteriorAbono.toStringAsFixed(2)}',
                   isPositive: true,
                 ),
+              if (pendienteAnteriorVenta > 0)
+                _buildFinancialRow(
+                  'Saldo pendiente del mes anterior',
+                  '-\$${pendienteAnteriorVenta.toStringAsFixed(2)}',
+                  isPositive: false,
+                ),
               _buildFinancialRow(
                 'Total Abonos del Mes',
                 '+\$${totalAbonos.toStringAsFixed(2)}',
@@ -311,8 +329,8 @@ class PdfGeneratorService {
                   fontWeight: pw.FontWeight.bold,
                   color:
                       balance >= 0
-                          ? const PdfColor.fromInt(0xFF10B981) // Verde
-                          : const PdfColor.fromInt(0xFFEF4444), // Rojo
+                          ? const PdfColor.fromInt(0xFF90ee90)
+                          : const PdfColor.fromInt(0xFFEF4444),
                 ),
               ),
             ],
@@ -369,47 +387,55 @@ class PdfGeneratorService {
           ),
         ),
         pw.SizedBox(height: 15),
-        pw.Table(
-          border: pw.TableBorder.all(color: const PdfColor.fromInt(0xFFE5E7EB)),
-          columnWidths: {
-            0: const pw.FlexColumnWidth(1.5), // Fecha
-            1: const pw.FlexColumnWidth(2.5), // Producto
-            2: const pw.FlexColumnWidth(1), // Cantidad
-            3: const pw.FlexColumnWidth(1), // Total
-          },
-          children: [
-            // Header con fondo azul oscuro
-            pw.TableRow(
-              decoration: const pw.BoxDecoration(
-                color: PdfColor.fromInt(0xFF0a2647), // Azul oscuro
-              ),
-              children: [
-                _buildTableHeaderCell('Fecha'),
-                _buildTableHeaderCell('Producto'),
-                _buildTableHeaderCell('Cantidad'),
-                _buildTableHeaderCell('Total'),
-              ],
+        pw.Container(
+          decoration: pw.BoxDecoration(
+            borderRadius: pw.BorderRadius.circular(12),
+            border: pw.Border.all(
+              color: const PdfColor.fromInt(0xFFE5E7EB),
+              width: 1,
             ),
-            // Data rows
-            ...ventas.map((venta) {
-              final total = venta.nProductos * (venta.producto?.precio ?? 0);
-              return pw.TableRow(
+          ),
+          child: pw.Table(
+            columnWidths: {
+              0: const pw.FlexColumnWidth(1.5), // Fecha
+              1: const pw.FlexColumnWidth(2.5), // Producto
+              2: const pw.FlexColumnWidth(1), // Cantidad
+              3: const pw.FlexColumnWidth(1), // Total
+            },
+            children: [
+              // Header con fondo azul oscuro
+              pw.TableRow(
                 decoration: const pw.BoxDecoration(
-                  color: PdfColor.fromInt(0xFFF8FAFC), // Fondo gris muy claro
+                  color: PdfColor.fromInt(0xFF0a2647), // Azul oscuro
                 ),
                 children: [
-                  _buildTableDataCell(
-                    DateFormat('d/M/yyyy').format(venta.fechaTransaccion),
-                  ),
-                  _buildTableDataCell(
-                    venta.producto?.nombre ?? 'Producto ${venta.idProducto}',
-                  ),
-                  _buildTableDataCell(venta.nProductos.toString()),
-                  _buildTableDataCell('\$${total.toStringAsFixed(2)}'),
+                  _buildTableHeaderCell('Fecha'),
+                  _buildTableHeaderCell('Producto'),
+                  _buildTableHeaderCell('Cantidad'),
+                  _buildTableHeaderCell('Total'),
                 ],
-              );
-            }),
-          ],
+              ),
+              // Data rows
+              ...ventas.map((venta) {
+                final total = venta.nProductos * (venta.producto?.precio ?? 0);
+                return pw.TableRow(
+                  decoration: const pw.BoxDecoration(
+                    color: PdfColor.fromInt(0xFFF8FAFC), // Fondo gris muy claro
+                  ),
+                  children: [
+                    _buildTableDataCell(
+                      DateFormat('d/M/yyyy').format(venta.fechaTransaccion),
+                    ),
+                    _buildTableDataCell(
+                      venta.producto?.nombre ?? 'Producto ${venta.idProducto}',
+                    ),
+                    _buildTableDataCell(venta.nProductos.toString()),
+                    _buildTableDataCell('\$${total.toStringAsFixed(2)}'),
+                  ],
+                );
+              }),
+            ],
+          ),
         ),
       ],
     );
@@ -429,44 +455,52 @@ class PdfGeneratorService {
           ),
         ),
         pw.SizedBox(height: 15),
-        pw.Table(
-          border: pw.TableBorder.all(color: const PdfColor.fromInt(0xFFE5E7EB)),
-          columnWidths: {
-            0: const pw.FlexColumnWidth(1.5), // Fecha
-            1: const pw.FlexColumnWidth(2), // Tipo de Abono
-            2: const pw.FlexColumnWidth(2), // Comentario
-            3: const pw.FlexColumnWidth(1), // Monto
-          },
-          children: [
-            // Header con fondo azul oscuro
-            pw.TableRow(
-              decoration: const pw.BoxDecoration(
-                color: PdfColor.fromInt(0xFF0a2647), // Azul oscuro
-              ),
-              children: [
-                _buildTableHeaderCell('Fecha'),
-                _buildTableHeaderCell('Tipo de Abono'),
-                _buildTableHeaderCell('Comentario'),
-                _buildTableHeaderCell('Monto'),
-              ],
+        pw.Container(
+          decoration: pw.BoxDecoration(
+            borderRadius: pw.BorderRadius.circular(12),
+            border: pw.Border.all(
+              color: const PdfColor.fromInt(0xFFE5E7EB),
+              width: 1,
             ),
-            // Data rows
-            ...abonos.map((abono) {
-              return pw.TableRow(
+          ),
+          child: pw.Table(
+            columnWidths: {
+              0: const pw.FlexColumnWidth(1.5), // Fecha
+              1: const pw.FlexColumnWidth(2), // Tipo de Abono
+              2: const pw.FlexColumnWidth(2), // Comentario
+              3: const pw.FlexColumnWidth(1), // Monto
+            },
+            children: [
+              // Header con fondo azul oscuro
+              pw.TableRow(
                 decoration: const pw.BoxDecoration(
-                  color: PdfColor.fromInt(0xFFF8FAFC), // Fondo gris muy claro
+                  color: PdfColor.fromInt(0xFF0a2647), // Azul oscuro
                 ),
                 children: [
-                  _buildTableDataCell(
-                    DateFormat('d/M/yyyy').format(abono.fechaAbono),
-                  ),
-                  _buildTableDataCell(abono.tipoAbono),
-                  _buildTableDataCell('-'), // Placeholder para comentario
-                  _buildTableDataCell('\$${abono.total.toStringAsFixed(2)}'),
+                  _buildTableHeaderCell('Fecha'),
+                  _buildTableHeaderCell('Tipo de Abono'),
+                  _buildTableHeaderCell('Comentario'),
+                  _buildTableHeaderCell('Monto'),
                 ],
-              );
-            }),
-          ],
+              ),
+              // Data rows
+              ...abonos.map((abono) {
+                return pw.TableRow(
+                  decoration: const pw.BoxDecoration(
+                    color: PdfColor.fromInt(0xFFF8FAFC), // Fondo gris muy claro
+                  ),
+                  children: [
+                    _buildTableDataCell(
+                      DateFormat('d/M/yyyy').format(abono.fechaAbono),
+                    ),
+                    _buildTableDataCell(abono.tipoAbono),
+                    _buildTableDataCell('-'), // Placeholder para comentario
+                    _buildTableDataCell('\$${abono.total.toStringAsFixed(2)}'),
+                  ],
+                );
+              }),
+            ],
+          ),
         ),
       ],
     );
@@ -476,14 +510,19 @@ class PdfGeneratorService {
   pw.Widget _buildFooter() {
     return pw.Container(
       width: double.infinity,
-      padding: const pw.EdgeInsets.only(top: 40),
+      margin: const pw.EdgeInsets.only(top: 40),
+      padding: const pw.EdgeInsets.all(20),
+      decoration: pw.BoxDecoration(
+        color: const PdfColor.fromInt(0xFFF1F5F9), // Fondo gris claro
+        borderRadius: pw.BorderRadius.circular(8),
+      ),
       child: pw.Column(
         children: [
           pw.Text(
             'Reporte generado el ${DateFormat('d/M/yyyy').format(DateTime.now())} a las ${DateFormat('HH:mm:ss').format(DateTime.now())}',
             style: pw.TextStyle(
               fontSize: 10,
-              color: const PdfColor.fromInt(0xFF6B7280),
+              color: const PdfColor.fromInt(0xFF374151),
             ),
             textAlign: pw.TextAlign.center,
           ),
@@ -492,7 +531,8 @@ class PdfGeneratorService {
             'FazzTrack - Sistema de Gestión de Pagos y Cuotas',
             style: pw.TextStyle(
               fontSize: 10,
-              color: const PdfColor.fromInt(0xFF6B7280),
+              fontWeight: pw.FontWeight.bold,
+              color: const PdfColor.fromInt(0xFF0a2647),
             ),
             textAlign: pw.TextAlign.center,
           ),
@@ -533,7 +573,7 @@ class PdfGeneratorService {
   pw.Widget _buildTableHeaderCell(String text) {
     return pw.Container(
       color: PdfColor.fromInt(0xFF0a2647),
-      padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+      padding: const pw.EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       child: pw.Text(
         text,
         style: pw.TextStyle(
@@ -541,6 +581,7 @@ class PdfGeneratorService {
           fontSize: 12,
           fontWeight: pw.FontWeight.bold,
         ),
+        textAlign: pw.TextAlign.center,
       ),
     );
   }
@@ -548,15 +589,19 @@ class PdfGeneratorService {
   /// Helper method to build table data cells
   pw.Widget _buildTableDataCell(String text) {
     return pw.Container(
-      padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      padding: const pw.EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: const pw.BoxDecoration(
         border: pw.Border(
-          bottom: pw.BorderSide(color: PdfColors.grey300, width: 0.5),
+          bottom: pw.BorderSide(
+            color: PdfColor.fromInt(0xFFE5E7EB),
+            width: 0.5,
+          ),
         ),
       ),
       child: pw.Text(
         text,
         style: const pw.TextStyle(fontSize: 11, color: PdfColors.black),
+        textAlign: pw.TextAlign.center,
       ),
     );
   }
