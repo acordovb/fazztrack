@@ -70,9 +70,9 @@ class PdfGeneratorService {
             return pw.Column(
               children: [
                 _buildHeader(estudiante, barName, monthName, year, month),
-                pw.SizedBox(height: 30),
+                pw.SizedBox(height: 20),
                 _buildStudentInfo(estudiante, barName),
-                pw.SizedBox(height: 30),
+                pw.SizedBox(height: 20),
                 _buildFinancialSummary(
                   totalVentas,
                   totalAbonos,
@@ -314,7 +314,7 @@ class PdfGeneratorService {
           child: pw.Column(
             children: [
               pw.Text(
-                balance >= 0 ? 'SALDO A FAVOR' : 'SALDO PENDIENTE',
+                balance >= 0 ? 'SALDO A FAVOR' : 'SALDO PENDIENTE DE PAGO',
                 style: pw.TextStyle(
                   fontSize: 14,
                   fontWeight: pw.FontWeight.bold,
@@ -323,7 +323,7 @@ class PdfGeneratorService {
               ),
               pw.SizedBox(height: 8),
               pw.Text(
-                '\$${balance.toStringAsFixed(2)}',
+                '\$${balance.abs().toStringAsFixed(2)}',
                 style: pw.TextStyle(
                   fontSize: 28,
                   fontWeight: pw.FontWeight.bold,
@@ -510,7 +510,7 @@ class PdfGeneratorService {
   pw.Widget _buildFooter() {
     return pw.Container(
       width: double.infinity,
-      margin: const pw.EdgeInsets.only(top: 40),
+      margin: const pw.EdgeInsets.only(top: 0),
       padding: const pw.EdgeInsets.all(20),
       decoration: pw.BoxDecoration(
         color: const PdfColor.fromInt(0xFFF1F5F9), // Fondo gris claro
