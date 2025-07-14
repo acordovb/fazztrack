@@ -21,25 +21,18 @@ export class ControlHistoricoCronService {
   ) {}
 
   /**
-   * Cron job que se ejecuta el último día de cada mes a las 23:59
-   * Se ejecuta todos los días y verifica si es el último día del mes
+   * Cron job que se ejecuta el primer día de cada mes a las 2:00 AM
+   * Genera el control histórico del mes anterior
    */
-  @Cron('0 0 23 * * *', {
+  @Cron('0 0 2 1 * *', {
     name: 'generate-monthly-control-historico',
-    timeZone: 'America/Guayaquil', // Adjust timezone as needed
+    timeZone: 'America/Guayaquil',
   })
-  async checkAndGenerateMonthlyControlHistorico() {
-    const now = new Date();
-    const tomorrow = new Date(now);
-    tomorrow.setDate(now.getDate() + 1);
-
-    // Verificar si mañana es el primer día del siguiente mes
-    if (tomorrow.getDate() === 1) {
-      this.logger.log(
-        'Es el último día del mes, ejecutando generación de control histórico...',
-      );
-      await this.generateMonthlyControlHistorico();
-    }
+  async generateMonthlyControlHistoricoCron() {
+    this.logger.log(
+      'Ejecutando generación de control histórico del mes anterior...',
+    );
+    await this.generateMonthlyControlHistorico();
   }
 
   async generateMonthlyControlHistorico() {
@@ -47,11 +40,18 @@ export class ControlHistoricoCronService {
 
     try {
       const now = new Date();
-      const currentMonth = now.getMonth() + 1;
-      const currentYear = now.getFullYear();
+      // Calcular el mes anterior
+      let targetMonth = now.getMonth(); // getMonth() devuelve 0-11, así que esto es el mes anterior
+      let targetYear = now.getFullYear();
+
+      // Si estamos en enero, el mes anterior es diciembre del año anterior
+      if (targetMonth === 0) {
+        targetMonth = 12;
+        targetYear -= 1;
+      }
 
       this.logger.log(
-        `Procesando control histórico para ${currentMonth}/${currentYear}`,
+        `Procesando control histórico para ${targetMonth}/${targetYear} (mes anterior)`,
       );
 
       // Obtener todos los estudiantes
@@ -65,21 +65,18 @@ export class ControlHistoricoCronService {
         try {
           const estudianteId = decodeId(estudiante.id);
 
-          // Verificar si el estudiante tiene ventas o abonos en el mes actual
+          // Verificar si el estudiante tiene ventas o abonos en el mes objetivo (mes anterior)
           const [totalVentas, totalAbonos] = await Promise.all([
-            this.ventasService.calculateTotalVentas(
-              estudiante.id,
-              currentMonth,
-            ),
-            this.abonosService.calculateTotalAbonos(estudianteId, currentMonth),
+            this.ventasService.calculateTotalVentas(estudiante.id, targetMonth),
+            this.abonosService.calculateTotalAbonos(estudianteId, targetMonth),
           ]);
 
           // Solo procesar estudiantes que tengan transacciones
           if (totalVentas > 0 || totalAbonos > 0) {
             studentsWithTransactions++;
 
-            // Obtener control histórico del mes anterior
-            const previousMonth = currentMonth === 1 ? 12 : currentMonth - 1;
+            // Obtener control histórico del mes anterior al que estamos procesando
+            const previousMonth = targetMonth === 1 ? 12 : targetMonth - 1;
 
             const previousControlHistorico =
               await this.controlHistoricoService.findByEstudianteIdAndMonth(
@@ -117,11 +114,11 @@ export class ControlHistoricoCronService {
               newTotalPendienteVenta = Math.abs(balance);
             }
 
-            // Verificar si ya existe un control histórico para el mes actual
+            // Verificar si ya existe un control histórico para el mes objetivo
             const existingControlHistorico =
               await this.controlHistoricoService.findByEstudianteIdAndMonth(
                 estudianteId,
-                currentMonth,
+                targetMonth,
               );
 
             if (existingControlHistorico) {
@@ -136,20 +133,20 @@ export class ControlHistoricoCronService {
                 updateDto,
               );
               this.logger.log(
-                `Actualizado control histórico para estudiante ${estudiante.nombre} (mes ${currentMonth})`,
+                `Actualizado control histórico para estudiante ${estudiante.nombre} (mes ${targetMonth})`,
               );
             } else {
               // Crear uno nuevo usando el CRUD estándar
               const createDto: CreateControlHistoricoDto = {
                 id_estudiante: estudianteId,
-                n_mes: currentMonth,
+                n_mes: targetMonth,
                 total_pendiente_ult_mes_abono: newTotalPendienteAbono,
                 total_pendiente_ult_mes_venta: newTotalPendienteVenta,
               };
 
               await this.controlHistoricoService.create(createDto);
               this.logger.log(
-                `Creado control histórico para estudiante ${estudiante.nombre} (mes ${currentMonth})`,
+                `Creado control histórico para estudiante ${estudiante.nombre} (mes ${targetMonth})`,
               );
             }
 
@@ -180,7 +177,7 @@ export class ControlHistoricoCronService {
    * Cron job que se ejecuta el primer día de cada mes a las 3:00 AM
    * Elimina datos de ventas, abonos y control histórico de hace dos meses
    */
-  @Cron('0 0 3 1 * *', {
+  @Cron('0 0 4 1 * *', {
     name: 'cleanup-old-data',
     timeZone: 'America/Guayaquil',
   })
