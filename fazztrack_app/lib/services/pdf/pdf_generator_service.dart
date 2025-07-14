@@ -61,7 +61,6 @@ class PdfGeneratorService {
 
       final monthName = _monthNames[month];
 
-      // Primera página - Solo resumen
       pdf.addPage(
         pw.Page(
           pageFormat: PdfPageFormat.a4,
@@ -99,11 +98,11 @@ class PdfGeneratorService {
                 _buildTransactionHeader(estudiante, monthName, year),
                 pw.SizedBox(height: 30),
                 if (ventas.isNotEmpty) ...[
-                  _buildVentasSection(ventas),
+                  ..._buildVentasSection(ventas),
                   pw.SizedBox(height: 20),
                 ],
                 if (abonos.isNotEmpty) ...[
-                  _buildAbonosSection(abonos),
+                  ..._buildAbonosSection(abonos),
                   pw.SizedBox(height: 20),
                 ],
                 _buildFooter(),
@@ -373,137 +372,161 @@ class PdfGeneratorService {
     );
   }
 
-  /// Builds sales section
-  pw.Widget _buildVentasSection(List<VentaModel> ventas) {
-    return pw.Column(
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
-      children: [
-        pw.Text(
-          'Ventas del Mes',
-          style: pw.TextStyle(
-            fontSize: 16,
-            fontWeight: pw.FontWeight.bold,
-            color: const PdfColor.fromInt(0xFF374151),
-          ),
-        ),
-        pw.SizedBox(height: 15),
-        pw.Container(
-          decoration: pw.BoxDecoration(
-            borderRadius: pw.BorderRadius.circular(12),
-            border: pw.Border.all(
-              color: const PdfColor.fromInt(0xFFE5E7EB),
-              width: 1,
-            ),
-          ),
-          child: pw.Table(
-            columnWidths: {
-              0: const pw.FlexColumnWidth(1.5), // Fecha
-              1: const pw.FlexColumnWidth(2.5), // Producto
-              2: const pw.FlexColumnWidth(1), // Cantidad
-              3: const pw.FlexColumnWidth(1), // Total
-            },
-            children: [
-              // Header con fondo azul oscuro
-              pw.TableRow(
-                decoration: const pw.BoxDecoration(
-                  color: PdfColor.fromInt(0xFF0a2647), // Azul oscuro
-                ),
-                children: [
-                  _buildTableHeaderCell('Fecha'),
-                  _buildTableHeaderCell('Producto'),
-                  _buildTableHeaderCell('Cantidad'),
-                  _buildTableHeaderCell('Total'),
-                ],
-              ),
-              // Data rows
-              ...ventas.map((venta) {
-                final total = venta.nProductos * (venta.producto?.precio ?? 0);
-                return pw.TableRow(
-                  decoration: const pw.BoxDecoration(
-                    color: PdfColor.fromInt(0xFFF8FAFC), // Fondo gris muy claro
-                  ),
-                  children: [
-                    _buildTableDataCell(
-                      DateFormat('d/M/yyyy').format(venta.fechaTransaccion),
-                    ),
-                    _buildTableDataCell(
-                      venta.producto?.nombre ?? 'Producto ${venta.idProducto}',
-                    ),
-                    _buildTableDataCell(venta.nProductos.toString()),
-                    _buildTableDataCell('\$${total.toStringAsFixed(2)}'),
-                  ],
-                );
-              }),
-            ],
-          ),
-        ),
-      ],
-    );
+  /// Safely formats product name for display in PDF
+  String _formatProductName(String? productName, String productId) {
+    // Debugging line
+    if (productName == null || productName.isEmpty) {
+      return 'Producto $productId';
+    }
+
+    return productName.replaceAll('/', '').trim();
   }
 
-  /// Builds payments section
-  pw.Widget _buildAbonosSection(List<AbonoModel> abonos) {
-    return pw.Column(
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
-      children: [
-        pw.Text(
-          'Abonos del Mes',
-          style: pw.TextStyle(
-            fontSize: 16,
-            fontWeight: pw.FontWeight.bold,
-            color: const PdfColor.fromInt(0xFF374151),
-          ),
+  /// Builds sales section - Fixed for pagination
+  List<pw.Widget> _buildVentasSection(List<VentaModel> ventas) {
+    final List<pw.Widget> widgets = [];
+
+    // Título de la sección
+    widgets.add(
+      pw.Text(
+        'Ventas del Mes',
+        style: pw.TextStyle(
+          fontSize: 16,
+          fontWeight: pw.FontWeight.bold,
+          color: const PdfColor.fromInt(0xFF374151),
         ),
-        pw.SizedBox(height: 15),
-        pw.Container(
-          decoration: pw.BoxDecoration(
-            borderRadius: pw.BorderRadius.circular(12),
-            border: pw.Border.all(
-              color: const PdfColor.fromInt(0xFFE5E7EB),
-              width: 1,
-            ),
-          ),
-          child: pw.Table(
-            columnWidths: {
-              0: const pw.FlexColumnWidth(1.5), // Fecha
-              1: const pw.FlexColumnWidth(2), // Tipo de Abono
-              2: const pw.FlexColumnWidth(2), // Comentario
-              3: const pw.FlexColumnWidth(1), // Monto
-            },
-            children: [
-              // Header con fondo azul oscuro
-              pw.TableRow(
-                decoration: const pw.BoxDecoration(
-                  color: PdfColor.fromInt(0xFF0a2647), // Azul oscuro
-                ),
-                children: [
-                  _buildTableHeaderCell('Fecha'),
-                  _buildTableHeaderCell('Tipo de Abono'),
-                  _buildTableHeaderCell('Comentario'),
-                  _buildTableHeaderCell('Monto'),
-                ],
-              ),
-              // Data rows
-              ...abonos.map((abono) {
-                return pw.TableRow(
-                  decoration: const pw.BoxDecoration(
-                    color: PdfColor.fromInt(0xFFF8FAFC), // Fondo gris muy claro
-                  ),
-                  children: [
-                    _buildTableDataCell(
-                      DateFormat('d/M/yyyy').format(abono.fechaAbono),
-                    ),
-                    _buildTableDataCell(abono.tipoAbono),
-                    _buildTableDataCell('-'), // Placeholder para comentario
-                    _buildTableDataCell('\$${abono.total.toStringAsFixed(2)}'),
-                  ],
-                );
-              }),
-            ],
-          ),
-        ),
-      ],
+      ),
     );
+
+    widgets.add(pw.SizedBox(height: 15));
+
+    // Crear tabla usando TableHelper para paginación automática
+    final tableData = <List<String>>[
+      ['Fecha', 'Producto', 'Cantidad', 'Total'], // Header
+    ];
+
+    // Agregar datos de ventas
+    for (final venta in ventas) {
+      final total = venta.nProductos * (venta.producto?.precio ?? 0);
+      tableData.add([
+        DateFormat('d/M/yyyy').format(venta.fechaTransaccion),
+        _formatProductName(venta.producto?.nombre, venta.idProducto),
+        venta.nProductos.toString(),
+        '\$${total.toStringAsFixed(2)}',
+      ]);
+    }
+
+    widgets.add(
+      pw.TableHelper.fromTextArray(
+        context: null,
+        data: tableData,
+        border: pw.TableBorder.all(
+          color: const PdfColor.fromInt(0xFFE5E7EB),
+          width: 1,
+        ),
+        headerDecoration: const pw.BoxDecoration(
+          color: PdfColor.fromInt(0xFF0a2647), // Azul oscuro
+        ),
+        headerStyle: pw.TextStyle(
+          color: PdfColors.white,
+          fontSize: 12,
+          fontWeight: pw.FontWeight.bold,
+        ),
+        cellStyle: const pw.TextStyle(fontSize: 11, color: PdfColors.black),
+        cellDecoration:
+            (int index, dynamic data, int rowNum) => const pw.BoxDecoration(
+              color: PdfColor.fromInt(0xFFF8FAFC), // Fondo gris muy claro
+            ),
+        cellAlignment: pw.Alignment.center,
+        headerAlignment: pw.Alignment.center,
+        columnWidths: {
+          0: const pw.FlexColumnWidth(1.5), // Fecha
+          1: const pw.FlexColumnWidth(2.5), // Producto
+          2: const pw.FlexColumnWidth(1), // Cantidad
+          3: const pw.FlexColumnWidth(1), // Total
+        },
+        cellPadding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+        headerPadding: const pw.EdgeInsets.symmetric(
+          horizontal: 8,
+          vertical: 12,
+        ),
+      ),
+    );
+
+    return widgets;
+  }
+
+  /// Builds payments section - Fixed for pagination
+  List<pw.Widget> _buildAbonosSection(List<AbonoModel> abonos) {
+    final List<pw.Widget> widgets = [];
+
+    // Título de la sección
+    widgets.add(
+      pw.Text(
+        'Abonos del Mes',
+        style: pw.TextStyle(
+          fontSize: 16,
+          fontWeight: pw.FontWeight.bold,
+          color: const PdfColor.fromInt(0xFF374151),
+        ),
+      ),
+    );
+
+    widgets.add(pw.SizedBox(height: 15));
+
+    // Crear tabla usando TableHelper para paginación automática
+    final tableData = <List<String>>[
+      ['Fecha', 'Tipo de Abono', 'Comentario', 'Monto'], // Header
+    ];
+
+    // Agregar datos de abonos
+    for (final abono in abonos) {
+      tableData.add([
+        DateFormat('d/M/yyyy').format(abono.fechaAbono),
+        abono.tipoAbono,
+        '-', // Placeholder para comentario
+        '\$${abono.total.toStringAsFixed(2)}',
+      ]);
+    }
+
+    widgets.add(
+      pw.TableHelper.fromTextArray(
+        context: null,
+        data: tableData,
+        border: pw.TableBorder.all(
+          color: const PdfColor.fromInt(0xFFE5E7EB),
+          width: 1,
+        ),
+        headerDecoration: const pw.BoxDecoration(
+          color: PdfColor.fromInt(0xFF0a2647), // Azul oscuro
+        ),
+        headerStyle: pw.TextStyle(
+          color: PdfColors.white,
+          fontSize: 12,
+          fontWeight: pw.FontWeight.bold,
+        ),
+        cellStyle: const pw.TextStyle(fontSize: 11, color: PdfColors.black),
+        cellDecoration:
+            (int index, dynamic data, int rowNum) => const pw.BoxDecoration(
+              color: PdfColor.fromInt(0xFFF8FAFC), // Fondo gris muy claro
+            ),
+        cellAlignment: pw.Alignment.center,
+        headerAlignment: pw.Alignment.center,
+        columnWidths: {
+          0: const pw.FlexColumnWidth(1.5), // Fecha
+          1: const pw.FlexColumnWidth(2), // Tipo de Abono
+          2: const pw.FlexColumnWidth(2), // Comentario
+          3: const pw.FlexColumnWidth(1), // Monto
+        },
+        cellPadding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+        headerPadding: const pw.EdgeInsets.symmetric(
+          horizontal: 8,
+          vertical: 12,
+        ),
+      ),
+    );
+
+    return widgets;
   }
 
   /// Builds footer
@@ -565,43 +588,6 @@ class PdfGeneratorService {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  /// Helper method to build table header cells
-  pw.Widget _buildTableHeaderCell(String text) {
-    return pw.Container(
-      color: PdfColor.fromInt(0xFF0a2647),
-      padding: const pw.EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-      child: pw.Text(
-        text,
-        style: pw.TextStyle(
-          color: PdfColors.white,
-          fontSize: 12,
-          fontWeight: pw.FontWeight.bold,
-        ),
-        textAlign: pw.TextAlign.center,
-      ),
-    );
-  }
-
-  /// Helper method to build table data cells
-  pw.Widget _buildTableDataCell(String text) {
-    return pw.Container(
-      padding: const pw.EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: const pw.BoxDecoration(
-        border: pw.Border(
-          bottom: pw.BorderSide(
-            color: PdfColor.fromInt(0xFFE5E7EB),
-            width: 0.5,
-          ),
-        ),
-      ),
-      child: pw.Text(
-        text,
-        style: const pw.TextStyle(fontSize: 11, color: PdfColors.black),
-        textAlign: pw.TextAlign.center,
       ),
     );
   }
