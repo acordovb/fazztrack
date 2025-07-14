@@ -1,4 +1,4 @@
-# fly.toml app configuration file generated for fazztrack-backend on 2025-07-10T12:05:43-05:00
+# fly.toml app configuration file generated for fazztrack-backend on 2025-07-14T14:19:00-05:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
@@ -16,7 +16,7 @@ primary_region = 'iad'
   PORT = '3000'
 
 [processes]
-  app = 'dumb-init node dist/main'
+  app = 'node dist/main'
 
 [http_service]
   internal_port = 3000

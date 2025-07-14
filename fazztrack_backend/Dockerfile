@@ -34,20 +34,8 @@ RUN yarn install --frozen-lockfile --production=true && \
 # Etapa 3: Runtime
 FROM node:22-alpine AS runner
 
-# Instalar solo dependencias mínimas necesarias
-RUN apk add --no-cache \
-    chromium \
-    nss \
-    harfbuzz \
-    ca-certificates \
-    ttf-freefont \
-    dumb-init && \
-    rm -rf /var/cache/apk/* /tmp/*
-
-# Configurar variables de entorno para Puppeteer
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
-    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser \
-    NODE_ENV=production
+# Configurar variables de entorno
+ENV NODE_ENV=production
 
 # Crear usuario no-root para seguridad
 RUN addgroup -g 1001 -S nodejs && \
@@ -66,5 +54,5 @@ USER nestjs
 
 EXPOSE 3000
 
-# Usar dumb-init para mejor manejo de procesos
-CMD ["dumb-init", "node", "dist/main"]
+# Comando simplificado sin dumb-init
+CMD ["node", "dist/main"]
