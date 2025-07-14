@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Cron, CronExpression } from '@nestjs/schedule';
+import { Cron } from '@nestjs/schedule';
 import { DatabaseService } from '../../database/database.service';
 import { MailService } from '../../shared/mail/mail.service';
 
@@ -28,10 +28,8 @@ export class BackupService {
 
       // Ejecutar backups uno por uno para evitar cancelaciones
       await this.backupAbonos(year, month);
-      await this.delay(5000); // Esperar 5 segundos entre operaciones
 
       await this.backupVentas(year, month);
-      await this.delay(5000); // Esperar 5 segundos entre operaciones
 
       await this.backupControlHistorico(year, month);
 
@@ -340,12 +338,5 @@ export class BackupService {
     const month = now.getMonth() === 0 ? 12 : now.getMonth();
 
     return { year, month };
-  }
-
-  /**
-   * Función auxiliar para crear delays entre operaciones
-   */
-  private delay(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
