@@ -228,6 +228,47 @@ class _StudentSummaryWidgetState extends State<StudentSummaryWidget> {
         ),
 
         const SizedBox(height: 20),
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            onPressed:
+                !isDownloadLoading && !isLoading && error == null
+                    ? _generateLocalReport
+                    : null,
+            icon:
+                isDownloadLoading
+                    ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          AppColors.primaryDarkBlue,
+                        ),
+                      ),
+                    )
+                    : const Icon(Icons.download),
+            label:
+                isDownloadLoading
+                    ? const Text('Generando PDF...')
+                    : const Text('Descargar Reporte'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor:
+                  !isDownloadLoading && !isLoading && error == null
+                      ? AppColors.primaryTurquoise
+                      : AppColors.darkGray,
+              foregroundColor:
+                  !isDownloadLoading && !isLoading && error == null
+                      ? AppColors.primaryDarkBlue
+                      : AppColors.textPrimary.withAlpha(50),
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 20),
 
         // Resumen financiero
         _buildInfoCard(
@@ -347,48 +388,6 @@ class _StudentSummaryWidgetState extends State<StudentSummaryWidget> {
         ),
 
         const SizedBox(height: 20),
-
-        // Botón de descarga
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton.icon(
-            onPressed:
-                !isDownloadLoading && !isLoading && error == null
-                    ? _generateLocalReport
-                    : null,
-            icon:
-                isDownloadLoading
-                    ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          AppColors.primaryDarkBlue,
-                        ),
-                      ),
-                    )
-                    : const Icon(Icons.download),
-            label:
-                isDownloadLoading
-                    ? const Text('Generando PDF...')
-                    : const Text('Descargar Reporte'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor:
-                  !isDownloadLoading && !isLoading && error == null
-                      ? AppColors.primaryTurquoise
-                      : AppColors.darkGray,
-              foregroundColor:
-                  !isDownloadLoading && !isLoading && error == null
-                      ? AppColors.primaryDarkBlue
-                      : AppColors.textPrimary.withAlpha(50),
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-          ),
-        ),
       ],
     );
   }
