@@ -3,10 +3,8 @@ import 'dart:async';
 import 'package:fazztrack_app/config/build.config.dart';
 import 'package:fazztrack_app/config/general.config.dart';
 import 'package:fazztrack_app/constants/colors_constants.dart';
-import 'package:fazztrack_app/models/bar_model.dart';
 import 'package:fazztrack_app/models/control_historico_model.dart';
 import 'package:fazztrack_app/models/estudiante_model.dart';
-import 'package:fazztrack_app/services/bar/bar_api_service.dart';
 import 'package:fazztrack_app/services/estudiantes/control_historico_api_service.dart';
 import 'package:fazztrack_app/services/estudiantes/estudiantes_api_service.dart';
 import 'package:flutter/material.dart';
@@ -37,39 +35,14 @@ class _SaldoClienteWidgetState extends State<SaldoClienteWidget> {
   final EstudiantesApiService _estudiantesService = EstudiantesApiService();
   final ControlHistoricoApiService _controlHistoricoService =
       ControlHistoricoApiService();
-  final BarApiService _barApiService = BarApiService();
   ControlHistoricoModel? _controlHistorico;
   bool _isLoading = false;
   bool _isLoadingBalance = false;
-  List<BarModel> _bares = [];
   final bool _isAdmin = BuildConfig.appLevel == AppConfig.appLevel.admin;
 
   @override
   void initState() {
     super.initState();
-    if (_isAdmin) {
-      _loadBares();
-    }
-  }
-
-  Future<void> _loadBares() async {
-    try {
-      final bares = await _barApiService.getAllBars();
-      setState(() {
-        _bares = bares;
-      });
-    } catch (e) {
-      // Manejar error silenciosamente ya que es opcional
-    }
-  }
-
-  String? _getBarName(String barId) {
-    try {
-      final bar = _bares.firstWhere((bar) => bar.id == barId);
-      return bar.nombre;
-    } catch (e) {
-      return null;
-    }
   }
 
   Future<void> _fetchStudentBalance(String estudianteId) async {
@@ -327,12 +300,11 @@ class _SaldoClienteWidgetState extends State<SaldoClienteWidget> {
                                                 if (estudiante.curso != null)
                                                   Text(
                                                     _isAdmin &&
-                                                            _getBarName(
-                                                                  estudiante
-                                                                      .idBar,
-                                                                ) !=
+                                                            estudiante
+                                                                    .bar
+                                                                    ?.nombre !=
                                                                 null
-                                                        ? '${estudiante.curso!} • ${_getBarName(estudiante.idBar)!}'
+                                                        ? '${estudiante.curso!} • ${estudiante.bar!.nombre}'
                                                         : estudiante.curso!,
                                                     style: const TextStyle(
                                                       color:
