@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { DatabaseService } from '../../database/database.service';
 import { CreateEstudianteDto, UpdateEstudianteDto, EstudianteDto } from './dto';
 import { BaseCrudService } from '../../common/crud/base-crud.service';
@@ -23,13 +23,23 @@ export class EstudiantesService extends BaseCrudService<
       celular: model.celular,
       curso: model.curso,
       nombre_representante: model.nombre_representante,
-      bar: model.bar
+      bar: model.bares
         ? {
-            id: encodeId(model.bar.id),
-            nombre: model.bar.nombre,
+            id: encodeId(model.bares.id),
+            nombre: model.bares.nombre,
           }
         : undefined,
     };
+  }
+
+  async findAll(): Promise<EstudianteDto[]> {
+    const estudiantes = await this.database.estudiantes.findMany({
+      include: {
+        bares: true,
+      },
+    });
+
+    return estudiantes.map((estudiante) => this.mapToDto(estudiante));
   }
 
   async search(nombre: string, idbar?: string): Promise<EstudianteDto[]> {
@@ -46,6 +56,9 @@ export class EstudiantesService extends BaseCrudService<
 
     const estudiantes = await this.database.estudiantes.findMany({
       where: whereCondition,
+      include: {
+        bares: true,
+      },
     });
 
     return estudiantes.map((estudiante) => this.mapToDto(estudiante));
