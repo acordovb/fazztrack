@@ -233,6 +233,7 @@ class _StudentSummaryWidgetState extends State<StudentSummaryWidget> {
         _buildInfoCard(
           title: 'Resumen',
           icon: Icons.summarize,
+          showMonthFilter: true,
           children: [
             if (isLoading)
               Container(
@@ -548,6 +549,7 @@ class _StudentSummaryWidgetState extends State<StudentSummaryWidget> {
     required String title,
     required IconData icon,
     required List<Widget> children,
+    bool showMonthFilter = false,
   }) {
     return Container(
       width: double.infinity,
@@ -573,58 +575,59 @@ class _StudentSummaryWidgetState extends State<StudentSummaryWidget> {
                   ),
                 ),
                 const Spacer(),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryTurquoise.withAlpha(20),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: AppColors.primaryTurquoise.withAlpha(50),
-                      width: 1,
+                if (showMonthFilter)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 4,
                     ),
-                  ),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<String>(
-                      value: selectedMonth,
-                      isDense: true,
-                      style: TextStyle(
-                        color: AppColors.primaryTurquoise,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryTurquoise.withAlpha(20),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: AppColors.primaryTurquoise.withAlpha(50),
+                        width: 1,
                       ),
-                      dropdownColor: AppColors.background,
-                      icon: Icon(
-                        Icons.keyboard_arrow_down,
-                        color: AppColors.primaryTurquoise,
-                        size: 18,
-                      ),
-                      items:
-                          months.map((month) {
-                            return DropdownMenuItem<String>(
-                              value: month['value'],
-                              child: Text(
-                                month['name']!,
-                                style: TextStyle(
-                                  color: AppColors.textPrimary,
-                                  fontSize: 14,
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value: selectedMonth,
+                        isDense: true,
+                        style: TextStyle(
+                          color: AppColors.primaryTurquoise,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        dropdownColor: AppColors.background,
+                        icon: Icon(
+                          Icons.keyboard_arrow_down,
+                          color: AppColors.primaryTurquoise,
+                          size: 18,
+                        ),
+                        items:
+                            months.map((month) {
+                              return DropdownMenuItem<String>(
+                                value: month['value'],
+                                child: Text(
+                                  month['name']!,
+                                  style: TextStyle(
+                                    color: AppColors.textPrimary,
+                                    fontSize: 14,
+                                  ),
                                 ),
-                              ),
-                            );
-                          }).toList(),
-                      onChanged: (String? newValue) {
-                        if (newValue != null) {
-                          setState(() {
-                            selectedMonth = newValue;
-                          });
-                          _loadData();
-                        }
-                      },
+                              );
+                            }).toList(),
+                        onChanged: (String? newValue) {
+                          if (newValue != null) {
+                            setState(() {
+                              selectedMonth = newValue;
+                            });
+                            _loadData();
+                          }
+                        },
+                      ),
                     ),
                   ),
-                ),
               ],
             ),
           ),
