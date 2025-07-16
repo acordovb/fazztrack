@@ -17,12 +17,16 @@ class ControlHistoricoApiService {
   Future<ControlHistoricoModel?> getControlHistoricoByEstudianteId(
     String estudianteId, {
     int? month,
+    int? year,
   }) async {
     try {
       String url = '${API.controlHistorico}/estudiante/$estudianteId';
 
       if (month != null) {
         url += '?month=$month';
+      }
+      if (year != null) {
+        url += '${url.contains('?') ? '&' : '?'}year=$year';
       }
 
       final response = await _apiService.get(url);

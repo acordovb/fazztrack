@@ -7,6 +7,7 @@ import 'package:fazztrack_app/services/ventas/ventas_api_service.dart';
 import 'package:fazztrack_app/services/abonos/abono_api_service.dart';
 import 'package:fazztrack_app/services/estudiantes/control_historico_api_service.dart';
 import 'package:fazztrack_app/services/reports/local_reports_service.dart';
+import 'package:fazztrack_app/widgets/month_year_selector.dart';
 import 'package:flutter/material.dart';
 
 class StudentSummaryWidget extends StatefulWidget {
@@ -31,7 +32,8 @@ class StudentSummaryWidget extends StatefulWidget {
 }
 
 class _StudentSummaryWidgetState extends State<StudentSummaryWidget> {
-  late String selectedMonth;
+  late int selectedMonth;
+  late int selectedYear;
   final VentasApiService _ventasApiService = VentasApiService();
   final AbonoApiService _abonoApiService = AbonoApiService();
   final ControlHistoricoApiService _controlHistoricoApiService =
@@ -48,25 +50,11 @@ class _StudentSummaryWidgetState extends State<StudentSummaryWidget> {
   // Variable para rastrear el estudiante actual y cancelar operaciones obsoletas
   String? _currentStudentId;
 
-  final List<Map<String, String>> months = [
-    {'value': '1', 'name': 'Enero'},
-    {'value': '2', 'name': 'Febrero'},
-    {'value': '3', 'name': 'Marzo'},
-    {'value': '4', 'name': 'Abril'},
-    {'value': '5', 'name': 'Mayo'},
-    {'value': '6', 'name': 'Junio'},
-    {'value': '7', 'name': 'Julio'},
-    {'value': '8', 'name': 'Agosto'},
-    {'value': '9', 'name': 'Septiembre'},
-    {'value': '10', 'name': 'Octubre'},
-    {'value': '11', 'name': 'Noviembre'},
-    {'value': '12', 'name': 'Diciembre'},
-  ];
-
   @override
   void initState() {
     super.initState();
-    selectedMonth = DateTime.now().month.toString();
+    selectedMonth = DateTime.now().month;
+    selectedYear = DateTime.now().year;
     _currentStudentId = widget.estudiante.id;
     _loadData();
   }
@@ -88,12 +76,12 @@ class _StudentSummaryWidgetState extends State<StudentSummaryWidget> {
     });
 
     try {
-      final month = int.parse(selectedMonth);
       final currentStudentId = widget.estudiante.id;
 
       final ventasData = await _ventasApiService.findAllByStudent(
         widget.estudiante.id,
-        mes: month,
+        selectedMonth,
+        selectedYear,
       );
 
       // Verificar si el widget sigue montado y si el estudiante no ha cambiado
@@ -103,7 +91,8 @@ class _StudentSummaryWidgetState extends State<StudentSummaryWidget> {
 
       final abonosData = await _abonoApiService.findAllByStudent(
         widget.estudiante.id,
-        mes: month,
+        selectedMonth,
+        selectedYear,
       );
 
       // Verificar nuevamente
@@ -114,7 +103,8 @@ class _StudentSummaryWidgetState extends State<StudentSummaryWidget> {
       final controlHistoricoData = await _controlHistoricoApiService
           .getControlHistoricoByEstudianteId(
             widget.estudiante.id,
-            month: month,
+            month: selectedMonth,
+            year: selectedYear,
           );
 
       // Verificación final antes de actualizar el estado
@@ -141,6 +131,34 @@ class _StudentSummaryWidgetState extends State<StudentSummaryWidget> {
     }
   }
 
+  void _onMonthYearChanged(int month, int year) {
+    if (month != selectedMonth || year != selectedYear) {
+      setState(() {
+        selectedMonth = month;
+        selectedYear = year;
+      });
+      _loadData();
+    }
+  }
+
+  String _getMonthName(int month) {
+    const monthNames = [
+      'Enero',
+      'Febrero',
+      'Marzo',
+      'Abril',
+      'Mayo',
+      'Junio',
+      'Julio',
+      'Agosto',
+      'Septiembre',
+      'Octubre',
+      'Noviembre',
+      'Diciembre',
+    ];
+    return monthNames[month - 1];
+  }
+
   double get totalVentas {
     return ventas.fold(0.0, (sum, venta) {
       if (venta.producto != null) {
@@ -165,8 +183,6 @@ class _StudentSummaryWidgetState extends State<StudentSummaryWidget> {
   Future<void> _generateLocalReport() async {
     try {
       setState(() => isDownloadLoading = true);
-      final month = int.parse(selectedMonth);
-      final year = DateTime.now().year;
 
       await _localReportsService.generateReportWithData(
         context: context,
@@ -174,8 +190,8 @@ class _StudentSummaryWidgetState extends State<StudentSummaryWidget> {
         ventas: ventas,
         abonos: abonos,
         controlHistorico: controlHistorico,
-        month: month,
-        year: year,
+        month: selectedMonth,
+        year: selectedYear,
       );
 
       if (!mounted) return;
@@ -327,7 +343,7 @@ class _StudentSummaryWidgetState extends State<StudentSummaryWidget> {
                 child: Column(
                   children: [
                     Text(
-                      'Resumen de ${months.firstWhere((month) => month['value'] == selectedMonth)['name']}',
+                      'Resumen de ${_getMonthName(selectedMonth)} $selectedYear',
                       style: TextStyle(
                         color: AppColors.textPrimary,
                         fontSize: 16,
@@ -575,57 +591,10 @@ class _StudentSummaryWidgetState extends State<StudentSummaryWidget> {
                 ),
                 const Spacer(),
                 if (showMonthFilter)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryTurquoise.withAlpha(20),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: AppColors.primaryTurquoise.withAlpha(50),
-                        width: 1,
-                      ),
-                    ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        value: selectedMonth,
-                        isDense: true,
-                        style: TextStyle(
-                          color: AppColors.primaryTurquoise,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                        ),
-                        dropdownColor: AppColors.background,
-                        icon: Icon(
-                          Icons.keyboard_arrow_down,
-                          color: AppColors.primaryTurquoise,
-                          size: 18,
-                        ),
-                        items:
-                            months.map((month) {
-                              return DropdownMenuItem<String>(
-                                value: month['value'],
-                                child: Text(
-                                  month['name']!,
-                                  style: TextStyle(
-                                    color: AppColors.textPrimary,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              );
-                            }).toList(),
-                        onChanged: (String? newValue) {
-                          if (newValue != null) {
-                            setState(() {
-                              selectedMonth = newValue;
-                            });
-                            _loadData();
-                          }
-                        },
-                      ),
-                    ),
+                  MonthYearSelector(
+                    initialMonth: selectedMonth,
+                    initialYear: selectedYear,
+                    onChanged: _onMonthYearChanged,
                   ),
               ],
             ),

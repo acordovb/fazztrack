@@ -117,18 +117,21 @@ class LocalReportsService {
         // Consultar datos del estudiante
         final ventas = await _ventasApiService.findAllByStudent(
           estudiante.id,
-          mes: reportMonth,
+          reportMonth,
+          reportYear,
         );
 
         final abonos = await _abonoApiService.findAllByStudent(
           estudiante.id,
-          mes: reportMonth,
+          reportMonth,
+          reportYear,
         );
 
         final controlHistorico = await _controlHistoricoApiService
             .getControlHistoricoByEstudianteId(
               estudiante.id,
               month: reportMonth,
+              year: reportYear,
             );
 
         // Generar PDF

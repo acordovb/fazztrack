@@ -5,6 +5,7 @@ import 'package:fazztrack_app/models/abono_model.dart';
 import 'package:fazztrack_app/services/estudiantes/estudiantes_api_service.dart';
 import 'package:fazztrack_app/services/ventas/ventas_api_service.dart';
 import 'package:fazztrack_app/services/abonos/abono_api_service.dart';
+import 'package:fazztrack_app/widgets/month_year_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -28,9 +29,15 @@ class _TransactionAdminScreenState extends State<TransactionAdminScreen> {
   bool _isLoading = false;
   bool _isLoadingTransactions = false;
 
+  // Variables para el filtro de mes y año
+  late int _selectedMonth;
+  late int _selectedYear;
+
   @override
   void initState() {
     super.initState();
+    _selectedMonth = DateTime.now().month;
+    _selectedYear = DateTime.now().year;
     _loadEstudiantes();
   }
 
@@ -56,6 +63,8 @@ class _TransactionAdminScreenState extends State<TransactionAdminScreen> {
       if (_selectedTransactionType == 'ventas') {
         final ventas = await _ventasService.findAllByStudent(
           _selectedEstudiante!.id,
+          _selectedMonth,
+          _selectedYear,
         );
         setState(() {
           _ventas = ventas;
@@ -64,6 +73,8 @@ class _TransactionAdminScreenState extends State<TransactionAdminScreen> {
       } else {
         final abonos = await _abonoService.findAllByStudent(
           _selectedEstudiante!.id,
+          _selectedMonth,
+          _selectedYear,
         );
         setState(() {
           _abonos = abonos;
@@ -74,6 +85,16 @@ class _TransactionAdminScreenState extends State<TransactionAdminScreen> {
       _showErrorSnackBar('Error al cargar transacciones: $e');
     } finally {
       setState(() => _isLoadingTransactions = false);
+    }
+  }
+
+  void _onMonthYearChanged(int month, int year) {
+    if (month != _selectedMonth || year != _selectedYear) {
+      setState(() {
+        _selectedMonth = month;
+        _selectedYear = year;
+      });
+      _loadTransactions();
     }
   }
 
@@ -130,7 +151,11 @@ class _TransactionAdminScreenState extends State<TransactionAdminScreen> {
             children: [
               _buildStudentSelector(),
               const SizedBox(height: 20),
-              if (_selectedEstudiante != null) _buildTransactionTypeSelector(),
+              if (_selectedEstudiante != null) ...[
+                _buildTransactionTypeSelector(),
+                const SizedBox(height: 20),
+                _buildMonthYearFilter(),
+              ],
             ],
           ),
         ),
@@ -178,9 +203,47 @@ class _TransactionAdminScreenState extends State<TransactionAdminScreen> {
         if (_selectedEstudiante != null) ...[
           _buildTransactionTypeSelector(),
           const SizedBox(height: 20),
+          _buildMonthYearFilter(),
+          const SizedBox(height: 20),
           _buildTransactionsList(),
         ],
       ],
+    );
+  }
+
+  Widget _buildMonthYearFilter() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.shadow,
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Filtro de Fecha',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 16),
+          MonthYearSelector(
+            initialMonth: _selectedMonth,
+            initialYear: _selectedYear,
+            onChanged: _onMonthYearChanged,
+          ),
+        ],
+      ),
     );
   }
 

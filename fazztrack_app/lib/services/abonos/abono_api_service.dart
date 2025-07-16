@@ -19,14 +19,12 @@ class AbonoApiService {
   }
 
   Future<List<AbonoModel>> findAllByStudent(
-    String idStudent, {
-    int? mes,
-  }) async {
+    String idStudent,
+    int month,
+    int year,
+  ) async {
     try {
-      String url = '${API.abonos}/$idStudent';
-      if (mes != null) {
-        url += '?mes=$mes';
-      }
+      String url = '${API.abonos}/$idStudent?month=$month&year=$year';
 
       final response = await _apiService.get(url);
       final data = jsonDecode(response.body) as List;
