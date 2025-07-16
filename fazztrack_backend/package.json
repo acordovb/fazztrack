@@ -1,6 +1,6 @@
 {
   "name": "fazztrack_backend",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Payment and installment management system for multiple bars administration",
   "author": "Alex Córdova Balón",
   "contributors": [
@@ -35,14 +35,12 @@
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.0.1",
     "@nestjs/platform-express": "^11.0.1",
-    "@nestjs/schedule": "^6.0.0",
     "@prisma/client": "^6.6.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "hashids": "^2.3.0",
     "prisma": "^6.6.0",
     "reflect-metadata": "^0.2.2",
-    "resend": "^4.6.0",
     "rxjs": "^7.8.1",
     "uuid": "^11.1.0"
   },
