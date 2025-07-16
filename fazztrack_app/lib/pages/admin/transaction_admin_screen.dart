@@ -648,44 +648,6 @@ class _TransactionAdminScreenState extends State<TransactionAdminScreen> {
                     ),
                   ),
                 ),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    ElevatedButton.icon(
-                      icon: const Icon(Icons.edit, size: 16),
-                      label: const Text('Editar'),
-                      onPressed: () => _editVenta(venta),
-                      style: ElevatedButton.styleFrom(
-                        foregroundColor: AppColors.primaryTurquoise,
-                        backgroundColor: AppColors.card,
-                        side: const BorderSide(
-                          color: AppColors.primaryTurquoise,
-                        ),
-                        elevation: 0,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    ElevatedButton.icon(
-                      icon: const Icon(Icons.delete, size: 16),
-                      label: const Text('Eliminar'),
-                      onPressed: () => _deleteVenta(venta),
-                      style: ElevatedButton.styleFrom(
-                        foregroundColor: AppColors.error,
-                        backgroundColor: AppColors.card,
-                        side: const BorderSide(color: AppColors.error),
-                        elevation: 0,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
               ],
             ),
             const SizedBox(height: 12),
@@ -706,6 +668,45 @@ class _TransactionAdminScreenState extends State<TransactionAdminScreen> {
                     DateFormat(
                       'dd/MM/yyyy HH:mm',
                     ).format(venta.fechaTransaccion),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            const Divider(color: AppColors.primaryTurquoise, height: 1),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.edit, size: 16),
+                  label: const Text('Editar'),
+                  onPressed: () => _editVenta(venta),
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: AppColors.primaryTurquoise,
+                    backgroundColor: AppColors.card,
+                    side: const BorderSide(color: AppColors.primaryTurquoise),
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.delete, size: 16),
+                  label: const Text('Eliminar'),
+                  onPressed: () => _deleteVenta(venta),
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: AppColors.error,
+                    backgroundColor: AppColors.card,
+                    side: const BorderSide(color: AppColors.error),
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
                   ),
                 ),
               ],
@@ -752,44 +753,6 @@ class _TransactionAdminScreenState extends State<TransactionAdminScreen> {
                     ),
                   ),
                 ),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    ElevatedButton.icon(
-                      icon: const Icon(Icons.edit, size: 16),
-                      label: const Text('Editar'),
-                      onPressed: () => _editAbono(abono),
-                      style: ElevatedButton.styleFrom(
-                        foregroundColor: AppColors.primaryTurquoise,
-                        backgroundColor: AppColors.card,
-                        side: const BorderSide(
-                          color: AppColors.primaryTurquoise,
-                        ),
-                        elevation: 0,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    ElevatedButton.icon(
-                      icon: const Icon(Icons.delete, size: 16),
-                      label: const Text('Eliminar'),
-                      onPressed: () => _deleteAbono(abono),
-                      style: ElevatedButton.styleFrom(
-                        foregroundColor: AppColors.error,
-                        backgroundColor: AppColors.card,
-                        side: const BorderSide(color: AppColors.error),
-                        elevation: 0,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
               ],
             ),
             const SizedBox(height: 12),
@@ -808,6 +771,79 @@ class _TransactionAdminScreenState extends State<TransactionAdminScreen> {
                     Icons.access_time,
                     'Fecha',
                     DateFormat('dd/MM/yyyy HH:mm').format(abono.fechaAbono),
+                  ),
+                ),
+              ],
+            ),
+            if (abono.comentario != null && abono.comentario!.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.lightBlue.withAlpha(10),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: AppColors.lightBlue.withAlpha(30),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.comment,
+                      size: 16,
+                      color: AppColors.primaryTurquoise,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        abono.comentario!,
+                        style: const TextStyle(
+                          color: AppColors.textPrimary,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+            const SizedBox(height: 12),
+            const Divider(color: AppColors.primaryTurquoise, height: 1),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.edit, size: 16),
+                  label: const Text('Editar'),
+                  onPressed: () => _editAbono(abono),
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: AppColors.primaryTurquoise,
+                    backgroundColor: AppColors.card,
+                    side: const BorderSide(color: AppColors.primaryTurquoise),
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.delete, size: 16),
+                  label: const Text('Eliminar'),
+                  onPressed: () => _deleteAbono(abono),
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: AppColors.error,
+                    backgroundColor: AppColors.card,
+                    side: const BorderSide(color: AppColors.error),
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
                   ),
                 ),
               ],

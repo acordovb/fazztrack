@@ -19,6 +19,8 @@ class BaseProceduresScreen extends StatefulWidget {
 
 class _BaseProceduresScreenState extends State<BaseProceduresScreen> {
   PageType _currentPage = PageType.consumo;
+  bool _isMenuExpanded = false;
+  bool _showMenuContent = false;
 
   final Map<PageType, String> _pageTitles = {
     PageType.consumo: 'Reportar Consumo',
@@ -31,6 +33,28 @@ class _BaseProceduresScreenState extends State<BaseProceduresScreen> {
     setState(() {
       _currentPage = page;
     });
+  }
+
+  void _toggleMenu() async {
+    if (_isMenuExpanded) {
+      // Si está expandido, primero ocultar contenido, luego colapsar
+      setState(() {
+        _showMenuContent = false;
+      });
+      await Future.delayed(const Duration(milliseconds: 50));
+      setState(() {
+        _isMenuExpanded = false;
+      });
+    } else {
+      // Si está colapsado, primero expandir, luego mostrar contenido
+      setState(() {
+        _isMenuExpanded = true;
+      });
+      await Future.delayed(const Duration(milliseconds: 300));
+      setState(() {
+        _showMenuContent = true;
+      });
+    }
   }
 
   Widget _getCurrentPageContent() {
@@ -57,17 +81,23 @@ class _BaseProceduresScreenState extends State<BaseProceduresScreen> {
       return Scaffold(
         body: Row(
           children: [
-            // Menú lateral permanente
-            SizedBox(
-              width: 280,
+            // Menú lateral con capacidad de expandir/colapsar
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              width: _isMenuExpanded ? 280 : 80,
               child: CustomSideMenu(
                 changePage: _changePage,
                 currentPage: _currentPage,
                 isWideScreen: true,
+                isExpanded: _isMenuExpanded,
+                showContent: _showMenuContent,
+                onToggleExpanded: _toggleMenu,
               ),
             ),
             // Divisor vertical
-            Container(
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
               width: 0.1,
               color: AppColors.primaryDarkBlue.withAlpha(30),
             ),
@@ -329,11 +359,17 @@ class CustomSideMenu extends StatefulWidget {
     required this.changePage,
     required this.currentPage,
     required this.isWideScreen,
+    required this.isExpanded,
+    required this.showContent,
+    required this.onToggleExpanded,
   });
 
   final Function(PageType) changePage;
   final PageType currentPage;
   final bool isWideScreen;
+  final bool isExpanded;
+  final bool showContent;
+  final VoidCallback onToggleExpanded;
 
   @override
   State<CustomSideMenu> createState() => _CustomSideMenuState();
@@ -376,15 +412,24 @@ class _CustomSideMenuState extends State<CustomSideMenu> {
                     onTap: () => _handlePageChange(PageType.abono),
                   ),
                   if (BuildConfig.appLevel == AppConfig.appLevel.admin) ...[
-                    const Padding(
+                    Padding(
                       padding: EdgeInsets.symmetric(
-                        horizontal: 20,
+                        horizontal: widget.isExpanded ? 20 : 16,
                         vertical: 10,
                       ),
-                      child: Divider(
-                        color: AppColors.textSecondary,
-                        thickness: 0.5,
-                      ),
+                      child:
+                          widget.isExpanded
+                              ? const Divider(
+                                color: AppColors.textSecondary,
+                                thickness: 0.5,
+                              )
+                              : Container(
+                                height: 1,
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                ),
+                                color: AppColors.textSecondary.withAlpha(127),
+                              ),
                     ),
                     _buildSideMenuItem(
                       context: context,
@@ -404,6 +449,51 @@ class _CustomSideMenuState extends State<CustomSideMenu> {
                     ),
                   ],
                 ],
+              ),
+            ),
+            // Botón para expandir/colapsar el menú
+            Container(
+              margin: const EdgeInsets.all(12),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(12),
+                  onTap: widget.onToggleExpanded,
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      color: AppColors.primary.withAlpha(10),
+                      border: Border.all(
+                        color: AppColors.primary.withAlpha(30),
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          widget.isExpanded
+                              ? Icons.keyboard_arrow_left
+                              : Icons.keyboard_arrow_right,
+                          color: AppColors.primary,
+                          size: 20,
+                        ),
+                        if (widget.isExpanded && widget.showContent) ...[
+                          const SizedBox(width: 8),
+                          const Text(
+                            'Colapsar',
+                            style: TextStyle(
+                              color: AppColors.primary,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
               ),
             ),
           ],
@@ -442,67 +532,97 @@ class _CustomSideMenuState extends State<CustomSideMenu> {
           borderRadius: BorderRadius.circular(16),
           onTap: onTap,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Row(
-              children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color:
-                        isSelected
-                            ? AppColors.primaryTurquoise
-                            : AppColors.primary.withAlpha(10),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    icon,
-                    color: isSelected ? Colors.white : AppColors.primary,
-                    size: 24,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: TextStyle(
-                          color:
-                              isSelected
-                                  ? AppColors.primaryTurquoise
-                                  : AppColors.textPrimary,
-                          fontSize: 16,
-                          fontWeight:
-                              isSelected ? FontWeight.w600 : FontWeight.w500,
-                        ),
-                      ),
-                      if (subtitle != null) ...[
-                        const SizedBox(height: 2),
-                        Text(
-                          subtitle,
-                          style: const TextStyle(
-                            color: AppColors.primaryWhite,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w400,
+            padding: EdgeInsets.symmetric(
+              horizontal: widget.isExpanded ? 16 : 8,
+              vertical: 12,
+            ),
+            child:
+                widget.isExpanded && widget.showContent
+                    ? Row(
+                      children: [
+                        Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color:
+                                isSelected
+                                    ? AppColors.primaryTurquoise
+                                    : AppColors.primary.withAlpha(10),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(
+                            icon,
+                            color:
+                                isSelected ? Colors.white : AppColors.primary,
+                            size: 24,
                           ),
                         ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                title,
+                                style: TextStyle(
+                                  color:
+                                      isSelected
+                                          ? AppColors.primaryTurquoise
+                                          : AppColors.textPrimary,
+                                  fontSize: 16,
+                                  fontWeight:
+                                      isSelected
+                                          ? FontWeight.w600
+                                          : FontWeight.w500,
+                                ),
+                              ),
+                              if (subtitle != null) ...[
+                                const SizedBox(height: 2),
+                                Text(
+                                  subtitle,
+                                  style: const TextStyle(
+                                    color: AppColors.primaryWhite,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                        if (isSelected)
+                          Container(
+                            width: 4,
+                            height: 20,
+                            decoration: BoxDecoration(
+                              color: AppColors.primaryTurquoise,
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
                       ],
-                    ],
-                  ),
-                ),
-                if (isSelected)
-                  Container(
-                    width: 4,
-                    height: 20,
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryTurquoise,
-                      borderRadius: BorderRadius.circular(2),
+                    )
+                    : Center(
+                      child: Tooltip(
+                        message: title,
+                        child: Container(
+                          width: 48,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color:
+                                isSelected
+                                    ? AppColors.primaryTurquoise
+                                    : AppColors.primary.withAlpha(10),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(
+                            icon,
+                            color:
+                                isSelected ? Colors.white : AppColors.primary,
+                            size: 24,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-              ],
-            ),
           ),
         ),
       ),
