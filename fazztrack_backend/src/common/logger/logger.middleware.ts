@@ -9,9 +9,11 @@ export class LoggerMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: NextFunction) {
     const { method, originalUrl } = req;
     const userAgent = req.get('user-agent') || '';
+    const clientIp = req.ip || req.connection.remoteAddress || 'unknown';
 
-    this.loggerService.log(
-      `${method} ${originalUrl} - ${userAgent}`,
+    // Log incoming request
+    this.loggerService.info(
+      `${method} ${originalUrl} - ${clientIp} - ${userAgent}`,
       'HttpRequest',
     );
 
@@ -22,10 +24,9 @@ export class LoggerMiddleware implements NestMiddleware {
       const contentLength = res.get('content-length') || 0;
       const responseTime = Date.now() - startTime;
 
-      this.loggerService.log(
-        `${method} ${originalUrl} ${statusCode} ${contentLength} - ${responseTime}ms`,
-        'HttpResponse',
-      );
+      // Use the new http method for better status-based logging
+      const logMessage = `${method} ${originalUrl} ${statusCode} ${contentLength}b - ${responseTime}ms`;
+      this.loggerService.http(logMessage, statusCode, 'HttpResponse');
     });
 
     next();
