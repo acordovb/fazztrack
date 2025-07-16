@@ -26,3 +26,4 @@ eslint.config.mjs
 .prettierrc
 tsconfig.build.json
 yarn-error.log
+LICENSE

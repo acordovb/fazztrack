@@ -1,3 +1,4 @@
+######################################################################
 # Etapa 1: Build
 FROM node:22-alpine AS builder
 
@@ -17,6 +18,7 @@ COPY . .
 # Build de la aplicación
 RUN yarn run build
 
+######################################################################
 # Etapa 2: Dependencias de producción
 FROM node:22-alpine AS deps
 
@@ -31,11 +33,13 @@ RUN yarn install --frozen-lockfile --production=true && \
     yarn prisma generate && \
     yarn cache clean --force
 
+######################################################################
 # Etapa 3: Runtime
 FROM node:22-alpine AS runner
 
 # Configurar variables de entorno
 ENV NODE_ENV=production
+ENV NODE_OPTIONS="--max-old-space-size=256 --max-http-header-size=8192 --no-warnings"
 
 # Crear usuario no-root para seguridad
 RUN addgroup -g 1001 -S nodejs && \
