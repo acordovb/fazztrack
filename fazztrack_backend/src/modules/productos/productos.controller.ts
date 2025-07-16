@@ -26,6 +26,7 @@ export class ProductosController {
   findAll(): Promise<ProductoDto[]> {
     return this.productosService.findAll();
   }
+
   @Get('search')
   search(
     @Query('nombre') nombre?: string,
