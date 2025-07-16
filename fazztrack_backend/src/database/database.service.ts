@@ -21,6 +21,7 @@ export class DatabaseService
           url: configService.get('database.url'),
         },
       },
+      log: ['error'],
     });
   }
 

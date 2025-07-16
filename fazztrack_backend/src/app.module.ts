@@ -15,15 +15,16 @@ import configuration from './config/configuration';
     ConfigModule.forRoot({
       isGlobal: true,
       load: [configuration],
+      cache: true,
     }),
     DatabaseModule,
+    LoggerModule,
     BarsModule,
     ProductosModule,
     EstudiantesModule,
     AbonosModule,
     VentasModule,
     ControlHistoricoModule,
-    LoggerModule,
   ],
 })
 export class AppModule implements NestModule {
