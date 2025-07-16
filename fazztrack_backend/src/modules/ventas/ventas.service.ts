@@ -67,7 +67,7 @@ export class VentasService extends BaseCrudService<
   }
 
   async calculateTotalVentas(
-    idEstudiante: string,
+    idEstudiante: number,
     month: number,
   ): Promise<number> {
     const currentYear = new Date().getFullYear();
@@ -76,7 +76,7 @@ export class VentasService extends BaseCrudService<
 
     const result = await this.database.ventas.aggregate({
       where: {
-        id_estudiante: decodeId(idEstudiante),
+        id_estudiante: idEstudiante,
         fecha_transaccion: {
           gte: startDate,
           lte: endDate,

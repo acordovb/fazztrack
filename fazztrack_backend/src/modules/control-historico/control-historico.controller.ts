@@ -20,19 +20,16 @@ export class ControlHistoricoController {
   ): Promise<ControlHistoricoDto> {
     const currentMonth =
       month !== undefined ? Number(month) : new Date().getMonth() + 1;
-
+    const idNumberEstudiante = decodeId(idEstudiante);
     let controlHistorico =
       await this.controlHistoricoService.findByEstudianteId(
-        idEstudiante,
+        idNumberEstudiante,
         currentMonth,
       );
 
     const [totalVentas, totalAbonos] = await Promise.all([
-      this.ventasService.calculateTotalVentas(idEstudiante, currentMonth),
-      this.abonosService.calculateTotalAbonos(
-        decodeId(idEstudiante),
-        currentMonth,
-      ),
+      this.ventasService.calculateTotalVentas(idNumberEstudiante, currentMonth),
+      this.abonosService.calculateTotalAbonos(idNumberEstudiante, currentMonth),
     ]);
 
     controlHistorico.total_venta = totalVentas;
