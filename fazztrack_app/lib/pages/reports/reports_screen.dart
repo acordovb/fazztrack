@@ -264,7 +264,7 @@ class _ReportsContentState extends State<ReportsContent> {
               children: [
                 // Lista de estudiantes
                 Expanded(
-                  flex: _selectedEstudiante != null ? 2 : 3,
+                  flex: _selectedEstudiante != null ? 1 : 3,
                   child: _buildDataTable(),
                 ),
 
