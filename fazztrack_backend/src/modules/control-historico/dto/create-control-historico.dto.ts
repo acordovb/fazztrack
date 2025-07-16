@@ -10,6 +10,10 @@ export class CreateControlHistoricoDto implements CreateDto {
   @IsPositive()
   n_mes: number;
 
+  @IsNumber()
+  @IsPositive()
+  n_year: number;
+
   @IsOptional()
   @IsNumber()
   total_pendiente_ult_mes_abono?: number;

@@ -34,6 +34,7 @@ export class ControlHistoricoService extends BaseCrudService<
       total_pendiente_ult_mes_venta:
         model.total_pendiente_ult_mes_venta.toNumber(),
       n_mes: model.n_mes,
+      n_year: model.n_year,
     };
   }
 
@@ -48,7 +49,7 @@ export class ControlHistoricoService extends BaseCrudService<
     const monthNumber = month > 1 ? month - 1 : 12;
 
     let controlHistorico = await this.database.control_historico.findFirst({
-      where: { id_estudiante: idEstudiante, n_mes: monthNumber },
+      where: { id_estudiante: idEstudiante, n_mes: monthNumber, n_year: year },
     });
 
     if (!controlHistorico) {
@@ -66,6 +67,7 @@ export class ControlHistoricoService extends BaseCrudService<
       controlHistoricoNew.total_pendiente_ult_mes_abono = 0;
       controlHistoricoNew.total_pendiente_ult_mes_venta = 0;
       controlHistoricoNew.n_mes = month;
+      controlHistoricoNew.n_year = year;
 
       return controlHistoricoNew;
     }
@@ -96,6 +98,7 @@ export class ControlHistoricoService extends BaseCrudService<
       total_pendiente_ult_mes_abono: totalPendiente > 0 ? totalPendiente : 0,
       total_pendiente_ult_mes_venta: totalPendiente < 0 ? totalPendiente : 0,
       n_mes: month,
+      n_year: year,
     });
     return this.mapToDto(objCreated);
   }

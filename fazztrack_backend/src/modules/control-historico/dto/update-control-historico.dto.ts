@@ -8,6 +8,10 @@ export class UpdateControlHistoricoDto implements UpdateDto {
 
   @IsNumber()
   @IsOptional()
+  n_year?: number;
+
+  @IsNumber()
+  @IsOptional()
   total_pendiente_ult_mes_abono?: number;
 
   @IsNumber()
