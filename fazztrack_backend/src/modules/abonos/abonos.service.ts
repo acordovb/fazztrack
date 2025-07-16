@@ -29,11 +29,10 @@ export class AbonosService extends BaseCrudService<
   async findAllByStudent(
     idStudent: string,
     month: number,
+    year: number,
   ): Promise<AbonoDto[]> {
-    const currentYear = new Date().getFullYear();
-
-    const startDate = new Date(currentYear, month - 1, 1);
-    const endDate = new Date(currentYear, month, 0, 23, 59, 59, 999);
+    const startDate = new Date(year, month - 1, 1);
+    const endDate = new Date(year, month, 0, 23, 59, 59, 999);
 
     const abonos = await this.database.abonos.findMany({
       orderBy: { fecha_abono: 'desc' },
@@ -51,10 +50,10 @@ export class AbonosService extends BaseCrudService<
   async calculateTotalAbonos(
     idEstudiante: number,
     month: number,
+    year: number,
   ): Promise<number> {
-    const currentYear = new Date().getFullYear();
-    const startDate = new Date(currentYear, month - 1, 1);
-    const endDate = new Date(currentYear, month, 0, 23, 59, 59, 999);
+    const startDate = new Date(year, month - 1, 1);
+    const endDate = new Date(year, month, 0, 23, 59, 59, 999);
     const result = await this.database.abonos.aggregate({
       where: {
         id_estudiante: idEstudiante,

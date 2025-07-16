@@ -40,11 +40,13 @@ export class ControlHistoricoService extends BaseCrudService<
   async findByEstudianteId(
     idEstudiante: number,
     month: number,
+    year: number,
   ): Promise<ControlHistoricoDto> {
-    let monthNumber = month - 1;
-    if (monthNumber < 0) {
-      monthNumber = 12;
-    }
+    // Aqui ya se resta para el mes que se busca, es decir
+    // si se busca el control historico de Julio quiere decir que es el de Junio
+    // porque el control historico se calcula al final del mes y depende del anterior.
+    const monthNumber = month > 1 ? month - 1 : 12;
+
     let controlHistorico = await this.database.control_historico.findFirst({
       where: { id_estudiante: idEstudiante, n_mes: monthNumber },
     });
@@ -53,6 +55,7 @@ export class ControlHistoricoService extends BaseCrudService<
       const controlHistoricoCheck = await this.calculateControlHistorico(
         idEstudiante,
         monthNumber,
+        year,
       );
       if (controlHistoricoCheck) {
         return controlHistoricoCheck;
@@ -73,24 +76,26 @@ export class ControlHistoricoService extends BaseCrudService<
   async calculateControlHistorico(
     idEstudiante: number,
     month: number,
+    year: number,
   ): Promise<ControlHistoricoDto | undefined> {
-    const currentDate = new Date();
-    const currentMonth = currentDate.getMonth() + 1;
+    const now = new Date();
+    const currentMonth = now.getMonth() + 1;
+    const currentYear = now.getFullYear();
 
-    if (month >= currentMonth) {
+    if (year > currentYear || (year === currentYear && month >= currentMonth)) {
       return;
     }
 
     const [totalVentas, totalAbonos] = await Promise.all([
-      this.ventasService.calculateTotalVentas(idEstudiante, month - 1),
-      this.abonosService.calculateTotalAbonos(idEstudiante, month - 1),
+      this.ventasService.calculateTotalVentas(idEstudiante, month, year),
+      this.abonosService.calculateTotalAbonos(idEstudiante, month, year),
     ]);
     const totalPendiente = totalAbonos - totalVentas;
     const objCreated = await this.create({
       id_estudiante: idEstudiante,
       total_pendiente_ult_mes_abono: totalPendiente > 0 ? totalPendiente : 0,
       total_pendiente_ult_mes_venta: totalPendiente < 0 ? totalPendiente : 0,
-      n_mes: month - 1,
+      n_mes: month,
     });
     return this.mapToDto(objCreated);
   }

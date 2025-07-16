@@ -26,10 +26,16 @@ export class VentasController {
   @Get(':idStudent')
   findAllByStudent(
     @Param('idStudent') idStudent: string,
-    @Query('mes') mes?: string,
+    @Query('month') month?: string,
+    @Query('year') year?: string,
   ): Promise<VentaDto[]> {
-    const month = mes ? parseInt(mes) : new Date().getMonth() + 1;
-    return this.ventasService.findAllByStudent(idStudent, month);
+    const monthNumber = month ? parseInt(month) : new Date().getMonth() + 1;
+    const yearNumber = year ? parseInt(year) : new Date().getFullYear();
+    return this.ventasService.findAllByStudent(
+      idStudent,
+      monthNumber,
+      yearNumber,
+    );
   }
 
   @Patch(':id')

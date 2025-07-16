@@ -44,11 +44,10 @@ export class VentasService extends BaseCrudService<
   async findAllByStudent(
     idStudent: string,
     month: number,
+    year: number,
   ): Promise<VentaDto[]> {
-    const currentYear = new Date().getFullYear();
-
-    const startDate = new Date(currentYear, month - 1, 1);
-    const endDate = new Date(currentYear, month, 0, 23, 59, 59, 999);
+    const startDate = new Date(year, month - 1, 1);
+    const endDate = new Date(year, month, 0, 23, 59, 59, 999);
 
     const ventas = await this.database.ventas.findMany({
       orderBy: { fecha_transaccion: 'desc' },
@@ -69,10 +68,10 @@ export class VentasService extends BaseCrudService<
   async calculateTotalVentas(
     idEstudiante: number,
     month: number,
+    year: number,
   ): Promise<number> {
-    const currentYear = new Date().getFullYear();
-    const startDate = new Date(currentYear, month - 1, 1);
-    const endDate = new Date(currentYear, month, 0, 23, 59, 59, 999);
+    const startDate = new Date(year, month - 1, 1);
+    const endDate = new Date(year, month, 0, 23, 59, 59, 999);
 
     const result = await this.database.ventas.aggregate({
       where: {

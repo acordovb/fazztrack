@@ -16,20 +16,31 @@ export class ControlHistoricoController {
   @Get('estudiante/:idEstudiante')
   async findByEstudianteId(
     @Param('idEstudiante') idEstudiante: string,
-    @Query('month') month?: number,
+    @Query('month') month?: string,
+    @Query('year') year?: string,
   ): Promise<ControlHistoricoDto> {
-    const currentMonth =
-      month !== undefined ? Number(month) : new Date().getMonth() + 1;
+    const monthNumber = month ? parseInt(month) : new Date().getMonth() + 1;
+    const yearNumber = year ? parseInt(year) : new Date().getFullYear();
+
     const idNumberEstudiante = decodeId(idEstudiante);
     let controlHistorico =
       await this.controlHistoricoService.findByEstudianteId(
         idNumberEstudiante,
-        currentMonth,
+        monthNumber,
+        yearNumber,
       );
 
     const [totalVentas, totalAbonos] = await Promise.all([
-      this.ventasService.calculateTotalVentas(idNumberEstudiante, currentMonth),
-      this.abonosService.calculateTotalAbonos(idNumberEstudiante, currentMonth),
+      this.ventasService.calculateTotalVentas(
+        idNumberEstudiante,
+        monthNumber,
+        yearNumber,
+      ),
+      this.abonosService.calculateTotalAbonos(
+        idNumberEstudiante,
+        monthNumber,
+        yearNumber,
+      ),
     ]);
 
     controlHistorico.total_venta = totalVentas;
