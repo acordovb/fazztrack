@@ -213,6 +213,8 @@ class _TransactionAdminScreenState extends State<TransactionAdminScreen> {
 
   Widget _buildMonthYearFilter() {
     return Container(
+      width: double.infinity,
+      height: 100,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.card,
@@ -237,10 +239,12 @@ class _TransactionAdminScreenState extends State<TransactionAdminScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          MonthYearSelector(
-            initialMonth: _selectedMonth,
-            initialYear: _selectedYear,
-            onChanged: _onMonthYearChanged,
+          Expanded(
+            child: MonthYearSelector(
+              initialMonth: _selectedMonth,
+              initialYear: _selectedYear,
+              onChanged: _onMonthYearChanged,
+            ),
           ),
         ],
       ),
