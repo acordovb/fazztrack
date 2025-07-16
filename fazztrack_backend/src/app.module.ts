@@ -1,6 +1,5 @@
 import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { ScheduleModule } from '@nestjs/schedule';
 import { DatabaseModule } from './database/database.module';
 import { BarsModule } from './modules/bars/bars.module';
 import { ProductosModule } from './modules/productos/productos.module';
@@ -17,7 +16,6 @@ import configuration from './config/configuration';
       isGlobal: true,
       load: [configuration],
     }),
-    ScheduleModule.forRoot(),
     DatabaseModule,
     BarsModule,
     ProductosModule,
