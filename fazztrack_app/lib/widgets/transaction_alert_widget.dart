@@ -13,7 +13,7 @@ class TransactionAlertWidget extends StatefulWidget {
     required this.title,
     required this.message,
     required this.isError,
-    this.autoDismissDuration = 1,
+    this.autoDismissDuration = 2,
   });
 
   static Future<void> show({
@@ -21,7 +21,7 @@ class TransactionAlertWidget extends StatefulWidget {
     required String title,
     required String message,
     bool isError = false,
-    int autoDismissDuration = 1,
+    int autoDismissDuration = 2,
   }) async {
     return showDialog(
       context: context,

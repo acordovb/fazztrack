@@ -47,6 +47,8 @@ class _AbonoScreenState extends State<AbonoScreen> {
 
       if (_controlHistorico != null) {
         _nuevoSaldo =
+            _controlHistorico!.totalPendienteUltMesAbono -
+            _controlHistorico!.totalPendienteUltMesVenta +
             _controlHistorico!.totalAbono -
             _controlHistorico!.totalVenta +
             monto;

@@ -108,13 +108,18 @@ class _ConsumoScreenState extends State<ConsumoScreen> {
                 ),
                 Text(
                   formatCurrency.format(
-                    _controlHistorico!.totalAbono -
+                    _controlHistorico!.totalPendienteUltMesAbono -
+                        _controlHistorico!.totalPendienteUltMesVenta +
+                        _controlHistorico!.totalAbono -
                         _controlHistorico!.totalVenta -
                         _total,
                   ),
                   style: TextStyle(
                     color:
-                        (_controlHistorico!.totalAbono -
+                        (_controlHistorico!.totalPendienteUltMesAbono -
+                                    _controlHistorico!
+                                        .totalPendienteUltMesVenta +
+                                    _controlHistorico!.totalAbono -
                                     _controlHistorico!.totalVenta -
                                     _total) <
                                 0
