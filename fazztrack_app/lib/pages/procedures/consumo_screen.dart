@@ -152,7 +152,7 @@ class _ConsumoScreenState extends State<ConsumoScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'Comentario (opcional):',
+                  'Comentario:',
                   style: TextStyle(
                     color: AppColors.textPrimary,
                     fontSize: 16,
@@ -163,9 +163,11 @@ class _ConsumoScreenState extends State<ConsumoScreen> {
                 TextField(
                   controller: _comentarioController,
                   style: const TextStyle(color: AppColors.textPrimary),
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     hintText: 'Ingrese un comentario para esta venta',
-                    hintStyle: TextStyle(color: AppColors.textSecondary),
+                    hintStyle: TextStyle(
+                      color: AppColors.textPrimary.withAlpha(80),
+                    ),
                     enabledBorder: OutlineInputBorder(
                       borderSide: BorderSide(color: AppColors.lightGray),
                     ),

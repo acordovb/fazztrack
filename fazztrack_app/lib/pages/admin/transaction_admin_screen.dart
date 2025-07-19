@@ -613,371 +613,359 @@ class _TransactionAdminScreenState extends State<TransactionAdminScreen> {
   }
 
   Widget _buildVentaCard(VentaModel venta) {
-    return Card(
-      color: AppColors.backgroundSecondary,
-      margin: const EdgeInsets.only(bottom: 12),
-      elevation: 3,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryTurquoise.withAlpha(10),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(
-                    Icons.shopping_cart,
-                    color: AppColors.primaryTurquoise,
-                    size: 20,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    'Producto: ${venta.producto?.nombre ?? 'N/A'}',
-                    style: const TextStyle(
-                      color: AppColors.textPrimary,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
+    return Center(
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 700),
+        margin: const EdgeInsets.only(bottom: 12),
+        child: Card(
+          color: AppColors.backgroundSecondary,
+          elevation: 3,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: const BorderSide(
+              color: AppColors.primaryTurquoise,
+              width: 2.5,
             ),
-            const SizedBox(height: 12),
-            Row(
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: _buildInfoChip(
-                    Icons.inventory_2,
-                    'Cantidad',
-                    '${venta.nProductos}',
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _buildInfoChip(
-                    Icons.access_time,
-                    'Fecha',
-                    DateFormat(
-                      'dd/MM/yyyy HH:mm',
-                    ).format(venta.fechaTransaccion),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-
-            if (venta.comentario != null && venta.comentario!.isNotEmpty) ...[
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: AppColors.lightBlue.withAlpha(5),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: AppColors.lightBlue.withAlpha(20),
-                    width: 1,
-                  ),
-                ),
-                child: Row(
+                Row(
                   children: [
-                    const Icon(
-                      Icons.comment,
-                      size: 16,
-                      color: AppColors.primaryTurquoise,
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryTurquoise,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(
+                        Icons.shopping_cart,
+                        color: AppColors.primaryDarkBlue,
+                        size: 24,
+                      ),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 16),
                     Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            venta.producto?.nombre ?? 'N/A',
+                            style: const TextStyle(
+                              color: AppColors.textPrimary,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            DateFormat(
+                              'dd/MM/yyyy HH:mm',
+                            ).format(venta.fechaTransaccion),
+                            style: const TextStyle(
+                              color: AppColors.textPrimary,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryTurquoise,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
                       child: Text(
-                        venta.comentario!,
+                        '${venta.nProductos} unid.',
                         style: const TextStyle(
-                          color: AppColors.textPrimary,
-                          fontStyle: FontStyle.italic,
+                          color: AppColors.primaryDarkBlue,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(height: 12),
-            ],
 
-            const Divider(color: AppColors.primaryTurquoise, height: 1),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.edit, size: 16),
-                  label: const Text('Editar'),
-                  onPressed: () => _editVenta(venta),
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: AppColors.primaryTurquoise,
-                    backgroundColor: AppColors.card,
-                    side: const BorderSide(color: AppColors.primaryTurquoise),
-                    elevation: 0,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
+                if (venta.comentario != null &&
+                    venta.comentario!.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.lightBlue.withAlpha(10),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: AppColors.lightBlue.withAlpha(30),
+                        width: 1,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.comment,
+                              size: 16,
+                              color: AppColors.primaryTurquoise,
+                            ),
+                            const SizedBox(width: 8),
+                            const Text(
+                              'Comentario',
+                              style: TextStyle(
+                                color: AppColors.primaryTurquoise,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          venta.comentario!,
+                          style: const TextStyle(
+                            color: AppColors.textPrimary,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.delete, size: 16),
-                  label: const Text('Eliminar'),
-                  onPressed: () => _deleteVenta(venta),
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: AppColors.error,
-                    backgroundColor: AppColors.card,
-                    side: const BorderSide(color: AppColors.error),
-                    elevation: 0,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
+                ],
+
+                const SizedBox(height: 12),
+                const Divider(color: AppColors.primaryTurquoise, height: 1),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    ElevatedButton.icon(
+                      icon: const Icon(Icons.edit, size: 16),
+                      label: const Text('Editar'),
+                      onPressed: () => _editVenta(venta),
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: AppColors.primaryTurquoise,
+                        backgroundColor: AppColors.card,
+                        side: const BorderSide(
+                          color: AppColors.primaryTurquoise,
+                        ),
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                      ),
                     ),
-                  ),
+                    const SizedBox(width: 8),
+                    ElevatedButton.icon(
+                      icon: const Icon(Icons.delete, size: 16),
+                      label: const Text('Eliminar'),
+                      onPressed: () => _deleteVenta(venta),
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: AppColors.error,
+                        backgroundColor: AppColors.card,
+                        side: const BorderSide(color: AppColors.error),
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
-          ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildAbonoCard(AbonoModel abono) {
-    return Card(
-      color: AppColors.backgroundSecondary,
-      margin: const EdgeInsets.only(bottom: 12),
-      elevation: 3,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+    return Center(
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 700),
+        margin: const EdgeInsets.only(bottom: 12),
+        child: Card(
+          color: AppColors.backgroundSecondary,
+          elevation: 3,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: const BorderSide(color: AppColors.success, width: 2.5),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: AppColors.success.withAlpha(10),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(
-                    Icons.payments,
-                    color: AppColors.success,
-                    size: 20,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    'Total: \$${abono.total.toStringAsFixed(2)}',
-                    style: const TextStyle(
-                      color: AppColors.textPrimary,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildInfoChip(
-                    Icons.category,
-                    'Tipo',
-                    abono.tipoAbono,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _buildInfoChip(
-                    Icons.access_time,
-                    'Fecha',
-                    DateFormat('dd/MM/yyyy HH:mm').format(abono.fechaAbono),
-                  ),
-                ),
-              ],
-            ),
-            if (abono.comentario != null && abono.comentario!.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppColors.lightBlue.withAlpha(10),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: AppColors.lightBlue.withAlpha(30),
-                    width: 1,
-                  ),
-                ),
-                child: Row(
+                Row(
                   children: [
-                    Icon(
-                      Icons.comment,
-                      size: 16,
-                      color: AppColors.primaryTurquoise,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        abono.comentario!,
-                        style: const TextStyle(
-                          color: AppColors.textPrimary,
-                          fontSize: 14,
-                        ),
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: AppColors.success,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(
+                        Icons.payments,
+                        color: Colors.white,
+                        size: 24,
                       ),
                     ),
-                  ],
-                ),
-              ),
-            ],
-            const SizedBox(height: 12),
-            const Divider(color: AppColors.primaryTurquoise, height: 1),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.edit, size: 16),
-                  label: const Text('Editar'),
-                  onPressed: () => _editAbono(abono),
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: AppColors.primaryTurquoise,
-                    backgroundColor: AppColors.card,
-                    side: const BorderSide(color: AppColors.primaryTurquoise),
-                    elevation: 0,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.delete, size: 16),
-                  label: const Text('Eliminar'),
-                  onPressed: () => _deleteAbono(abono),
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: AppColors.error,
-                    backgroundColor: AppColors.card,
-                    side: const BorderSide(color: AppColors.error),
-                    elevation: 0,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            if (abono.comentario != null && abono.comentario!.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppColors.lightBlue.withAlpha(5),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: AppColors.lightBlue.withAlpha(20),
-                    width: 1,
-                  ),
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(
-                      Icons.comment,
-                      size: 16,
-                      color: AppColors.primaryTurquoise,
-                    ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 16),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Comentario',
-                            style: TextStyle(
-                              color: AppColors.textPrimary.withAlpha(70),
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
+                            'Abono ${abono.tipoAbono}',
+                            style: const TextStyle(
+                              color: AppColors.textPrimary,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            abono.comentario!,
+                            DateFormat(
+                              'dd/MM/yyyy HH:mm',
+                            ).format(abono.fechaAbono),
                             style: const TextStyle(
                               color: AppColors.textPrimary,
-                              fontSize: 13,
+                              fontSize: 14,
                             ),
                           ),
                         ],
                       ),
                     ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.success,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        '\$${abono.total.toStringAsFixed(2)}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
-              ),
-            ],
-          ],
+
+                if (abono.comentario != null &&
+                    abono.comentario!.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.lightBlue.withAlpha(10),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: AppColors.lightBlue.withAlpha(30),
+                        width: 1,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.comment,
+                              size: 16,
+                              color: AppColors.success,
+                            ),
+                            const SizedBox(width: 8),
+                            const Text(
+                              'Comentario',
+                              style: TextStyle(
+                                color: AppColors.success,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          abono.comentario!,
+                          style: const TextStyle(
+                            color: AppColors.textPrimary,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+
+                const SizedBox(height: 12),
+                const Divider(color: AppColors.success, height: 1),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    ElevatedButton.icon(
+                      icon: const Icon(Icons.edit, size: 16),
+                      label: const Text('Editar'),
+                      onPressed: () => _editAbono(abono),
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: AppColors.success,
+                        backgroundColor: AppColors.card,
+                        side: const BorderSide(color: AppColors.success),
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton.icon(
+                      icon: const Icon(Icons.delete, size: 16),
+                      label: const Text('Eliminar'),
+                      onPressed: () => _deleteAbono(abono),
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: AppColors.error,
+                        backgroundColor: AppColors.card,
+                        side: const BorderSide(color: AppColors.error),
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildInfoChip(IconData icon, String label, String value) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: AppColors.lightBlue.withAlpha(10),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.lightBlue.withAlpha(30), width: 1),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 16, color: AppColors.primaryTurquoise),
-          const SizedBox(width: 6),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  label,
-                  style: TextStyle(
-                    color: AppColors.textPrimary.withAlpha(70),
-                    fontSize: 12,
-                  ),
-                ),
-                Text(
-                  value,
-                  style: const TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  // We've refactored the cards to not use this helper method anymore
 
   Future<void> _editVenta(VentaModel venta) async {
     final result = await showDialog<VentaModel>(
@@ -1183,12 +1171,12 @@ class _EditVentaDialogState extends State<_EditVentaDialog> {
           const SizedBox(height: 16),
           TextField(
             controller: _comentarioController,
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               labelText: 'Comentario (opcional)',
               labelStyle: TextStyle(color: AppColors.textPrimary),
               border: OutlineInputBorder(),
               hintText: 'Ingrese un comentario para esta venta',
-              hintStyle: TextStyle(color: AppColors.textSecondary),
+              hintStyle: TextStyle(color: AppColors.textPrimary.withAlpha(80)),
             ),
             style: const TextStyle(color: AppColors.textPrimary),
             maxLines: 2,
