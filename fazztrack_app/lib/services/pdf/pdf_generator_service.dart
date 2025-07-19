@@ -402,7 +402,7 @@ class PdfGeneratorService {
 
     // Crear tabla usando TableHelper para paginación automática
     final tableData = <List<String>>[
-      ['Fecha', 'Producto', 'Cantidad', 'Total'], // Header
+      ['Fecha', 'Producto', 'Cantidad', 'Comentario', 'Total'], // Header
     ];
 
     // Agregar datos de ventas
@@ -412,6 +412,7 @@ class PdfGeneratorService {
         DateFormat('d/M/yyyy').format(venta.fechaTransaccion),
         _formatProductName(venta.producto?.nombre, venta.idProducto),
         venta.nProductos.toString(),
+        venta.comentario ?? '-',
         '\$${total.toStringAsFixed(2)}',
       ]);
     }
@@ -441,9 +442,10 @@ class PdfGeneratorService {
         headerAlignment: pw.Alignment.center,
         columnWidths: {
           0: const pw.FlexColumnWidth(1.5), // Fecha
-          1: const pw.FlexColumnWidth(2.5), // Producto
+          1: const pw.FlexColumnWidth(2), // Producto
           2: const pw.FlexColumnWidth(1), // Cantidad
-          3: const pw.FlexColumnWidth(1), // Total
+          3: const pw.FlexColumnWidth(2), // Comentario
+          4: const pw.FlexColumnWidth(1), // Total
         },
         cellPadding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         headerPadding: const pw.EdgeInsets.symmetric(
