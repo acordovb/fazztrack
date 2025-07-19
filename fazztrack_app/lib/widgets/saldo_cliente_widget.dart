@@ -311,21 +311,18 @@ class _SaldoClienteWidgetState extends State<SaldoClienteWidget> {
                                                     fontSize: 15,
                                                   ),
                                                 ),
-                                                if (estudiante.curso != null)
-                                                  Text(
-                                                    _isAdmin &&
-                                                            estudiante
-                                                                    .bar
-                                                                    ?.nombre !=
-                                                                null
-                                                        ? '${estudiante.curso!} • ${estudiante.bar!.nombre}'
-                                                        : estudiante.curso!,
-                                                    style: const TextStyle(
-                                                      color:
-                                                          AppColors.lightGray,
-                                                      fontSize: 12,
-                                                    ),
+                                                Text(
+                                                  _isAdmin
+                                                      ? getStudentDetails(
+                                                        estudiante,
+                                                      )
+                                                      : (estudiante.curso ??
+                                                          ''),
+                                                  style: const TextStyle(
+                                                    color: AppColors.lightGray,
+                                                    fontSize: 12,
                                                   ),
+                                                ),
                                               ],
                                             ),
                                           ),
@@ -423,6 +420,24 @@ class _SaldoClienteWidgetState extends State<SaldoClienteWidget> {
         ),
       ],
     );
+  }
+
+  // Helper method to format student details display
+  String getStudentDetails(EstudianteModel estudiante) {
+    // If both bar and curso are available, show both
+    if (estudiante.bar?.nombre != null && estudiante.curso != null) {
+      return '${estudiante.bar!.nombre} • ${estudiante.curso!}';
+    }
+    // If only bar is available
+    else if (estudiante.bar?.nombre != null) {
+      return estudiante.bar!.nombre;
+    }
+    // If only curso is available
+    else if (estudiante.curso != null) {
+      return estudiante.curso!;
+    }
+    // If neither are available
+    return '';
   }
 
   @override
