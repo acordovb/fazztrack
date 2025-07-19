@@ -38,6 +38,8 @@ class _SaldoClienteWidgetState extends State<SaldoClienteWidget> {
   bool _isLoading = false;
   bool _isLoadingBalance = false;
   bool _hasBalanceError = false;
+  bool _hasSearchError = false;
+  String _currentSearchQuery = '';
   final bool _isAdmin = BuildConfig.appLevel == AppConfig.appLevel.admin;
 
   @override
@@ -92,6 +94,8 @@ class _SaldoClienteWidgetState extends State<SaldoClienteWidget> {
     // Remove debounce timer entirely to eliminate delay
     setState(() {
       _isLoading = true;
+      _hasSearchError = false;
+      _currentSearchQuery = query;
     });
 
     // Execute search immediately without delay
@@ -104,17 +108,33 @@ class _SaldoClienteWidgetState extends State<SaldoClienteWidget> {
     }
 
     try {
-      _estudiantesService.searchEstudiantesByName(query).then((estudiantes) {
-        setState(() {
-          filteredEstudiantes = estudiantes;
-          _isLoading = false;
-        });
-      });
+      _estudiantesService
+          .searchEstudiantesByName(query)
+          .then((estudiantes) {
+            setState(() {
+              filteredEstudiantes = estudiantes;
+              _isLoading = false;
+            });
+          })
+          .catchError((e) {
+            setState(() {
+              filteredEstudiantes = [];
+              _isLoading = false;
+              _hasSearchError = true;
+            });
+          });
     } catch (e) {
       setState(() {
         filteredEstudiantes = [];
         _isLoading = false;
+        _hasSearchError = true;
       });
+    }
+  }
+
+  void _retrySearch() {
+    if (_currentSearchQuery.isNotEmpty) {
+      _searchEstudiantes(_currentSearchQuery);
     }
   }
 
@@ -203,6 +223,7 @@ class _SaldoClienteWidgetState extends State<SaldoClienteWidget> {
                         selectedClient = null;
                         _searchController.clear();
                         _isSearching = false;
+                        _hasSearchError = false;
                         // Keep the selectedEstudiante and balance for reference
                         // until a new search is performed
                       });
@@ -211,13 +232,18 @@ class _SaldoClienteWidgetState extends State<SaldoClienteWidget> {
                   onChanged: (value) {
                     setState(() {
                       _isSearching = value.isNotEmpty;
+                      if (!value.isNotEmpty) {
+                        _hasSearchError = false;
+                      }
                     });
                     _searchEstudiantes(value);
                   },
                 ),
               ),
-              if ((_isSearching && filteredEstudiantes.isNotEmpty) ||
-                  _isLoading)
+              if (_isSearching &&
+                  (_isLoading ||
+                      filteredEstudiantes.isNotEmpty ||
+                      _hasSearchError))
                 Container(
                   height: 220,
                   margin: const EdgeInsets.only(top: 8),
@@ -245,6 +271,39 @@ class _SaldoClienteWidgetState extends State<SaldoClienteWidget> {
                                 color: AppColors.primaryTurquoise,
                                 strokeWidth: 2,
                               ),
+                            ),
+                          )
+                          : _hasSearchError
+                          ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Text(
+                                  'Error al buscar estudiantes',
+                                  style: TextStyle(
+                                    color: AppColors.error,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                ElevatedButton.icon(
+                                  onPressed: _retrySearch,
+                                  icon: const Icon(Icons.refresh),
+                                  label: const Text('Reintentar'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppColors.primaryTurquoise,
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 10,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           )
                           : ListView.separated(
