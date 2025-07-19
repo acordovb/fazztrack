@@ -41,6 +41,7 @@ class EstudiantesApiService {
   Future<EstudianteModel> createEstudiante(EstudianteModel estudiante) async {
     final estudianteData = estudiante.toJson();
     estudianteData.remove('id');
+    estudianteData.remove('bar');
 
     final response = await _apiService.post(API.estudiantes, estudianteData);
     final data = jsonDecode(response.body);
@@ -51,9 +52,13 @@ class EstudiantesApiService {
     String id,
     EstudianteModel estudiante,
   ) async {
+    final estudianteData = estudiante.toJson();
+    estudianteData.remove('id');
+    estudianteData.remove('bar');
+
     final response = await _apiService.patch(
       '${API.estudiantes}/$id',
-      estudiante.toJson(),
+      estudianteData,
     );
     final data = jsonDecode(response.body);
     return EstudianteModel.fromJson(data);
