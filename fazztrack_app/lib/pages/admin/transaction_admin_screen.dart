@@ -673,6 +673,41 @@ class _TransactionAdminScreenState extends State<TransactionAdminScreen> {
               ],
             ),
             const SizedBox(height: 12),
+
+            if (venta.comentario != null && venta.comentario!.isNotEmpty) ...[
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.lightBlue.withAlpha(5),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: AppColors.lightBlue.withAlpha(20),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.comment,
+                      size: 16,
+                      color: AppColors.primaryTurquoise,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        venta.comentario!,
+                        style: const TextStyle(
+                          color: AppColors.textPrimary,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
+
             const Divider(color: AppColors.primaryTurquoise, height: 1),
             const SizedBox(height: 8),
             Row(
@@ -1072,6 +1107,7 @@ class _EditVentaDialog extends StatefulWidget {
 
 class _EditVentaDialogState extends State<_EditVentaDialog> {
   late TextEditingController _nProductosController;
+  late TextEditingController _comentarioController;
 
   @override
   void initState() {
@@ -1079,11 +1115,15 @@ class _EditVentaDialogState extends State<_EditVentaDialog> {
     _nProductosController = TextEditingController(
       text: widget.venta.nProductos.toString(),
     );
+    _comentarioController = TextEditingController(
+      text: widget.venta.comentario ?? '',
+    );
   }
 
   @override
   void dispose() {
     _nProductosController.dispose();
+    _comentarioController.dispose();
     super.dispose();
   }
 
@@ -1140,6 +1180,19 @@ class _EditVentaDialogState extends State<_EditVentaDialog> {
             style: const TextStyle(color: AppColors.textPrimary),
             keyboardType: TextInputType.number,
           ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _comentarioController,
+            decoration: const InputDecoration(
+              labelText: 'Comentario (opcional)',
+              labelStyle: TextStyle(color: AppColors.textPrimary),
+              border: OutlineInputBorder(),
+              hintText: 'Ingrese un comentario para esta venta',
+              hintStyle: TextStyle(color: AppColors.textSecondary),
+            ),
+            style: const TextStyle(color: AppColors.textPrimary),
+            maxLines: 2,
+          ),
         ],
       ),
       actions: [
@@ -1160,6 +1213,8 @@ class _EditVentaDialogState extends State<_EditVentaDialog> {
               return;
             }
 
+            final String comentario = _comentarioController.text.trim();
+
             final updatedVenta = VentaModel(
               id: widget.venta.id,
               idEstudiante: widget.venta.idEstudiante,
@@ -1168,6 +1223,8 @@ class _EditVentaDialogState extends State<_EditVentaDialog> {
               idBar: widget.venta.idBar,
               nProductos: cantidad,
               total: widget.venta.total,
+              comentario: comentario.isNotEmpty ? comentario : null,
+              producto: widget.venta.producto,
             );
             Navigator.of(context).pop(updatedVenta);
           },

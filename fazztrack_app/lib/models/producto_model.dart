@@ -14,6 +14,7 @@ class ProductoModel {
   });
 
   factory ProductoModel.fromJson(Map<String, dynamic> json) {
+    print('ProductoModel.fromJson: $json');
     return ProductoModel(
       id: json['id'],
       nombre: json['nombre'],

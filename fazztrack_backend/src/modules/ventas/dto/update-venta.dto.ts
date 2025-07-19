@@ -1,4 +1,10 @@
-import { IsOptional, IsNumber, IsPositive, IsDate } from 'class-validator';
+import {
+  IsOptional,
+  IsNumber,
+  IsPositive,
+  IsDate,
+  IsString,
+} from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export class UpdateVentaDto {
@@ -28,4 +34,8 @@ export class UpdateVentaDto {
   @IsNumber({}, { message: 'El valor total debe ser un número' })
   @IsPositive({ message: 'El valor total debe ser un valor positivo' })
   total?: number;
+
+  @IsOptional()
+  @IsString({ message: 'El comentario debe ser un string (hasheado)' })
+  comentario?: string;
 }

@@ -4,6 +4,7 @@ import {
   IsOptional,
   IsPositive,
   IsDate,
+  IsString,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
 
@@ -37,4 +38,8 @@ export class CreateVentaDto {
   @IsNumber({}, { message: 'El valor total debe ser un número' })
   @IsPositive({ message: 'El valor total debe ser un valor positivo' })
   total: number;
+
+  @IsOptional()
+  @IsString({ message: 'El comentario debe ser un string (hasheado)' })
+  comentario?: string;
 }

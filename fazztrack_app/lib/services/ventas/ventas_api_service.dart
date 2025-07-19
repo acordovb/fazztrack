@@ -39,6 +39,7 @@ class VentasApiService {
       final data = jsonDecode(response.body);
       return VentaModel.fromJson(data);
     } catch (e) {
+      print('Error updating venta: $e');
       throw Exception('Error updating venta: $e');
     }
   }

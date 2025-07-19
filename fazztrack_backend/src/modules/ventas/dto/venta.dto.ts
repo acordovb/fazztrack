@@ -8,5 +8,6 @@ export class VentaDto {
   id_bar: string;
   n_productos: number;
   total: number;
+  comentario?: string;
   producto?: ProductoDto;
 }

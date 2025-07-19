@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { decodeId, encodeId } from 'src/shared/hashid/hashid.utils';
 import { BaseCrudService } from '../../common/crud/base-crud.service';
 import { DatabaseService } from '../../database/database.service';
@@ -23,6 +23,7 @@ export class VentasService extends BaseCrudService<
       id_bar: encodeId(model.id_bar),
       n_productos: model.n_productos,
       total: model.total,
+      comentario: model.comentario,
       producto: model.productos
         ? {
             id: encodeId(model.productos.id),
@@ -87,5 +88,19 @@ export class VentasService extends BaseCrudService<
     });
 
     return result._sum.total?.toNumber() || 0;
+  }
+
+  async update(id: string, updateDto: UpdateVentaDto): Promise<VentaDto> {
+    const numericId = decodeId(id);
+
+    const model = await this.database.ventas.update({
+      where: { id: numericId },
+      data: updateDto,
+      include: {
+        productos: true,
+      },
+    });
+
+    return this.mapToDto(model);
   }
 }

@@ -10,7 +10,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { CreateVentaDto, VentaDto } from './dto';
+import { CreateVentaDto, UpdateVentaDto, VentaDto } from './dto';
 import { VentasService } from './ventas.service';
 
 @Controller('ventas')
@@ -41,7 +41,7 @@ export class VentasController {
   @Patch(':id')
   update(
     @Param('id') id: string,
-    @Body() updateVentaDto: CreateVentaDto,
+    @Body() updateVentaDto: UpdateVentaDto,
   ): Promise<VentaDto> {
     return this.ventasService.update(id, updateVentaDto);
   }

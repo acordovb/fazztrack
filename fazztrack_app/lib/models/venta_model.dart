@@ -8,6 +8,7 @@ class VentaModel {
   final String idBar;
   final int nProductos;
   final double total;
+  final String? comentario;
   final ProductoModel? producto;
 
   VentaModel({
@@ -18,6 +19,7 @@ class VentaModel {
     required this.idBar,
     required this.nProductos,
     required this.total,
+    this.comentario,
     this.producto,
   });
 
@@ -30,6 +32,7 @@ class VentaModel {
       idBar: json['id_bar'],
       nProductos: json['n_productos'],
       total: double.parse(json['total'].toString()),
+      comentario: json['comentario'] ?? '',
       producto: ProductoModel.fromJson(json['producto'] ?? <String, dynamic>{}),
     );
   }
@@ -42,6 +45,7 @@ class VentaModel {
       'id_bar': idBar,
       'n_productos': nProductos,
       'total': total,
+      'comentario': comentario,
     };
   }
 }
