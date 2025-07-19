@@ -5,8 +5,9 @@ import 'package:fazztrack_app/services/ventas/ventas_api_service.dart';
 class ConsumoProvider {
   Future<String> registrarConsumo(
     EstudianteModel estudiante,
-    List<ProductoSeleccionadoModel> productos,
-  ) async {
+    List<ProductoSeleccionadoModel> productos, [
+    String? comentario,
+  ]) async {
     final List<Map<String, dynamic>> ventasJson =
         productos.map((producto) {
           return {
@@ -20,6 +21,7 @@ class ConsumoProvider {
             'id_bar': producto.producto!.idBar,
             'n_productos': producto.cantidad,
             'total': producto.subtotal,
+            'comentario': comentario?.isNotEmpty == true ? comentario : null,
           };
         }).toList();
 

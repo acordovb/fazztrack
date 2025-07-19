@@ -24,6 +24,7 @@ class _ConsumoScreenState extends State<ConsumoScreen> {
   double _total = 0.0;
   EstudianteModel? _estudianteSeleccionado;
   ControlHistoricoModel? _controlHistorico;
+  final TextEditingController _comentarioController = TextEditingController();
 
   void _actualizarProductosSeleccionados(
     List<ProductoSeleccionadoModel> productos,
@@ -43,7 +44,14 @@ class _ConsumoScreenState extends State<ConsumoScreen> {
       _total = 0.0;
       _estudianteSeleccionado = null;
       _controlHistorico = null;
+      _comentarioController.clear();
     });
+  }
+
+  @override
+  void dispose() {
+    _comentarioController.dispose();
+    super.dispose();
   }
 
   Widget _buildRightColumn(NumberFormat formatCurrency) {
@@ -132,7 +140,49 @@ class _ConsumoScreenState extends State<ConsumoScreen> {
               ],
             ),
           ),
-          const SizedBox(height: 100),
+          const SizedBox(height: 20),
+          Container(
+            constraints: const BoxConstraints(maxWidth: 500),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.secondaryBlue,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Comentario (opcional):',
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: _comentarioController,
+                  style: const TextStyle(color: AppColors.textPrimary),
+                  decoration: const InputDecoration(
+                    hintText: 'Ingrese un comentario para esta venta',
+                    hintStyle: TextStyle(color: AppColors.textSecondary),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.lightGray),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.primaryTurquoise),
+                    ),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                  ),
+                  maxLines: 2,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 80),
         ],
       ],
     );
@@ -216,6 +266,7 @@ class _ConsumoScreenState extends State<ConsumoScreen> {
                   final result = await ConsumoProvider().registrarConsumo(
                     _estudianteSeleccionado!,
                     _productosSeleccionados,
+                    _comentarioController.text.trim(),
                   );
                   if (result == 'OK') {
                     await TransactionAlertWidget.show(
