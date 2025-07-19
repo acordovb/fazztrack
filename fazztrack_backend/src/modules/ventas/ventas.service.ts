@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { decodeId, encodeId } from 'src/shared/hashid/hashid.utils';
 import { BaseCrudService } from '../../common/crud/base-crud.service';
 import { DatabaseService } from '../../database/database.service';
