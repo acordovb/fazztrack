@@ -676,7 +676,6 @@ class PdfGeneratorService {
           directory = await getDownloadsDirectory();
           platformInfo = 'macOS - Downloads';
         } catch (e) {
-          print('Could not access Downloads directory on macOS: $e');
           directory = await getApplicationDocumentsDirectory();
           platformInfo = 'macOS - Documents (fallback)';
         }
@@ -686,7 +685,6 @@ class PdfGeneratorService {
           directory = await getDownloadsDirectory();
           platformInfo = 'Windows - Downloads';
         } catch (e) {
-          print('Could not access Downloads directory on Windows: $e');
           directory = await getApplicationDocumentsDirectory();
           platformInfo = 'Windows - Documents (fallback)';
         }
@@ -696,7 +694,6 @@ class PdfGeneratorService {
           directory = await getDownloadsDirectory();
           platformInfo = 'Linux - Downloads';
         } catch (e) {
-          print('Could not access Downloads directory on Linux: $e');
           directory = await getApplicationDocumentsDirectory();
           platformInfo = 'Linux - Documents (fallback)';
         }
@@ -705,9 +702,6 @@ class PdfGeneratorService {
         directory = await getApplicationDocumentsDirectory();
         platformInfo = 'Unknown Platform - Documents';
       }
-
-      print('Saving PDF to: $platformInfo');
-      print('Directory path: ${directory?.path ?? 'null'}');
 
       // Ensure we have a valid directory
       if (directory == null) {
@@ -718,7 +712,6 @@ class PdfGeneratorService {
       final fazztrackDir = Directory('${directory.path}/FazzTrack');
       if (!await fazztrackDir.exists()) {
         await fazztrackDir.create(recursive: true);
-        print('Created FazzTrack directory: ${fazztrackDir.path}');
       }
 
       // Generate filename
@@ -729,8 +722,6 @@ class PdfGeneratorService {
       final fileName = 'Reporte_${sanitizedName}_${monthName}_$year.pdf';
       final filePath = '${fazztrackDir.path}/$fileName';
 
-      print('Full file path: $filePath');
-
       // Save the PDF
       final file = File(filePath);
       final pdfBytes = await pdf.save();
@@ -739,14 +730,12 @@ class PdfGeneratorService {
       // Verify file was created
       if (await file.exists()) {
         final fileSize = await file.length();
-        print('PDF saved successfully. Size: $fileSize bytes');
       } else {
         throw Exception('File was not created successfully');
       }
 
       return filePath;
     } catch (e) {
-      print('Error saving PDF to device: $e');
       throw Exception('Error saving PDF to device: $e');
     }
   }
