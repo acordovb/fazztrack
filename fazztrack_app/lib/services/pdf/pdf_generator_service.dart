@@ -730,6 +730,7 @@ class PdfGeneratorService {
       // Verify file was created
       if (await file.exists()) {
         final fileSize = await file.length();
+        print('PDF saved successfully. Size: $fileSize bytes');
       } else {
         throw Exception('File was not created successfully');
       }
