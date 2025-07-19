@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:fazztrack_app/constants/colors_constants.dart';
 import 'package:fazztrack_app/models/producto_model.dart';
 import 'package:fazztrack_app/models/producto_seleccionado_model.dart';
@@ -319,7 +318,6 @@ class _DialogoSeleccionProducto extends StatefulWidget {
 class _DialogoSeleccionProductoState extends State<_DialogoSeleccionProducto> {
   final TextEditingController _searchController = TextEditingController();
   final TextEditingController _cantidadController = TextEditingController();
-  Timer? _debounceTimer;
   bool _isLoading = false;
   List<ProductoModel> _productosEncontrados = [];
   ProductoModel? _productoSeleccionado;
@@ -337,51 +335,44 @@ class _DialogoSeleccionProductoState extends State<_DialogoSeleccionProducto> {
   void dispose() {
     _searchController.dispose();
     _cantidadController.dispose();
-    _debounceTimer?.cancel();
     super.dispose();
   }
 
-  void _buscarProductos(String query) {
-    if (_debounceTimer?.isActive ?? false) {
-      _debounceTimer!.cancel();
-    }
-
+  void _buscarProductos(String query) async {
     setState(() {
       _isLoading = true;
     });
 
-    _debounceTimer = Timer(const Duration(milliseconds: 500), () async {
-      if (query.isEmpty) {
-        setState(() {
-          _productosEncontrados = [];
-          _isLoading = false;
-        });
-        return;
-      }
+    if (query.isEmpty) {
+      setState(() {
+        _productosEncontrados = [];
+        _isLoading = false;
+      });
+      return;
+    }
 
-      try {
-        if (widget.barId != null) {
-          final productos = await widget.productosService.searchProductosByName(
-            query,
-            widget.barId!,
-          );
-          setState(() {
-            _productosEncontrados = productos;
-            _isLoading = false;
-          });
-        } else {
-          setState(() {
-            _productosEncontrados = [];
-            _isLoading = false;
-          });
-        }
-      } catch (e) {
+    try {
+      if (widget.barId != null) {
+        final productos = await widget.productosService.searchProductosByName(
+          query,
+          widget.barId!,
+        );
+        setState(() {
+          _productosEncontrados = productos;
+          _isLoading = false;
+        });
+      } else {
         setState(() {
           _productosEncontrados = [];
           _isLoading = false;
         });
       }
-    });
+    } catch (e) {
+      setState(() {
+        _productosEncontrados = [];
+        _isLoading = false;
+      });
+    }
   }
 
   void _seleccionarProducto(ProductoModel producto) {
