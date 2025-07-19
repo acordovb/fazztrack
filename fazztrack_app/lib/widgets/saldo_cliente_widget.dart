@@ -31,13 +31,13 @@ class _SaldoClienteWidgetState extends State<SaldoClienteWidget> {
   final TextEditingController _searchController = TextEditingController();
   bool _isSearching = false;
   List<EstudianteModel> filteredEstudiantes = [];
-  Timer? _debounceTimer;
   final EstudiantesApiService _estudiantesService = EstudiantesApiService();
   final ControlHistoricoApiService _controlHistoricoService =
       ControlHistoricoApiService();
   ControlHistoricoModel? _controlHistorico;
   bool _isLoading = false;
   bool _isLoadingBalance = false;
+  bool _hasBalanceError = false;
   final bool _isAdmin = BuildConfig.appLevel == AppConfig.appLevel.admin;
 
   @override
@@ -48,6 +48,7 @@ class _SaldoClienteWidgetState extends State<SaldoClienteWidget> {
   Future<void> _fetchStudentBalance(String estudianteId) async {
     setState(() {
       _isLoadingBalance = true;
+      _hasBalanceError = false;
     });
 
     try {
@@ -66,58 +67,55 @@ class _SaldoClienteWidgetState extends State<SaldoClienteWidget> {
         setState(() {
           balance = 0.0;
           _isLoadingBalance = false;
+          _hasBalanceError = true;
         });
       }
 
-      if (widget.onUserChange != null) {
+      if (widget.onUserChange != null && _controlHistorico != null) {
         widget.onUserChange!(selectedEstudiante, _controlHistorico!);
       }
     } catch (e) {
       setState(() {
         balance = 0.0;
         _isLoadingBalance = false;
+        _hasBalanceError = true;
       });
 
-      // Notify parent widget even in case of error
-      if (widget.onUserChange != null) {
+      // Only notify parent widget if we have valid data
+      if (widget.onUserChange != null && _controlHistorico != null) {
         widget.onUserChange!(selectedEstudiante, _controlHistorico!);
       }
     }
   }
 
   void _searchEstudiantes(String query) {
-    if (_debounceTimer?.isActive ?? false) {
-      _debounceTimer!.cancel();
-    }
-
+    // Remove debounce timer entirely to eliminate delay
     setState(() {
       _isLoading = true;
     });
 
-    _debounceTimer = Timer(const Duration(milliseconds: 400), () async {
-      if (query.isEmpty) {
-        setState(() {
-          filteredEstudiantes = [];
-          _isLoading = false;
-        });
-        return;
-      }
+    // Execute search immediately without delay
+    if (query.isEmpty) {
+      setState(() {
+        filteredEstudiantes = [];
+        _isLoading = false;
+      });
+      return;
+    }
 
-      try {
-        final estudiantes = await _estudiantesService.searchEstudiantesByName(
-          query,
-        );
+    try {
+      _estudiantesService.searchEstudiantesByName(query).then((estudiantes) {
         setState(() {
           filteredEstudiantes = estudiantes;
           _isLoading = false;
         });
-      } catch (e) {
-        setState(() {
-          filteredEstudiantes = [];
-          _isLoading = false;
-        });
-      }
-    });
+      });
+    } catch (e) {
+      setState(() {
+        filteredEstudiantes = [];
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -174,7 +172,8 @@ class _SaldoClienteWidgetState extends State<SaldoClienteWidget> {
                       minHeight: 30,
                     ),
                     suffixIcon:
-                        _searchController.text.isNotEmpty
+                        _searchController.text.isNotEmpty ||
+                                selectedClient != null
                             ? IconButton(
                               icon: const Icon(Icons.close, size: 20),
                               color: AppColors.lightGray,
@@ -184,6 +183,10 @@ class _SaldoClienteWidgetState extends State<SaldoClienteWidget> {
                                 setState(() {
                                   _searchController.clear();
                                   filteredEstudiantes = [];
+                                  selectedClient = null;
+                                  selectedClientId = null;
+                                  selectedEstudiante = null;
+                                  balance = 0.0;
                                 });
                               },
                             )
@@ -194,6 +197,17 @@ class _SaldoClienteWidgetState extends State<SaldoClienteWidget> {
                     color: AppColors.textPrimary,
                     fontSize: 16,
                   ),
+                  onTap: () {
+                    if (selectedClient != null) {
+                      setState(() {
+                        selectedClient = null;
+                        _searchController.clear();
+                        _isSearching = false;
+                        // Keep the selectedEstudiante and balance for reference
+                        // until a new search is performed
+                      });
+                    }
+                  },
                   onChanged: (value) {
                     setState(() {
                       _isSearching = value.isNotEmpty;
@@ -341,6 +355,39 @@ class _SaldoClienteWidgetState extends State<SaldoClienteWidget> {
                 color: AppColors.primaryTurquoise,
               ),
             )
+            : _hasBalanceError
+            ? Column(
+              children: [
+                const Text(
+                  'Error al cargar el saldo',
+                  style: TextStyle(
+                    color: AppColors.error,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                ElevatedButton.icon(
+                  onPressed:
+                      selectedClientId != null
+                          ? () => _fetchStudentBalance(selectedClientId!)
+                          : null,
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Reintentar'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryTurquoise,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 10,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+              ],
+            )
             : Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
               decoration: BoxDecoration(
@@ -380,7 +427,6 @@ class _SaldoClienteWidgetState extends State<SaldoClienteWidget> {
 
   @override
   void dispose() {
-    _debounceTimer?.cancel();
     _searchController.dispose();
     super.dispose();
   }
