@@ -23,6 +23,7 @@ class _AbonoScreenState extends State<AbonoScreen> {
   final TextEditingController _comentarioController = TextEditingController();
   ControlHistoricoModel? _controlHistorico;
   double _nuevoSaldo = 0.0;
+  bool _isProcessing = false;
 
   @override
   void initState() {
@@ -65,6 +66,7 @@ class _AbonoScreenState extends State<AbonoScreen> {
       _estudianteSeleccionado = null;
       _controlHistorico = null;
       _nuevoSaldo = 0.0;
+      _isProcessing = false;
     });
     _montoController.clear();
     _comentarioController.clear();
@@ -393,46 +395,84 @@ class _AbonoScreenState extends State<AbonoScreen> {
         (_montoController.text.isNotEmpty &&
             double.tryParse(_montoController.text.replaceAll(',', '.')) !=
                 null &&
-            double.tryParse(_montoController.text.replaceAll(',', '.'))! > 0);
+            double.tryParse(_montoController.text.replaceAll(',', '.'))! > 0) &&
+        !_isProcessing;
 
     return Scaffold(
       backgroundColor: AppColors.background,
       floatingActionButton:
           mostrarBoton
               ? FloatingActionButton.extended(
-                onPressed: () async {
-                  final String resultado = await _registrarAbonoConResultado();
+                onPressed:
+                    _isProcessing
+                        ? null
+                        : () async {
+                          // Doble verificación - bloquear inmediatamente
+                          if (_isProcessing) return;
 
-                  if (!mounted) return;
+                          setState(() {
+                            _isProcessing = true;
+                          });
 
-                  if (resultado == 'OK') {
-                    await TransactionAlertWidget.show(
-                      context: context,
-                      title: 'Abono Registrado',
-                      message:
-                          'El abono de \$${_montoController.text} ha sido registrado exitosamente para ${_estudianteSeleccionado!.nombre}.',
-                      isError: false,
-                    );
+                          final String resultado =
+                              await _registrarAbonoConResultado();
 
-                    _reiniciarValores();
-                  } else {
-                    await TransactionAlertWidget.show(
-                      context: context,
-                      title: 'Error al Registrar',
-                      message:
-                          resultado.startsWith('Error:')
-                              ? resultado
-                              : 'No se pudo procesar el abono. Por favor intente nuevamente.',
-                      isError: true,
-                    );
-                  }
-                },
+                          if (!mounted) return;
+
+                          if (resultado == 'OK') {
+                            await TransactionAlertWidget.show(
+                              context: context,
+                              title: 'Abono Registrado',
+                              message:
+                                  'El abono de \$${_montoController.text} ha sido registrado exitosamente para ${_estudianteSeleccionado!.nombre}.',
+                              isError: false,
+                            );
+
+                            _reiniciarValores(); // Esto resetea _isProcessing = false
+                          } else {
+                            await TransactionAlertWidget.show(
+                              context: context,
+                              title: 'Error al Registrar',
+                              message:
+                                  resultado.startsWith('Error:')
+                                      ? resultado
+                                      : 'No se pudo procesar el abono. Por favor intente nuevamente.',
+                              isError: true,
+                            );
+                            // En caso de error, también resetear para permitir reintento
+                            setState(() {
+                              _isProcessing = false;
+                            });
+                          }
+                        },
                 backgroundColor: AppColors.primaryTurquoise,
-                label: Text(
-                  'Registrar Abono',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                icon: Icon(Icons.save),
+                label:
+                    _isProcessing
+                        ? Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: 8),
+                            Text(
+                              'Procesando...',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        )
+                        : Text(
+                          'Registrar Abono',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                icon: _isProcessing ? null : Icon(Icons.save),
               )
               : null,
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,

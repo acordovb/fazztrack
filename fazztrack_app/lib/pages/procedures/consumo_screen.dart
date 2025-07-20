@@ -25,6 +25,7 @@ class _ConsumoScreenState extends State<ConsumoScreen> {
   EstudianteModel? _estudianteSeleccionado;
   ControlHistoricoModel? _controlHistorico;
   final TextEditingController _comentarioController = TextEditingController();
+  bool _isProcessing = false;
 
   void _actualizarProductosSeleccionados(
     List<ProductoSeleccionadoModel> productos,
@@ -45,6 +46,7 @@ class _ConsumoScreenState extends State<ConsumoScreen> {
       _estudianteSeleccionado = null;
       _controlHistorico = null;
       _comentarioController.clear();
+      _isProcessing = false;
     });
   }
 
@@ -262,33 +264,73 @@ class _ConsumoScreenState extends State<ConsumoScreen> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton:
-          _productosSeleccionados.isNotEmpty && _estudianteSeleccionado != null
+          _productosSeleccionados.isNotEmpty &&
+                  _estudianteSeleccionado != null &&
+                  !_isProcessing
               ? FloatingActionButton.extended(
-                onPressed: () async {
-                  final result = await ConsumoProvider().registrarConsumo(
-                    _estudianteSeleccionado!,
-                    _productosSeleccionados,
-                    _comentarioController.text.trim(),
-                  );
-                  if (result == 'OK') {
-                    await TransactionAlertWidget.show(
-                      context: context,
-                      title: 'Registro Exitoso',
-                      message: 'El consumo ha sido registrado correctamente.',
-                      isError: false,
-                    );
-                    _reiniciarValores();
-                  } else {
-                    await TransactionAlertWidget.show(
-                      context: context,
-                      title: 'Error',
-                      message: result,
-                      isError: true,
-                    );
-                  }
-                },
-                label: const Text('Registrar Consumo'),
-                icon: const Icon(Icons.check_circle),
+                onPressed:
+                    _isProcessing
+                        ? null
+                        : () async {
+                          // Doble verificación - bloquear inmediatamente
+                          if (_isProcessing) return;
+
+                          setState(() {
+                            _isProcessing = true;
+                          });
+
+                          final result = await ConsumoProvider()
+                              .registrarConsumo(
+                                _estudianteSeleccionado!,
+                                _productosSeleccionados,
+                                _comentarioController.text.trim(),
+                              );
+
+                          if (!mounted) return;
+
+                          if (result == 'OK') {
+                            await TransactionAlertWidget.show(
+                              context: context,
+                              title: 'Registro Exitoso',
+                              message:
+                                  'El consumo ha sido registrado correctamente.',
+                              isError: false,
+                            );
+                            _reiniciarValores(); // Esto resetea _isProcessing = false
+                          } else {
+                            await TransactionAlertWidget.show(
+                              context: context,
+                              title: 'Error',
+                              message: result,
+                              isError: true,
+                            );
+                            // En caso de error, también resetear para permitir reintento
+                            setState(() {
+                              _isProcessing = false;
+                            });
+                          }
+                        },
+                label:
+                    _isProcessing
+                        ? Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: 8),
+                            Text('Procesando...'),
+                          ],
+                        )
+                        : const Text('Registrar Consumo'),
+                icon: _isProcessing ? null : const Icon(Icons.check_circle),
                 backgroundColor: AppColors.primaryTurquoise,
               )
               : null,
