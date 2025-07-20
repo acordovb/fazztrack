@@ -160,7 +160,7 @@ class PdfGeneratorService {
                 ),
                 pw.SizedBox(height: 4),
                 pw.Text(
-                  'Del 1/$month/$year al ${DateTime(year, month + 1, 0).day}/$month/$year',
+                  _buildDateRangeText(month, year),
                   style: pw.TextStyle(fontSize: 12, color: PdfColors.white),
                 ),
               ],
@@ -370,6 +370,21 @@ class PdfGeneratorService {
         ],
       ),
     );
+  }
+
+  /// Builds the date range text based on whether it's current month or not
+  String _buildDateRangeText(int month, int year) {
+    final now = DateTime.now();
+    final isCurrentMonth = now.month == month && now.year == year;
+
+    if (isCurrentMonth) {
+      // Si es el mes actual, mostrar desde el 1 hasta hoy
+      return 'Del 1/$month/$year al ${now.day}/$month/$year';
+    } else {
+      // Si es un mes anterior, mostrar el mes completo
+      final lastDayOfMonth = DateTime(year, month + 1, 0).day;
+      return 'Del 1/$month/$year al $lastDayOfMonth/$month/$year';
+    }
   }
 
   /// Safely formats product name for display in PDF
