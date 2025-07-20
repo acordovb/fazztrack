@@ -55,7 +55,7 @@ class _MonthYearSelectorState extends State<MonthYearSelector> {
 
   List<int> _getYearRange() {
     final currentYear = DateTime.now().year;
-    final startYear = currentYear - 5;
+    final startYear = currentYear - 2;
     final endYear = currentYear + 2;
     return List.generate(endYear - startYear + 1, (index) => startYear + index);
   }
