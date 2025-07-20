@@ -486,7 +486,7 @@ class PdfGeneratorService {
       tableData.add([
         DateFormat('d/M/yyyy').format(abono.fechaAbono),
         abono.tipoAbono,
-        '-', // Placeholder para comentario
+        abono.comentario ?? '-',
         '\$${abono.total.toStringAsFixed(2)}',
       ]);
     }
