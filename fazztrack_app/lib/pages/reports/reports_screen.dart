@@ -242,86 +242,176 @@ class _ReportsContentState extends State<ReportsContent> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 768;
+    final isTablet = screenWidth >= 768 && screenWidth < 1024;
+
     return Container(
       width: double.infinity,
       height: double.infinity,
       color: AppColors.background,
-      padding: const EdgeInsets.all(24.0),
+      padding: EdgeInsets.all(isMobile ? 16.0 : 24.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header
-          _buildHeader(),
-          const SizedBox(height: 24),
+          _buildHeader(isMobile),
+          SizedBox(height: isMobile ? 16 : 24),
 
           // Search and Actions Bar
-          _buildSearchAndActionsBar(),
-          const SizedBox(height: 20),
+          _buildSearchAndActionsBar(isMobile),
+          SizedBox(height: isMobile ? 16 : 20),
 
-          // Data Table
-          Expanded(
-            child: Row(
-              children: [
-                // Lista de estudiantes
-                Expanded(
-                  flex: _selectedEstudiante != null ? 1 : 3,
-                  child: _buildDataTable(),
-                ),
-
-                // Panel de información del estudiante seleccionado
-                if (_selectedEstudiante != null) ...[
-                  const SizedBox(width: 20),
-                  Expanded(flex: 1, child: _buildStudentInfoPanel()),
-                ],
-              ],
-            ),
-          ),
+          // Data Table and Student Info
+          Expanded(child: _buildMainContent(isMobile, isTablet)),
         ],
       ),
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildMainContent(bool isMobile, bool isTablet) {
+    if (isMobile && _selectedEstudiante != null) {
+      // En móvil, mostrar solo el panel de información del estudiante cuando hay uno seleccionado
+      return _buildStudentInfoPanel(isMobile);
+    }
+
+    if (isMobile) {
+      // En móvil, mostrar solo la lista de estudiantes
+      return _buildDataTable(isMobile);
+    }
+
+    // En tablet y desktop, mostrar ambos paneles como antes
     return Row(
       children: [
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: AppColors.primaryTurquoise.withAlpha(10),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: const Icon(
-            Icons.assessment,
-            size: 32,
-            color: AppColors.primaryTurquoise,
-          ),
+        // Lista de estudiantes
+        Expanded(
+          flex: _selectedEstudiante != null ? 1 : 3,
+          child: _buildDataTable(isMobile),
         ),
-        const SizedBox(width: 16),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Reportes de Estudiantes',
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            Text(
-              'Gestiona y descarga reportes de estudiantes',
-              style: TextStyle(
-                fontSize: 16,
-                color: AppColors.textPrimary.withAlpha(70),
-              ),
-            ),
-          ],
-        ),
+
+        // Panel de información del estudiante seleccionado
+        if (_selectedEstudiante != null) ...[
+          const SizedBox(width: 20),
+          Expanded(flex: 1, child: _buildStudentInfoPanel(isMobile)),
+        ],
       ],
     );
   }
 
-  Widget _buildSearchAndActionsBar() {
+  Widget _buildHeader(bool isMobile) {
+    return Row(
+      children: [
+        Container(
+          padding: EdgeInsets.all(isMobile ? 8 : 12),
+          decoration: BoxDecoration(
+            color: AppColors.primaryTurquoise.withAlpha(10),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(
+            Icons.assessment,
+            size: isMobile ? 24 : 32,
+            color: AppColors.primaryTurquoise,
+          ),
+        ),
+        SizedBox(width: isMobile ? 12 : 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Reportes de Estudiantes',
+                style: TextStyle(
+                  fontSize: isMobile ? 20 : 28,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              if (!isMobile) // Solo mostrar subtítulo en tablets y desktop
+                Text(
+                  'Gestiona y descarga reportes de estudiantes',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: AppColors.textPrimary.withAlpha(70),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        // Botón de regreso en móvil cuando hay un estudiante seleccionado
+        if (isMobile && _selectedEstudiante != null)
+          IconButton(
+            onPressed: () {
+              setState(() {
+                _selectedEstudiante = null;
+              });
+            },
+            icon: const Icon(
+              Icons.arrow_back,
+              color: AppColors.primaryTurquoise,
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildSearchAndActionsBar(bool isMobile) {
+    if (isMobile) {
+      return Column(
+        children: [
+          // Search Bar
+          BuscadorReporte(
+            controller: _searchController,
+            hintText: 'Buscar estudiantes...',
+            onChanged: _filterEstudiantes,
+            onClear: _clearSearch,
+          ),
+          const SizedBox(height: 12),
+
+          // Action Buttons - Wrapped to handle overflow
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _buildActionButton(
+                icon: Icons.refresh,
+                label: 'Actualizar',
+                onPressed: _loadEstudiantes,
+                isCompact: true,
+              ),
+              _buildActionButton(
+                icon:
+                    _isMultiSelectMode
+                        ? Icons.check_box
+                        : Icons.check_box_outline_blank,
+                label: _isMultiSelectMode ? 'Salir' : 'Selección',
+                onPressed: _toggleMultiSelectMode,
+                isCompact: true,
+              ),
+              if (_isMultiSelectMode)
+                _buildActionButton(
+                  icon: Icons.download,
+                  label: 'Desc. Sel.',
+                  onPressed:
+                      _selectedEstudiantes.isNotEmpty
+                          ? _downloadSelectedReports
+                          : null,
+                  isCompact: true,
+                ),
+              _buildActionButton(
+                icon: Icons.download_for_offline,
+                label: 'Desc. Todos',
+                onPressed:
+                    _filteredEstudiantes.isNotEmpty
+                        ? _downloadAllReports
+                        : null,
+                isCompact: true,
+              ),
+            ],
+          ),
+        ],
+      );
+    }
+
     return Row(
       children: [
         // Search Bar
@@ -379,15 +469,16 @@ class _ReportsContentState extends State<ReportsContent> {
     required IconData icon,
     required String label,
     required VoidCallback? onPressed,
+    bool isCompact = false,
   }) {
     final isEnabled = onPressed != null && !_isLoading;
     return ElevatedButton.icon(
       onPressed: isEnabled ? onPressed : null,
       icon:
           _isLoading && onPressed != null
-              ? const SizedBox(
-                width: 18,
-                height: 18,
+              ? SizedBox(
+                width: isCompact ? 16 : 18,
+                height: isCompact ? 16 : 18,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
                   valueColor: AlwaysStoppedAnimation<Color>(
@@ -395,8 +486,8 @@ class _ReportsContentState extends State<ReportsContent> {
                   ),
                 ),
               )
-              : Icon(icon, size: 18),
-      label: Text(label),
+              : Icon(icon, size: isCompact ? 16 : 18),
+      label: Text(label, style: TextStyle(fontSize: isCompact ? 12 : 14)),
       style: ElevatedButton.styleFrom(
         backgroundColor:
             isEnabled ? AppColors.primaryTurquoise : AppColors.darkGray,
@@ -406,12 +497,15 @@ class _ReportsContentState extends State<ReportsContent> {
                 : AppColors.textPrimary.withAlpha(50),
         elevation: isEnabled ? 2 : 0,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: EdgeInsets.symmetric(
+          horizontal: isCompact ? 12 : 16,
+          vertical: isCompact ? 8 : 12,
+        ),
       ),
     );
   }
 
-  Widget _buildDataTable() {
+  Widget _buildDataTable(bool isMobile) {
     if (_isLoading) {
       return const Center(
         child: CircularProgressIndicator(color: AppColors.primaryTurquoise),
@@ -425,18 +519,19 @@ class _ReportsContentState extends State<ReportsContent> {
           children: [
             Icon(
               Icons.search_off,
-              size: 64,
+              size: isMobile ? 48 : 64,
               color: AppColors.textPrimary.withAlpha(30),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: isMobile ? 12 : 16),
             Text(
               _allEstudiantes.isEmpty
                   ? 'No hay estudiantes registrados'
                   : 'No se encontraron estudiantes',
               style: TextStyle(
-                fontSize: 18,
+                fontSize: isMobile ? 16 : 18,
                 color: AppColors.textPrimary.withAlpha(70),
               ),
+              textAlign: TextAlign.center,
             ),
           ],
         ),
@@ -451,62 +546,63 @@ class _ReportsContentState extends State<ReportsContent> {
       ),
       child: Column(
         children: [
-          // Table Header
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: AppColors.primaryTurquoise.withAlpha(10),
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(12),
-                topRight: Radius.circular(12),
+          // Table Header - Solo en tablet y desktop
+          if (!isMobile)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: AppColors.primaryTurquoise.withAlpha(10),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(12),
+                  topRight: Radius.circular(12),
+                ),
+              ),
+              child: Row(
+                children: [
+                  // Select All Checkbox (solo en modo selección múltiple)
+                  if (_isMultiSelectMode) ...[
+                    Checkbox(
+                      value: _selectAll,
+                      onChanged: (_) => _toggleSelectAll(),
+                      activeColor: AppColors.primaryTurquoise,
+                    ),
+                    const SizedBox(width: 12),
+                  ],
+
+                  // Headers
+                  Expanded(
+                    flex: 3,
+                    child: Text(
+                      'Nombre',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                  ),
+                  const Expanded(
+                    flex: 2,
+                    child: Text(
+                      'Curso',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                  ),
+                  const Expanded(
+                    flex: 3,
+                    child: Text(
+                      'Bar',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-            child: Row(
-              children: [
-                // Select All Checkbox (solo en modo selección múltiple)
-                if (_isMultiSelectMode) ...[
-                  Checkbox(
-                    value: _selectAll,
-                    onChanged: (_) => _toggleSelectAll(),
-                    activeColor: AppColors.primaryTurquoise,
-                  ),
-                  const SizedBox(width: 12),
-                ],
-
-                // Headers
-                Expanded(
-                  flex: 3,
-                  child: Text(
-                    'Nombre',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                ),
-                const Expanded(
-                  flex: 2,
-                  child: Text(
-                    'Curso',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                ),
-                const Expanded(
-                  flex: 3,
-                  child: Text(
-                    'Bar',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
 
           // Table Body
           Expanded(
@@ -516,95 +612,11 @@ class _ReportsContentState extends State<ReportsContent> {
                 final estudiante = _filteredEstudiantes[index];
                 final isSelected = _selectedEstudiantes.contains(estudiante.id);
 
-                return Container(
-                  decoration: BoxDecoration(
-                    color:
-                        _isMultiSelectMode && isSelected
-                            ? AppColors.primaryTurquoise.withAlpha(10)
-                            : !_isMultiSelectMode &&
-                                _selectedEstudiante?.id == estudiante.id
-                            ? AppColors.primaryTurquoise.withAlpha(20)
-                            : index % 2 == 0
-                            ? AppColors.card
-                            : AppColors.background.withAlpha(30),
-                    border: Border(
-                      bottom: BorderSide(
-                        color: AppColors.primaryTurquoise,
-                        width: 0.5,
-                      ),
-                      left:
-                          !_isMultiSelectMode &&
-                                  _selectedEstudiante?.id == estudiante.id
-                              ? BorderSide(
-                                color: AppColors.primaryTurquoise,
-                                width: 4,
-                              )
-                              : BorderSide.none,
-                    ),
-                  ),
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: () {
-                        if (_isMultiSelectMode) {
-                          _toggleStudentSelection(estudiante.id);
-                        } else {
-                          _selectEstudiante(estudiante);
-                        }
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
-                        child: Row(
-                          children: [
-                            // Checkbox (solo en modo selección múltiple)
-                            if (_isMultiSelectMode) ...[
-                              Checkbox(
-                                value: isSelected,
-                                onChanged:
-                                    (_) =>
-                                        _toggleStudentSelection(estudiante.id),
-                                activeColor: AppColors.primaryTurquoise,
-                              ),
-                              const SizedBox(width: 12),
-                            ],
-
-                            // Data
-                            Expanded(
-                              flex: 3,
-                              child: Text(
-                                estudiante.nombre,
-                                style: const TextStyle(
-                                  color: AppColors.textPrimary,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              flex: 2,
-                              child: Text(
-                                estudiante.curso ?? '-',
-                                style: const TextStyle(
-                                  color: AppColors.textPrimary,
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              flex: 3,
-                              child: Text(
-                                estudiante.bar?.nombre ?? 'Bar desconocido',
-                                style: const TextStyle(
-                                  color: AppColors.textPrimary,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
+                return _buildStudentRow(
+                  estudiante,
+                  isSelected,
+                  index,
+                  isMobile,
                 );
               },
             ),
@@ -629,11 +641,13 @@ class _ReportsContentState extends State<ReportsContent> {
                     color: AppColors.primaryTurquoise,
                   ),
                   const SizedBox(width: 8),
-                  Text(
-                    '${_selectedEstudiantes.length} estudiante(s) seleccionado(s) de ${_filteredEstudiantes.length}',
-                    style: const TextStyle(
-                      color: AppColors.textPrimary,
-                      fontSize: 14,
+                  Expanded(
+                    child: Text(
+                      '${_selectedEstudiantes.length} estudiante(s) seleccionado(s) de ${_filteredEstudiantes.length}',
+                      style: const TextStyle(
+                        color: AppColors.textPrimary,
+                        fontSize: 14,
+                      ),
                     ),
                   ),
                 ],
@@ -644,7 +658,210 @@ class _ReportsContentState extends State<ReportsContent> {
     );
   }
 
-  Widget _buildStudentInfoPanel() {
+  Widget _buildStudentRow(
+    EstudianteModel estudiante,
+    bool isSelected,
+    int index,
+    bool isMobile,
+  ) {
+    if (isMobile) {
+      // Diseño tipo card para móvil
+      return Container(
+        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color:
+              _isMultiSelectMode && isSelected
+                  ? AppColors.primaryTurquoise.withAlpha(10)
+                  : !_isMultiSelectMode &&
+                      _selectedEstudiante?.id == estudiante.id
+                  ? AppColors.primaryTurquoise.withAlpha(20)
+                  : AppColors.card,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color:
+                !_isMultiSelectMode && _selectedEstudiante?.id == estudiante.id
+                    ? AppColors.primaryTurquoise
+                    : AppColors.primaryTurquoise.withAlpha(20),
+            width:
+                !_isMultiSelectMode && _selectedEstudiante?.id == estudiante.id
+                    ? 2
+                    : 1,
+          ),
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(8),
+            onTap: () {
+              if (_isMultiSelectMode) {
+                _toggleStudentSelection(estudiante.id);
+              } else {
+                _selectEstudiante(estudiante);
+              }
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                children: [
+                  // Checkbox (solo en modo selección múltiple)
+                  if (_isMultiSelectMode) ...[
+                    Checkbox(
+                      value: isSelected,
+                      onChanged: (_) => _toggleStudentSelection(estudiante.id),
+                      activeColor: AppColors.primaryTurquoise,
+                    ),
+                    const SizedBox(width: 12),
+                  ],
+
+                  // Información del estudiante
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          estudiante.nombre,
+                          style: const TextStyle(
+                            color: AppColors.textPrimary,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.school,
+                              size: 14,
+                              color: AppColors.textPrimary.withAlpha(100),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              estudiante.curso ?? '-',
+                              style: TextStyle(
+                                color: AppColors.textPrimary.withAlpha(150),
+                                fontSize: 14,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Icon(
+                              Icons.local_cafe,
+                              size: 14,
+                              color: AppColors.textPrimary.withAlpha(100),
+                            ),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                estudiante.bar?.nombre ?? 'Bar desconocido',
+                                style: TextStyle(
+                                  color: AppColors.textPrimary.withAlpha(150),
+                                  fontSize: 14,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Indicador de selección
+                  if (!_isMultiSelectMode &&
+                      _selectedEstudiante?.id == estudiante.id)
+                    const Icon(
+                      Icons.chevron_right,
+                      color: AppColors.primaryTurquoise,
+                      size: 24,
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Diseño tabla para tablet y desktop
+    return Container(
+      decoration: BoxDecoration(
+        color:
+            _isMultiSelectMode && isSelected
+                ? AppColors.primaryTurquoise.withAlpha(10)
+                : !_isMultiSelectMode &&
+                    _selectedEstudiante?.id == estudiante.id
+                ? AppColors.primaryTurquoise.withAlpha(20)
+                : index % 2 == 0
+                ? AppColors.card
+                : AppColors.background.withAlpha(30),
+        border: Border(
+          bottom: BorderSide(
+            color: AppColors.primaryTurquoise.withAlpha(50),
+            width: 0.5,
+          ),
+          left:
+              !_isMultiSelectMode && _selectedEstudiante?.id == estudiante.id
+                  ? BorderSide(color: AppColors.primaryTurquoise, width: 4)
+                  : BorderSide.none,
+        ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            if (_isMultiSelectMode) {
+              _toggleStudentSelection(estudiante.id);
+            } else {
+              _selectEstudiante(estudiante);
+            }
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              children: [
+                // Checkbox (solo en modo selección múltiple)
+                if (_isMultiSelectMode) ...[
+                  Checkbox(
+                    value: isSelected,
+                    onChanged: (_) => _toggleStudentSelection(estudiante.id),
+                    activeColor: AppColors.primaryTurquoise,
+                  ),
+                  const SizedBox(width: 12),
+                ],
+
+                // Data
+                Expanded(
+                  flex: 3,
+                  child: Text(
+                    estudiante.nombre,
+                    style: const TextStyle(
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: Text(
+                    estudiante.curso ?? '-',
+                    style: const TextStyle(color: AppColors.textPrimary),
+                  ),
+                ),
+                Expanded(
+                  flex: 3,
+                  child: Text(
+                    estudiante.bar?.nombre ?? 'Bar desconocido',
+                    style: const TextStyle(color: AppColors.textPrimary),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStudentInfoPanel(bool isMobile) {
     if (_selectedEstudiante == null) return Container();
 
     return Container(
@@ -658,7 +875,7 @@ class _ReportsContentState extends State<ReportsContent> {
         children: [
           // Header del panel
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(isMobile ? 12 : 16),
             decoration: BoxDecoration(
               color: AppColors.primaryTurquoise.withAlpha(10),
               borderRadius: const BorderRadius.only(
@@ -668,13 +885,17 @@ class _ReportsContentState extends State<ReportsContent> {
             ),
             child: Row(
               children: [
-                Icon(Icons.person, color: AppColors.primaryTurquoise, size: 24),
-                const SizedBox(width: 12),
+                Icon(
+                  Icons.person,
+                  color: AppColors.primaryTurquoise,
+                  size: isMobile ? 20 : 24,
+                ),
+                SizedBox(width: isMobile ? 8 : 12),
                 Expanded(
                   child: Text(
                     'Información del Estudiante',
                     style: TextStyle(
-                      fontSize: 18,
+                      fontSize: isMobile ? 16 : 18,
                       fontWeight: FontWeight.bold,
                       color: AppColors.textPrimary,
                     ),
@@ -690,6 +911,7 @@ class _ReportsContentState extends State<ReportsContent> {
                   icon: Icon(
                     Icons.close,
                     color: AppColors.textPrimary.withAlpha(70),
+                    size: isMobile ? 20 : 24,
                   ),
                 ),
               ],
@@ -699,7 +921,7 @@ class _ReportsContentState extends State<ReportsContent> {
           // Contenido del panel
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(isMobile ? 12 : 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
