@@ -55,6 +55,20 @@ class AdminContent extends StatelessWidget {
                     ),
                     _buildAdminCard(
                       context,
+                      icon: Icons.receipt_long,
+                      title: 'Transacciones',
+                      subtitle: 'Editar ventas\ny abonos',
+                      onTap:
+                          () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (context) => const TransactionAdminScreen(),
+                            ),
+                          ),
+                    ),
+                    _buildAdminCard(
+                      context,
                       icon: Icons.inventory,
                       title: 'Productos',
                       subtitle: 'Administrar inventario\ny productos',
@@ -76,20 +90,6 @@ class AdminContent extends StatelessWidget {
                             context,
                             MaterialPageRoute(
                               builder: (context) => const StoreAdminScreen(),
-                            ),
-                          ),
-                    ),
-                    _buildAdminCard(
-                      context,
-                      icon: Icons.receipt_long,
-                      title: 'Transacciones',
-                      subtitle: 'Editar ventas\ny abonos',
-                      onTap:
-                          () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder:
-                                  (context) => const TransactionAdminScreen(),
                             ),
                           ),
                     ),
