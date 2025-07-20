@@ -379,7 +379,7 @@ class _BulkReportProgressDialogState extends State<_BulkReportProgressDialog> {
       decoration: BoxDecoration(
         color: AppColors.secondaryBlue,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.primaryTurquoise.withOpacity(0.3)),
+        border: Border.all(color: AppColors.primaryTurquoise.withAlpha(30)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -451,7 +451,7 @@ class _BulkReportProgressDialogState extends State<_BulkReportProgressDialog> {
           decoration: BoxDecoration(
             color: AppColors.secondaryBlue,
             borderRadius: BorderRadius.circular(4),
-            border: Border.all(color: AppColors.error.withOpacity(0.3)),
+            border: Border.all(color: AppColors.error.withAlpha(30)),
           ),
           padding: const EdgeInsets.all(8),
           child: SingleChildScrollView(
