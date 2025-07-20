@@ -71,8 +71,8 @@ class LocalReportsService {
     required int year,
   }) async {
     try {
-      // Generar PDF directamente con los datos proporcionados
-      final filePath = await _pdfGeneratorService.generateStudentReport(
+      // Generar PDF con el nuevo método que incluye permisos y opción de compartir
+      final result = await _pdfGeneratorService.generateAndSaveStudentReport(
         estudiante: estudiante,
         ventas: ventas,
         abonos: abonos,
@@ -80,12 +80,20 @@ class LocalReportsService {
         barName: estudiante.bar?.nombre ?? '',
         month: month,
         year: year,
+        showShareOption: true,
       );
 
-      // Mostrar diálogo de éxito
-      _showReportGeneratedDialog(context, filePath);
-
-      return filePath;
+      if (result['success'] == true) {
+        // Mostrar diálogo de éxito con opción de compartir
+        _showReportGeneratedDialog(
+          context,
+          result['filePath'],
+          result['canShare'] ?? false,
+        );
+        return result['filePath'];
+      } else {
+        throw Exception(result['message'] ?? 'Error desconocido');
+      }
     } catch (e) {
       throw Exception('Error generating report with provided data: $e');
     }
@@ -134,7 +142,7 @@ class LocalReportsService {
               year: reportYear,
             );
 
-        // Generar PDF
+        // Generar PDF (usando método directo para bulk generation)
         final filePath = await _pdfGeneratorService.generateStudentReport(
           estudiante: estudiante,
           ventas: ventas,
@@ -167,7 +175,11 @@ class LocalReportsService {
   }
 
   /// Muestra un diálogo de confirmación cuando se genera un reporte
-  void _showReportGeneratedDialog(BuildContext context, String filePath) {
+  void _showReportGeneratedDialog(
+    BuildContext context,
+    String filePath, [
+    bool canShare = false,
+  ]) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -181,10 +193,30 @@ class LocalReportsService {
             ),
           ),
           content: Text(
-            'El reporte PDF ha sido generado y guardado exitosamente. Verifique en la carpeta de documentos de su dispositivo.',
+            'El reporte PDF ha sido generado y guardado exitosamente.',
             style: TextStyle(color: AppColors.textPrimary),
           ),
           actions: [
+            if (canShare) ...[
+              TextButton(
+                onPressed: () async {
+                  try {
+                    await _pdfGeneratorService.sharePdf(filePath);
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Error al compartir: $e'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                },
+                child: Text(
+                  'Compartir',
+                  style: TextStyle(color: AppColors.primaryTurquoise),
+                ),
+              ),
+            ],
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
               child: Text(

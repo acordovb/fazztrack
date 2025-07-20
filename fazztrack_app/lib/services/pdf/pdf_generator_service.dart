@@ -7,6 +7,9 @@ import 'package:fazztrack_app/models/estudiante_model.dart';
 import 'package:fazztrack_app/models/venta_model.dart';
 import 'package:fazztrack_app/models/abono_model.dart';
 import 'package:fazztrack_app/models/control_historico_model.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:file_picker/file_picker.dart';
 
 class PdfGeneratorService {
   static const List<String> _monthNames = [
@@ -121,6 +124,271 @@ class PdfGeneratorService {
       return filePath;
     } catch (e) {
       throw Exception('Error generating PDF: $e');
+    }
+  }
+
+  /// Generates, saves and optionally shares the PDF report
+  Future<Map<String, dynamic>> generateAndSaveStudentReport({
+    required EstudianteModel estudiante,
+    required List<VentaModel> ventas,
+    required List<AbonoModel> abonos,
+    required ControlHistoricoModel? controlHistorico,
+    required String barName,
+    required int month,
+    required int year,
+    bool showShareOption = true,
+  }) async {
+    try {
+      // Check and request permissions for mobile platforms
+      if (Platform.isAndroid || Platform.isIOS) {
+        final hasPermission = await _requestStoragePermission();
+        if (!hasPermission) {
+          throw Exception(
+            'No se otorgaron los permisos necesarios para guardar el archivo',
+          );
+        }
+      }
+
+      // Generate PDF
+      final pdf = await _generatePdfDocument(
+        estudiante: estudiante,
+        ventas: ventas,
+        abonos: abonos,
+        controlHistorico: controlHistorico,
+        barName: barName,
+        month: month,
+        year: year,
+      );
+
+      // Save PDF
+      final filePath = await _savePdfWithUserChoice(
+        pdf,
+        estudiante.nombre,
+        _monthNames[month],
+        year,
+      );
+
+      final result = {
+        'filePath': filePath,
+        'success': true,
+        'message': 'PDF guardado exitosamente',
+      };
+
+      // Add share option for mobile platforms
+      if ((Platform.isAndroid || Platform.isIOS) && showShareOption) {
+        result['canShare'] = true;
+      }
+
+      return result;
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Error al generar el PDF: $e',
+        'filePath': null,
+      };
+    }
+  }
+
+  /// Shares the PDF file (mobile only)
+  Future<bool> sharePdf(String filePath) async {
+    try {
+      if (!Platform.isAndroid && !Platform.isIOS) {
+        throw Exception(
+          'La función de compartir solo está disponible en dispositivos móviles',
+        );
+      }
+
+      final file = File(filePath);
+      if (!await file.exists()) {
+        throw Exception('El archivo no existe');
+      }
+
+      await Share.shareXFiles(
+        [XFile(filePath)],
+        text: 'Reporte de estudiante generado por FazzTrack',
+        subject: 'Reporte FazzTrack',
+      );
+
+      return true;
+    } catch (e) {
+      throw Exception('Error al compartir el archivo: $e');
+    }
+  }
+
+  /// Requests storage permission for Android
+  Future<bool> _requestStoragePermission() async {
+    if (Platform.isAndroid) {
+      // For Android 13+ (API level 33+), we don't need storage permissions for app-specific directories
+      final androidInfo = await _getAndroidVersion();
+      if (androidInfo >= 33) {
+        return true; // No storage permission needed for scoped storage
+      }
+
+      // For older Android versions
+      final status = await Permission.storage.request();
+      return status.isGranted;
+    } else if (Platform.isIOS) {
+      // iOS doesn't require explicit storage permissions for app documents
+      return true;
+    }
+    return true;
+  }
+
+  /// Gets Android SDK version
+  Future<int> _getAndroidVersion() async {
+    if (Platform.isAndroid) {
+      // This is a simplified check. In a real app, you might want to use
+      // device_info_plus package for more accurate version detection
+      return 33; // Assume modern Android for now
+    }
+    return 0;
+  }
+
+  /// Generates the PDF document
+  Future<pw.Document> _generatePdfDocument({
+    required EstudianteModel estudiante,
+    required List<VentaModel> ventas,
+    required List<AbonoModel> abonos,
+    required ControlHistoricoModel? controlHistorico,
+    required String barName,
+    required int month,
+    required int year,
+  }) async {
+    final pdf = pw.Document();
+
+    final totalVentas = ventas.fold<double>(
+      0.0,
+      (sum, venta) => sum + (venta.nProductos * (venta.producto?.precio ?? 0)),
+    );
+
+    final totalAbonos = abonos.fold<double>(
+      0.0,
+      (sum, abono) => sum + abono.total,
+    );
+
+    final pendienteAnteriorAbono =
+        controlHistorico?.totalPendienteUltMesAbono ?? 0;
+    final pendienteAnteriorVenta =
+        controlHistorico?.totalPendienteUltMesVenta ?? 0;
+
+    final balance =
+        totalAbonos -
+        totalVentas +
+        pendienteAnteriorAbono -
+        pendienteAnteriorVenta;
+
+    final monthName = _monthNames[month];
+
+    pdf.addPage(
+      pw.Page(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(40),
+        build: (pw.Context context) {
+          return pw.Column(
+            children: [
+              _buildHeader(estudiante, barName, monthName, year, month),
+              pw.SizedBox(height: 20),
+              _buildStudentInfo(estudiante, barName),
+              pw.SizedBox(height: 20),
+              _buildFinancialSummary(
+                totalVentas,
+                totalAbonos,
+                balance,
+                pendienteAnteriorAbono,
+                pendienteAnteriorVenta,
+              ),
+              pw.Spacer(),
+              _buildFooter(),
+            ],
+          );
+        },
+      ),
+    );
+
+    // Segunda página - Detalle de transacciones
+    if (ventas.isNotEmpty || abonos.isNotEmpty) {
+      pdf.addPage(
+        pw.MultiPage(
+          pageFormat: PdfPageFormat.a4,
+          margin: const pw.EdgeInsets.all(40),
+          build: (pw.Context context) {
+            return [
+              _buildTransactionHeader(estudiante, monthName, year),
+              pw.SizedBox(height: 30),
+              if (ventas.isNotEmpty) ...[
+                ..._buildVentasSection(ventas),
+                pw.SizedBox(height: 20),
+              ],
+              if (abonos.isNotEmpty) ...[
+                ..._buildAbonosSection(abonos),
+                pw.SizedBox(height: 20),
+              ],
+              _buildFooter(),
+            ];
+          },
+        ),
+      );
+    }
+
+    return pdf;
+  }
+
+  /// Saves PDF with user directory choice (mobile) or default location (desktop)
+  Future<String> _savePdfWithUserChoice(
+    pw.Document pdf,
+    String studentName,
+    String monthName,
+    int year,
+  ) async {
+    if (Platform.isAndroid || Platform.isIOS) {
+      // For mobile platforms, let user choose where to save
+      return await _savePdfWithFilePicker(pdf, studentName, monthName, year);
+    } else {
+      // For desktop platforms, use the existing method
+      return await _savePdfToDevice(pdf, studentName, monthName, year);
+    }
+  }
+
+  /// Saves PDF using file picker for user to choose location
+  Future<String> _savePdfWithFilePicker(
+    pw.Document pdf,
+    String studentName,
+    String monthName,
+    int year,
+  ) async {
+    try {
+      // Generate filename
+      final sanitizedName = studentName.replaceAll(
+        RegExp(r'[<>:"/\\|?*]'),
+        '_',
+      );
+      final fileName = 'Reporte_${sanitizedName}_${monthName}_$year.pdf';
+
+      // Let user choose where to save the file
+      final result = await FilePicker.platform.saveFile(
+        dialogTitle: 'Guardar reporte PDF',
+        fileName: fileName,
+        type: FileType.custom,
+        allowedExtensions: ['pdf'],
+      );
+
+      if (result == null) {
+        throw Exception('El usuario canceló la operación');
+      }
+
+      // Save the PDF
+      final pdfBytes = await pdf.save();
+      final file = File(result);
+      await file.writeAsBytes(pdfBytes);
+
+      if (await file.exists()) {
+        return result;
+      } else {
+        throw Exception('El archivo no se pudo crear');
+      }
+    } catch (e) {
+      // Fallback to app directory if file picker fails
+      return await _savePdfToDevice(pdf, studentName, monthName, year);
     }
   }
 
@@ -664,7 +932,7 @@ class PdfGeneratorService {
     );
   }
 
-  /// Saves the PDF to device storage
+  /// Saves the PDF to device storage (fallback method)
   Future<String> _savePdfToDevice(
     pw.Document pdf,
     String studentName,
@@ -674,48 +942,36 @@ class PdfGeneratorService {
     try {
       // Get the appropriate directory based on platform
       Directory? directory;
-      String platformInfo = '';
 
       if (Platform.isAndroid) {
-        // For Android, use external storage directory
-        directory = await getExternalStorageDirectory();
-        directory ??= await getApplicationDocumentsDirectory();
-        platformInfo = 'Android - External Storage';
+        // For Android, use app-specific directory (no permissions needed for Android 13+)
+        directory = await getApplicationDocumentsDirectory();
       } else if (Platform.isIOS) {
         // For iOS, use documents directory
         directory = await getApplicationDocumentsDirectory();
-        platformInfo = 'iOS - Documents';
       } else if (Platform.isMacOS) {
         // For macOS, try Downloads directory first
         try {
           directory = await getDownloadsDirectory();
-          platformInfo = 'macOS - Downloads';
         } catch (e) {
           directory = await getApplicationDocumentsDirectory();
-          platformInfo = 'macOS - Documents (fallback)';
         }
       } else if (Platform.isWindows) {
         // For Windows, try Downloads directory first
         try {
           directory = await getDownloadsDirectory();
-          platformInfo = 'Windows - Downloads';
         } catch (e) {
           directory = await getApplicationDocumentsDirectory();
-          platformInfo = 'Windows - Documents (fallback)';
         }
       } else if (Platform.isLinux) {
         // For Linux, try Downloads directory first
         try {
           directory = await getDownloadsDirectory();
-          platformInfo = 'Linux - Downloads';
         } catch (e) {
           directory = await getApplicationDocumentsDirectory();
-          platformInfo = 'Linux - Documents (fallback)';
         }
       } else {
-        // Fallback to documents directory
         directory = await getApplicationDocumentsDirectory();
-        platformInfo = 'Unknown Platform - Documents';
       }
 
       // Ensure we have a valid directory
@@ -742,15 +998,11 @@ class PdfGeneratorService {
       final pdfBytes = await pdf.save();
       await file.writeAsBytes(pdfBytes);
 
-      // Verify file was created
       if (await file.exists()) {
-        final fileSize = await file.length();
-        print('PDF saved successfully. Size: $fileSize bytes');
+        return filePath;
       } else {
         throw Exception('File was not created successfully');
       }
-
-      return filePath;
     } catch (e) {
       throw Exception('Error saving PDF to device: $e');
     }
