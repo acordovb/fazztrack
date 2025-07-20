@@ -28,7 +28,7 @@ android {
 
     signingConfigs {
         create("release") {
-            storeFile = file("../../../seymourdev-key.jks")
+            storeFile = file("../../seymourdev-key.jks")
             storePassword = "seymour151418"
             keyAlias = "seymourdev-key"
             keyPassword = "seymour151418"
