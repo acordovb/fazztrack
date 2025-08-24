@@ -93,6 +93,13 @@ export class VentasService extends BaseCrudService<
   async update(id: string, updateDto: UpdateVentaDto): Promise<VentaDto> {
     const numericId = decodeId(id);
 
+    if (updateDto.fecha_transaccion) {
+      const dateString = updateDto.fecha_transaccion.toString();
+      updateDto.fecha_transaccion = new Date(
+        dateString.endsWith('Z') ? dateString : dateString + 'Z',
+      );
+    }
+
     const model = await this.database.ventas.update({
       where: { id: numericId },
       data: updateDto,
