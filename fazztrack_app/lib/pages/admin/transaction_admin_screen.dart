@@ -29,7 +29,6 @@ class _TransactionAdminScreenState extends State<TransactionAdminScreen> {
   bool _isLoading = false;
   bool _isLoadingTransactions = false;
 
-  // Variables para el filtro de mes y año
   late int _selectedMonth;
   late int _selectedYear;
 
@@ -663,7 +662,7 @@ class _TransactionAdminScreenState extends State<TransactionAdminScreen> {
                           const SizedBox(height: 4),
                           Text(
                             DateFormat(
-                              'dd/MM/yyyy HH:mm',
+                              'dd/MM/yyyy',
                             ).format(venta.fechaTransaccion),
                             style: const TextStyle(
                               color: AppColors.textPrimary,
@@ -838,9 +837,7 @@ class _TransactionAdminScreenState extends State<TransactionAdminScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            DateFormat(
-                              'dd/MM/yyyy HH:mm',
-                            ).format(abono.fechaAbono),
+                            DateFormat('dd/MM/yyyy').format(abono.fechaAbono),
                             style: const TextStyle(
                               color: AppColors.textPrimary,
                               fontSize: 14,
@@ -1018,8 +1015,27 @@ class _TransactionAdminScreenState extends State<TransactionAdminScreen> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('Cancelar'),
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.textPrimary,
+                  backgroundColor: AppColors.backgroundSecondary,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                    side: BorderSide(
+                      color: AppColors.textPrimary.withAlpha(50),
+                      width: 1,
+                    ),
+                  ),
+                ),
+                child: const Text(
+                  'Cancelar',
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
               ),
+              const SizedBox(width: 8),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(true),
                 child: const Text(
@@ -1059,8 +1075,27 @@ class _TransactionAdminScreenState extends State<TransactionAdminScreen> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('Cancelar'),
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.textPrimary,
+                  backgroundColor: AppColors.backgroundSecondary,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                    side: BorderSide(
+                      color: AppColors.textPrimary.withAlpha(50),
+                      width: 1,
+                    ),
+                  ),
+                ),
+                child: const Text(
+                  'Cancelar',
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
               ),
+              const SizedBox(width: 8),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(true),
                 child: const Text(
@@ -1096,6 +1131,7 @@ class _EditVentaDialog extends StatefulWidget {
 class _EditVentaDialogState extends State<_EditVentaDialog> {
   late TextEditingController _nProductosController;
   late TextEditingController _comentarioController;
+  late DateTime _selectedDate;
 
   @override
   void initState() {
@@ -1106,6 +1142,7 @@ class _EditVentaDialogState extends State<_EditVentaDialog> {
     _comentarioController = TextEditingController(
       text: widget.venta.comentario ?? '',
     );
+    _selectedDate = widget.venta.fechaTransaccion;
   }
 
   @override
@@ -1113,6 +1150,45 @@ class _EditVentaDialogState extends State<_EditVentaDialog> {
     _nProductosController.dispose();
     _comentarioController.dispose();
     super.dispose();
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+      builder: (BuildContext context, Widget? child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: AppColors.primaryTurquoise,
+              onPrimary: AppColors.primaryDarkBlue,
+              surface: AppColors.card,
+              onSurface: AppColors.textPrimary,
+            ),
+            dialogTheme: DialogThemeData(backgroundColor: AppColors.card),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null && picked != _selectedDate) {
+      setState(() {
+        // Mantener la hora original, solo cambiar la fecha
+        _selectedDate = DateTime(
+          picked.year,
+          picked.month,
+          picked.day,
+          _selectedDate.hour,
+          _selectedDate.minute,
+          _selectedDate.second,
+          _selectedDate.millisecond,
+          _selectedDate.microsecond,
+        );
+      });
+    }
   }
 
   @override
@@ -1158,6 +1234,54 @@ class _EditVentaDialogState extends State<_EditVentaDialog> {
             ),
           ),
           const SizedBox(height: 16),
+          // Campo para seleccionar fecha
+          InkWell(
+            onTap: () => _selectDate(context),
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                border: Border.all(color: AppColors.lightBlue),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.calendar_today,
+                    color: AppColors.primaryTurquoise,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 12),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Fecha de la transacción',
+                        style: TextStyle(
+                          color: AppColors.textPrimary,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        DateFormat('dd/MM/yyyy').format(_selectedDate),
+                        style: const TextStyle(
+                          color: AppColors.textPrimary,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Spacer(),
+                  Icon(
+                    Icons.arrow_drop_down,
+                    color: AppColors.textPrimary.withAlpha(70),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
           TextField(
             controller: _nProductosController,
             decoration: const InputDecoration(
@@ -1186,8 +1310,21 @@ class _EditVentaDialogState extends State<_EditVentaDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancelar'),
+          style: TextButton.styleFrom(
+            foregroundColor: AppColors.error,
+            backgroundColor: AppColors.error.withAlpha(20),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+              side: const BorderSide(color: AppColors.error, width: 1),
+            ),
+          ),
+          child: const Text(
+            'Cancelar',
+            style: TextStyle(fontWeight: FontWeight.w600),
+          ),
         ),
+        const SizedBox(width: 8),
         ElevatedButton(
           onPressed: () {
             final cantidad = int.tryParse(_nProductosController.text);
@@ -1207,7 +1344,7 @@ class _EditVentaDialogState extends State<_EditVentaDialog> {
               id: widget.venta.id,
               idEstudiante: widget.venta.idEstudiante,
               idProducto: widget.venta.idProducto,
-              fechaTransaccion: widget.venta.fechaTransaccion,
+              fechaTransaccion: _selectedDate,
               idBar: widget.venta.idBar,
               nProductos: cantidad,
               total: widget.venta.total,
@@ -1234,7 +1371,9 @@ class _EditAbonoDialog extends StatefulWidget {
 
 class _EditAbonoDialogState extends State<_EditAbonoDialog> {
   late TextEditingController _totalController;
+  late TextEditingController _comentarioController;
   late String _selectedTipoAbono;
+  late DateTime _selectedDate;
 
   final List<String> _tiposAbono = ['Transferencia', 'Efectivo'];
 
@@ -1244,17 +1383,61 @@ class _EditAbonoDialogState extends State<_EditAbonoDialog> {
     _totalController = TextEditingController(
       text: widget.abono.total.toString(),
     );
+    _comentarioController = TextEditingController(
+      text: widget.abono.comentario ?? '',
+    );
     // Verificar si el tipo de abono actual está en la lista, si no, usar el primero
     _selectedTipoAbono =
         _tiposAbono.contains(widget.abono.tipoAbono)
             ? widget.abono.tipoAbono
             : _tiposAbono.first;
+    _selectedDate = widget.abono.fechaAbono;
   }
 
   @override
   void dispose() {
     _totalController.dispose();
+    _comentarioController.dispose();
     super.dispose();
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+      builder: (BuildContext context, Widget? child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: AppColors.success,
+              onPrimary: Colors.white,
+              surface: AppColors.card,
+              onSurface: AppColors.textPrimary,
+            ),
+            dialogTheme: DialogThemeData(backgroundColor: AppColors.card),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null && picked != _selectedDate) {
+      setState(() {
+        // Mantener la hora original, solo cambiar la fecha
+        _selectedDate = DateTime(
+          picked.year,
+          picked.month,
+          picked.day,
+          _selectedDate.hour,
+          _selectedDate.minute,
+          _selectedDate.second,
+          _selectedDate.millisecond,
+          _selectedDate.microsecond,
+        );
+      });
+    }
   }
 
   @override
@@ -1278,6 +1461,67 @@ class _EditAbonoDialogState extends State<_EditAbonoDialog> {
             ),
             style: const TextStyle(color: AppColors.textPrimary),
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          ),
+          const SizedBox(height: 16),
+          // Campo para seleccionar fecha
+          InkWell(
+            onTap: () => _selectDate(context),
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                border: Border.all(color: AppColors.lightBlue),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.calendar_today,
+                    color: AppColors.success,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 12),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Fecha del abono',
+                        style: TextStyle(
+                          color: AppColors.textPrimary,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        DateFormat('dd/MM/yyyy').format(_selectedDate),
+                        style: const TextStyle(
+                          color: AppColors.textPrimary,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Spacer(),
+                  Icon(
+                    Icons.arrow_drop_down,
+                    color: AppColors.textPrimary.withAlpha(70),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _comentarioController,
+            decoration: InputDecoration(
+              labelText: 'Comentario (opcional)',
+              labelStyle: TextStyle(color: AppColors.textPrimary),
+              border: OutlineInputBorder(),
+              hintText: 'Ingrese un comentario para este abono',
+              hintStyle: TextStyle(color: AppColors.textPrimary.withAlpha(80)),
+            ),
+            style: const TextStyle(color: AppColors.textPrimary),
+            maxLines: 2,
           ),
           const SizedBox(height: 16),
           DropdownButtonFormField<String>(
@@ -1324,8 +1568,21 @@ class _EditAbonoDialogState extends State<_EditAbonoDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancelar'),
+          style: TextButton.styleFrom(
+            foregroundColor: AppColors.error,
+            backgroundColor: AppColors.error.withAlpha(20),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+              side: const BorderSide(color: AppColors.error, width: 1),
+            ),
+          ),
+          child: const Text(
+            'Cancelar',
+            style: TextStyle(fontWeight: FontWeight.w600),
+          ),
         ),
+        const SizedBox(width: 8),
         ElevatedButton(
           onPressed: () {
             final total = double.tryParse(_totalController.text);
@@ -1339,12 +1596,15 @@ class _EditAbonoDialogState extends State<_EditAbonoDialog> {
               return;
             }
 
+            final String comentario = _comentarioController.text.trim();
+
             final updatedAbono = AbonoModel(
               id: widget.abono.id,
               idEstudiante: widget.abono.idEstudiante,
               total: total,
               tipoAbono: _selectedTipoAbono,
-              fechaAbono: widget.abono.fechaAbono,
+              fechaAbono: _selectedDate,
+              comentario: comentario.isNotEmpty ? comentario : null,
             );
             Navigator.of(context).pop(updatedAbono);
           },

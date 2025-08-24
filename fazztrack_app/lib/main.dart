@@ -4,11 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:fazztrack_app/constants/colors_constants.dart';
 import 'package:fazztrack_app/pages/splash/splash_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
-// import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> main() async {
-  // final SharedPreferences prefs = await SharedPreferences.getInstance();
-  // prefs.clear(); // Limpiar SharedPreferences para pruebas
   runApp(const MyApp());
 }
 
