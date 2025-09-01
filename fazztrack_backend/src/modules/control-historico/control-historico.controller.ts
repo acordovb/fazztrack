@@ -21,6 +21,7 @@ export class ControlHistoricoController {
   ): Promise<ControlHistoricoDto> {
     const monthNumber = month ? parseInt(month) : new Date().getMonth() + 1;
     const yearNumber = year ? parseInt(year) : new Date().getFullYear();
+    console.log('Mes y año de control:', { monthNumber, yearNumber });
 
     const idNumberEstudiante = decodeId(idEstudiante);
     let controlHistorico =
