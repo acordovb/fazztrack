@@ -19,9 +19,12 @@ export class ControlHistoricoController {
     @Query('month') month?: string,
     @Query('year') year?: string,
   ): Promise<ControlHistoricoDto> {
-    const monthNumber = month ? parseInt(month) : new Date().getMonth() + 1;
-    const yearNumber = year ? parseInt(year) : new Date().getFullYear();
-    console.log('Mes y año de control:', { monthNumber, yearNumber });
+    const now = new Date(
+      new Date().toLocaleString('en-US', { timeZone: 'America/Bogota' }),
+    );
+    const monthNumber = month ? parseInt(month) : now.getMonth() + 1;
+    const yearNumber = year ? parseInt(year) : now.getFullYear();
+    console.log('mes y año de control:', { monthNumber, yearNumber });
 
     const idNumberEstudiante = decodeId(idEstudiante);
     let controlHistorico =
