@@ -92,12 +92,27 @@ export class ControlHistoricoService extends BaseCrudService<
       this.ventasService.calculateTotalVentas(idEstudiante, month, year),
       this.abonosService.calculateTotalAbonos(idEstudiante, month, year),
     ]);
-    const totalPendiente = totalAbonos - totalVentas;
+    const pendienteMesPasado = await this.findByEstudianteId(
+      idEstudiante,
+      month,
+      year,
+    );
+
+    const totalPendiente =
+      pendienteMesPasado.total_pendiente_ult_mes_abono -
+      pendienteMesPasado.total_pendiente_ult_mes_venta +
+      totalAbonos -
+      totalVentas;
+
     const objCreated = await this.database.control_historico.create({
       data: {
         id_estudiante: idEstudiante,
-        total_pendiente_ult_mes_abono: totalPendiente > 0 ? totalPendiente : 0,
-        total_pendiente_ult_mes_venta: totalPendiente < 0 ? totalPendiente : 0,
+        total_pendiente_ult_mes_abono: Math.abs(
+          totalPendiente > 0 ? totalPendiente : 0,
+        ),
+        total_pendiente_ult_mes_venta: Math.abs(
+          totalPendiente < 0 ? totalPendiente : 0,
+        ),
         n_mes: month,
         n_year: year,
       },
